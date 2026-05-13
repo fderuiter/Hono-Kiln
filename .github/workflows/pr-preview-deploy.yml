@@ -22,7 +22,7 @@ env:
 jobs:
   deploy-preview:
     name: Deploy Preview
-    if: github.event.action != 'closed'
+    if: github.event.action != 'closed' && secrets.CLOUDFLARE_API_TOKEN != ''
     runs-on: ubuntu-latest
 
     steps:
@@ -68,7 +68,7 @@ jobs:
 
   remove-preview:
     name: Remove Preview
-    if: github.event.action == 'closed'
+    if: github.event.action == 'closed' && secrets.CLOUDFLARE_API_TOKEN != ''
     runs-on: ubuntu-latest
 
     steps:
