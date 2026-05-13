@@ -104,12 +104,8 @@ export async function mountModule(moduleName: string, routeName: string, repoRoo
 
   if (!updatedContent.includes(importLine)) {
     const lines = updatedContent.split('\n')
-    const lastImportIndex = lines.reduce(
-      (index, line, currentIndex) =>
-        line.startsWith('import ') ? currentIndex : index,
-      -1,
-    )
-    lines.splice(lastImportIndex + 1, 0, importLine)
+    const importInsertIndex = findImportInsertIndex(lines)
+    lines.splice(importInsertIndex, 0, importLine)
     updatedContent = lines.join('\n')
   }
 
@@ -117,13 +113,13 @@ export async function mountModule(moduleName: string, routeName: string, repoRoo
     const lines = updatedContent.split('\n')
     const lastRouteIndex = lines.reduce(
       (index, line, currentIndex) =>
-        line.startsWith('app.route(') ? currentIndex : index,
+        line.trim().startsWith('app.route(') ? currentIndex : index,
       -1,
     )
     if (lastRouteIndex >= 0) {
       lines.splice(lastRouteIndex + 1, 0, routeLine)
     } else {
-      const exportIndex = lines.findIndex((line) => line.startsWith('export default '))
+      const exportIndex = lines.findIndex((line) => line.trim().startsWith('export default '))
       lines.splice(exportIndex >= 0 ? exportIndex : lines.length, 0, routeLine)
     }
     updatedContent = lines.join('\n')
@@ -132,6 +128,40 @@ export async function mountModule(moduleName: string, routeName: string, repoRoo
   if (updatedContent !== appContent) {
     await writeFile(mountPath, updatedContent)
   }
+}
+
+function findImportInsertIndex(lines: string[]) {
+  let lastImportLine = -1
+  let inImportStatement = false
+
+  for (let index = 0; index < lines.length; index++) {
+    const trimmedLine = lines[index].trim()
+
+    if (trimmedLine.startsWith('import ')) {
+      lastImportLine = index
+      inImportStatement = true
+    } else if (inImportStatement) {
+      if (trimmedLine !== '') {
+        lastImportLine = index
+      }
+    } else if (lastImportLine >= 0 && trimmedLine !== '') {
+      break
+    }
+
+    if (inImportStatement && isImportStatementTerminator(trimmedLine)) {
+      inImportStatement = false
+    }
+  }
+
+  return lastImportLine + 1
+}
+
+function isImportStatementTerminator(trimmedLine: string) {
+  return (
+    /^import\s+.+\s+from\s+['"].+['"];?$/.test(trimmedLine) ||
+    /^}\s+from\s+['"].+['"];?$/.test(trimmedLine) ||
+    /^import\s+['"].+['"];?$/.test(trimmedLine)
+  )
 }
 
 export async function generateModule(moduleInputName: string, repoRoot = process.cwd()): Promise<GenerateModuleResult> {
