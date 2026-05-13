@@ -26,3 +26,20 @@ describe('health routes', () => {
     expect(await response.json()).toEqual({ status: 'ok' })
   })
 })
+
+describe('openapi routes', () => {
+  it('serves the OpenAPI JSON spec at /openapi.json', async () => {
+    const response = await app.request('/openapi.json')
+    expect(response.status).toBe(200)
+    const spec = await response.json()
+    expect(spec.openapi).toBe('3.0.0')
+    expect(spec.info.title).toBe('Hono Kiln API')
+  })
+
+  it('serves the Swagger UI at /docs', async () => {
+    const response = await app.request('/docs')
+    expect(response.status).toBe(200)
+    const html = await response.text()
+    expect(html).toContain('swagger')
+  })
+})
