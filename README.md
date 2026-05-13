@@ -48,6 +48,10 @@ On every pull request, the **PR Preview Deployment** workflow deploys a
 temporary Cloudflare Worker named `hono-kiln-pr-<number>` and posts the
 preview URL as a PR comment. The worker is deleted when the PR is closed.
 
+> **Note:** When the required secrets are not configured the deployment jobs
+> are automatically skipped, so the workflow will pass without deploying
+> anything. This is the expected behaviour for forks and template instances.
+
 Required repository secrets:
 
 | Secret | Description |
