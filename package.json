@@ -1,6 +1,9 @@
 {
   "name": "hono-kiln",
   "private": true,
+  "scripts": {
+    "kiln": "bun ./scripts/generate.ts"
+  },
   "workspaces": [
     "packages/*"
   ]
