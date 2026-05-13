@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.0.0...v1.1.0) (2026-05-13)
+
+
+### Features
+
+* integrate @hono/zod-openapi and @hono/swagger-ui, rewrite README ([f44d968](https://github.com/fderuiter/Hono-Kiln/commit/f44d968048d867b47b24cf480696f40aa9fb7771))
+
 # 1.0.0 (2026-05-13)
 
 
