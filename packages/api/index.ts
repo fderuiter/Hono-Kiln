@@ -1,11 +1,4 @@
-import { Hono } from 'hono'
-
-const app = new Hono()
-
-app.get('/', (c) => c.json({ message: 'Hono Kiln API' }))
-app.get('/health', (c) => c.json({ status: 'ok' }))
-app.get('/health/live', (c) => c.json({ status: 'ok' }))
-app.get('/health/ready', (c) => c.json({ status: 'ok' }))
+import app from './app'
 
 export default app
 
