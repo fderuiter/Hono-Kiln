@@ -5,9 +5,16 @@
   "scripts": {
     "dev": "bun --watch index.ts",
     "start": "bun index.ts",
-    "test": "bun test"
+    "test": "bun test",
+    "db:migrate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
+    "@libsql/client": "0.17.3",
+    "drizzle-orm": "0.45.2",
     "hono": "^4.10.1"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.10"
   }
 }
