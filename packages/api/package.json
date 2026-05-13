@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@libsql/client": "0.17.3",
+    "@lucia-auth/adapter-drizzle": "1.1.0",
     "drizzle-orm": "0.45.2",
-    "hono": "^4.10.1"
+    "hono": "^4.10.1",
+    "lucia": "3.2.2"
   },
   "devDependencies": {
     "drizzle-kit": "0.31.10"

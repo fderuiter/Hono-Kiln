@@ -8,6 +8,13 @@
       "when": 1778685251835,
       "tag": "0000_brown_malice",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1778686323845,
+      "tag": "0001_normal_switch",
+      "breakpoints": true
     }
   ]
 }

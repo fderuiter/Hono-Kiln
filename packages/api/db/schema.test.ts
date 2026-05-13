@@ -3,7 +3,7 @@ import { getTableName } from 'drizzle-orm'
 import { getTableColumns } from 'drizzle-orm/utils'
 
 import { DEFAULT_DATABASE_URL, getDatabaseUrl } from './config'
-import { users } from './schema'
+import { sessions, users } from './schema'
 
 describe('database configuration', () => {
   it('defaults to the local libsql server', () => {
@@ -24,5 +24,15 @@ describe('database configuration', () => {
     expect(columns.id).toBeDefined()
     expect(columns.email).toBeDefined()
     expect(columns.name).toBeDefined()
+  })
+
+  it('defines the sessions table for lucia auth', () => {
+    const columns = getTableColumns(sessions)
+
+    expect(getTableName(sessions)).toBe('sessions')
+    expect(Object.keys(columns)).toEqual(['id', 'userId', 'expiresAt'])
+    expect(columns.id).toBeDefined()
+    expect(columns.userId).toBeDefined()
+    expect(columns.expiresAt).toBeDefined()
   })
 })
