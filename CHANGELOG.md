@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.1.0...v1.2.0) (2026-05-13)
+
+
+### Features
+
+* **cli:** upgrade kiln cli to output openapi routes ([5057255](https://github.com/fderuiter/Hono-Kiln/commit/50572550e9c9ec24d3a0ad31826a461fd7dfb357))
+
 # [1.1.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.0.0...v1.1.0) (2026-05-13)
 
 
