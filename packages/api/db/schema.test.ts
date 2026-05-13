@@ -20,10 +20,11 @@ describe('database configuration', () => {
     const columns = getTableColumns(users)
 
     expect(getTableName(users)).toBe('users')
-    expect(Object.keys(columns)).toEqual(['id', 'email', 'name'])
+    expect(Object.keys(columns)).toEqual(['id', 'email', 'name', 'passwordHash'])
     expect(columns.id).toBeDefined()
     expect(columns.email).toBeDefined()
     expect(columns.name).toBeDefined()
+    expect(columns.passwordHash).toBeDefined()
   })
 
   it('defines the sessions table for lucia auth', () => {
