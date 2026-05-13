@@ -15,6 +15,13 @@
       "when": 1778686323845,
       "tag": "0001_normal_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1778709845048,
+      "tag": "0002_typical_nightmare",
+      "breakpoints": true
     }
   ]
 }

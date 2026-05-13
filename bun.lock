@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 1,
   "workspaces": {
     "": {
       "name": "hono-kiln",
@@ -10,7 +9,7 @@
       "dependencies": {
         "@hono/swagger-ui": "0.6.1",
         "@hono/zod-openapi": "1.4.0",
-        "@libsql/client": "0.17.3",
+        "@libsql/client": "^0.17.3",
         "@lucia-auth/adapter-drizzle": "1.1.0",
         "drizzle-orm": "0.45.2",
         "hono": "^4.10.1",
