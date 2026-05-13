@@ -1,0 +1,12 @@
+{
+  "name": "Hono Kiln",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/bun:1": {}
+  },
+  "postCreateCommand": "bun install",
+  "forwardPorts": [
+    3000,
+    8080
+  ]
+}

@@ -1,5 +1,13 @@
 # Hono-Kiln
 
+## Kiln CLI
+
+Generate a new API module scaffold:
+
+```sh
+bun kiln generate module <name>
+```
+
 ## Database
 
 Start a local LibSQL server:
