@@ -1,0 +1,75 @@
+name: PR Preview Deployment
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  WORKER_NAME: hono-kiln-pr-${{ github.event.pull_request.number }}
+
+jobs:
+  deploy-preview:
+    name: Deploy Preview
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy with Wrangler
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: >-
+            deploy packages/api/index.ts
+            --name ${{ env.WORKER_NAME }}
+            --compatibility-date 2026-05-13
+
+      - name: Comment preview URL
+        uses: actions/github-script@v7
+        env:
+          WRANGLER_OUTPUT: ${{ steps.deploy.outputs.command-output }}
+          WORKER_NAME: ${{ env.WORKER_NAME }}
+        with:
+          script: |
+            const output = process.env.WRANGLER_OUTPUT || '';
+            const match = output.match(/https:\/\/[^\s]+/);
+            const url = match ? match[0] : null;
+            const body = url
+              ? `✅ Preview deployment is live: ${url}`
+              : `✅ Preview deployment completed for worker \`${process.env.WORKER_NAME}\`.`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+  remove-preview:
+    name: Remove Preview
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Remove worker deployment
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: delete ${{ env.WORKER_NAME }} --force
