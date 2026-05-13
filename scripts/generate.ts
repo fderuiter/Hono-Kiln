@@ -49,27 +49,56 @@ function getTemplateFiles(moduleName: string) {
   return {
     routeName,
     files: {
-      'schema.ts': `export const ${schemaName} = {
-  entity: '${moduleName}',
-} as const
-`,
-      'repository.ts': `import { ${schemaName} } from './schema'
+      'schema.ts': `import { z } from 'zod'
 
-export function ${repositoryFnName}() {
-  return [${schemaName}]
+export const entityName = '${moduleName}' as const
+
+export const ${schemaName} = z.object({
+  entity: z.string(),
+})
+
+export type ${pascalName} = z.infer<typeof ${schemaName}>
+`,
+      'repository.ts': `import type { ${pascalName} } from './schema'
+import { entityName } from './schema'
+
+export function ${repositoryFnName}(): ${pascalName}[] {
+  return [{ entity: entityName }]
 }
 `,
-      'routes.ts': `import { Hono } from 'hono'
+      'routes.ts': `import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 
 import { ${repositoryFnName} } from './repository'
+import { ${schemaName} } from './schema'
 
-export const ${routeName} = new Hono()
+export const ${routeName} = new OpenAPIHono()
 
-${routeName}.get('/', (c) =>
-  c.json({
-    data: ${repositoryFnName}(),
-  }),
-)
+const listRoute = createRoute({
+  method: 'get',
+  path: '/',
+  tags: ['${pascalName}'],
+  responses: {
+    200: {
+      description: 'Respond with a list of ${moduleName}',
+      content: {
+        'application/json': {
+          schema: z.object({
+            data: z.array(${schemaName}),
+          }),
+        },
+      },
+    },
+  },
+})
+
+${routeName}.openapi(listRoute, (c) => {
+  return c.json(
+    {
+      data: ${repositoryFnName}(),
+    },
+    200,
+  )
+})
 `,
       'routes.test.ts': `import { describe, expect, it } from 'bun:test'
 
