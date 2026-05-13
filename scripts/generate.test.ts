@@ -31,6 +31,28 @@ export default app
   return repoRoot
 }
 
+async function createMultilineImportFixture() {
+  const repoRoot = await mkdtemp(path.join(os.tmpdir(), 'kiln-generate-'))
+  tempDirs.push(repoRoot)
+
+  await mkdir(path.join(repoRoot, 'packages', 'api', 'modules'), { recursive: true })
+  await writeFile(
+    path.join(repoRoot, 'packages', 'api', 'app.ts'),
+    `import {
+  Hono,
+} from 'hono'
+
+const app = new Hono()
+
+app.route('/health', healthRoutes)
+
+export default app
+`,
+  )
+
+  return repoRoot
+}
+
 afterEach(async () => {
   await Promise.all(
     tempDirs.splice(0).map((tempDir) => rm(tempDir, { recursive: true, force: true })),
@@ -63,11 +85,14 @@ describe('generate module script', () => {
     await mountModule('users', 'usersRoutes', repoRoot)
 
     const appContent = await readFile(path.join(repoRoot, 'packages', 'api', 'app.ts'), 'utf8')
-    expect(appContent.match(/usersRoutes/g)?.length).toBe(2)
+    expect(
+      appContent.match(/import \{ usersRoutes \} from '\.\/modules\/users\/routes'/g)?.length,
+    ).toBe(1)
+    expect(appContent.match(/app\.route\('\/users', usersRoutes\)/g)?.length).toBe(1)
   })
 
   it('returns non-zero when cli args are invalid', async () => {
-    expect(await run(['generate'], '/tmp/repo')).toBe(1)
+    expect(await run(['generate'], path.join(os.tmpdir(), 'repo'))).toBe(1)
   })
 
   it('rejects module names that do not start with a letter', async () => {
@@ -75,5 +100,18 @@ describe('generate module script', () => {
     await expect(generateModule('123-users', repoRoot)).rejects.toThrow(
       'Module name must start with a letter',
     )
+  })
+
+  it('inserts generated import after multiline imports', async () => {
+    const repoRoot = await createMultilineImportFixture()
+
+    await mountModule('users', 'usersRoutes', repoRoot)
+
+    const appContent = await readFile(path.join(repoRoot, 'packages', 'api', 'app.ts'), 'utf8')
+    expect(appContent).toContain(`import {
+  Hono,
+} from 'hono'
+import { usersRoutes } from './modules/users/routes'
+`)
   })
 })
