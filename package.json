@@ -1,0 +1,7 @@
+{
+  "name": "hono-kiln",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}

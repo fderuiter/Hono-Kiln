@@ -1,0 +1,5 @@
+{
+  "name": "@hono-kiln/shared",
+  "private": true,
+  "type": "module"
+}
