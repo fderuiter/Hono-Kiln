@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { Hono } from 'hono'
 import { Cookie, type Session, type User } from 'lucia'
 
-import { createAuthMiddleware } from './middleware'
+import { authMiddleware } from './middleware'
 
 function createTestCookie(value: string, attributes: ConstructorParameters<typeof Cookie>[2]) {
   return new Cookie('auth_session', value, attributes)
@@ -40,7 +40,11 @@ function createTestApp(
     },
   }
 
-  app.use('*', createAuthMiddleware(auth))
+  app.use('*', async (c, next) => {
+    c.set('auth', auth)
+    await next()
+  })
+  app.use('*', authMiddleware)
   app.get('/me', (c) =>
     c.json({
       user: c.get('user'),

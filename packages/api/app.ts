@@ -2,12 +2,14 @@ import { swaggerUI } from '@hono/swagger-ui'
 import { OpenAPIHono } from '@hono/zod-openapi'
 
 import { authMiddleware } from './auth/middleware'
+import { initMiddleware } from './middleware/init'
 import { authRoutes } from './modules/auth/routes'
 import { healthRoutes } from './modules/health/routes'
 import { rootRoutes } from './modules/root/routes'
 
 const app = new OpenAPIHono()
 
+app.use('*', initMiddleware)
 app.use('*', authMiddleware)
 app.route('/', rootRoutes)
 app.route('/auth', authRoutes)

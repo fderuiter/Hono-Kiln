@@ -1,32 +1,34 @@
 import { DrizzleSQLiteAdapter } from '@lucia-auth/adapter-drizzle'
 import { Lucia, TimeSpan } from 'lucia'
 
-import { db } from '../db'
+import type { Database } from '../db'
 import { sessions, users } from '../db/schema'
 
-const runtimeEnv = typeof Bun !== 'undefined' ? Bun.env : process.env
+export function createAuth(db: Database, isProd: boolean) {
+  const adapter = new DrizzleSQLiteAdapter(db, sessions, users)
 
-const adapter = new DrizzleSQLiteAdapter(db, sessions, users)
-
-export const auth = new Lucia(adapter, {
-  sessionExpiresIn: new TimeSpan(30, 'd'),
-  sessionCookie: {
-    expires: false,
-    attributes: {
-      path: '/',
-      sameSite: 'lax',
-      secure: runtimeEnv.NODE_ENV === 'production',
+  return new Lucia(adapter, {
+    sessionExpiresIn: new TimeSpan(30, 'd'),
+    sessionCookie: {
+      expires: false,
+      attributes: {
+        path: '/',
+        sameSite: 'lax',
+        secure: isProd,
+      },
     },
-  },
-  getUserAttributes: (attributes) => ({
-    email: attributes.email,
-    name: attributes.name,
-  }),
-})
+    getUserAttributes: (attributes) => ({
+      email: attributes.email,
+      name: attributes.name,
+    }),
+  })
+}
+
+export type Auth = ReturnType<typeof createAuth>
 
 declare module 'lucia' {
   interface Register {
-    Lucia: typeof auth
+    Lucia: Auth
     UserId: number
     DatabaseUserAttributes: {
       email: string

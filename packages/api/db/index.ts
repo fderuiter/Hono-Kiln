@@ -1,14 +1,15 @@
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
 
-import { getDatabaseAuthToken, getDatabaseUrl } from './config'
 import * as schema from './schema'
 
-const authToken = getDatabaseAuthToken()
+export function createDatabase(url: string, authToken?: string) {
+  const client = createClient({
+    url,
+    ...(authToken ? { authToken } : {}),
+  })
 
-export const client = createClient({
-  url: getDatabaseUrl(),
-  ...(authToken ? { authToken } : {}),
-})
+  return drizzle({ client, schema })
+}
 
-export const db = drizzle({ client, schema })
+export type Database = ReturnType<typeof createDatabase>
