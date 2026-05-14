@@ -2,8 +2,6 @@ import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { eq } from 'drizzle-orm'
 import { setCookie } from 'hono/cookie'
 
-import { auth } from '../../auth'
-import { db } from '../../db'
 import { users } from '../../db/schema'
 import {
   AuthResponseSchema,
@@ -48,6 +46,8 @@ const registerRoute = createRoute({
 })
 
 authRoutes.openapi(registerRoute, async (c) => {
+  const db = c.get('db')
+  const auth = c.get('auth')
   const { name, email, password } = c.req.valid('json')
 
   const existingUser = await db.query.users.findFirst({
@@ -120,6 +120,8 @@ const loginRoute = createRoute({
 })
 
 authRoutes.openapi(loginRoute, async (c) => {
+  const db = c.get('db')
+  const auth = c.get('auth')
   const { email, password } = c.req.valid('json')
 
   const user = await db.query.users.findFirst({
@@ -178,6 +180,7 @@ const logoutRoute = createRoute({
 })
 
 authRoutes.openapi(logoutRoute, async (c) => {
+  const auth = c.get('auth')
   const session = c.get('session')
 
   if (!session) {

@@ -1,8 +1,10 @@
-import { db } from './index'
+import { getDatabaseAuthToken, getDatabaseUrl } from './config'
+import { createDatabase } from './index'
 import * as schema from './schema'
 
 async function seed() {
   console.log('🌱 Seeding database...')
+  const db = createDatabase(getDatabaseUrl(), getDatabaseAuthToken())
 
   try {
     // Clear tables (idempotent)
