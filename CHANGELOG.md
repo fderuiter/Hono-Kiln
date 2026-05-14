@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.2.0...v1.3.0) (2026-05-14)
+
+
+### Features
+
+* implement auth register, login, and logout endpoints ([2707267](https://github.com/fderuiter/Hono-Kiln/commit/2707267f250b9d89064afa66daf4cfc519d3258b))
+
 # [1.2.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.1.0...v1.2.0) (2026-05-13)
 
 
