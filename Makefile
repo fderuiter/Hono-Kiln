@@ -1,4 +1,4 @@
-.PHONY: install dev db-migrate db-push
+.PHONY: install dev db-migrate db-push db-seed
 
 install:
 	bun install
@@ -11,3 +11,6 @@ db-migrate:
 
 db-push:
 	cd packages/api && bunx drizzle-kit push
+
+db-seed:
+	cd packages/api && bun run db:seed
