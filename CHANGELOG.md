@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.3.0...v1.4.0) (2026-05-14)
+
+
+### Features
+
+* add db-seed script with dummy user creation ([bff64e3](https://github.com/fderuiter/Hono-Kiln/commit/bff64e369c9d5d5df99e4150315b519b06872e9d))
+
 # [1.3.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.2.0...v1.3.0) (2026-05-14)
 
 
