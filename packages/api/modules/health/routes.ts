@@ -1,14 +1,21 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { createHealthRepository } from './repository'
+import { InternalServerErrorSchema, ServiceUnavailableSchema } from '@hono-kiln/shared'
 
 export const healthRoutes = new OpenAPIHono()
 
-const StatusSchema = z.object({ status: z.literal('ok') })
+const StatusSchema = z.object({
+  status: z.literal('ok').openapi({ description: 'The service is healthy', example: 'ok' })
+}).openapi('HealthStatus')
 
 const healthResponse = {
   200: {
     content: { 'application/json': { schema: StatusSchema } },
     description: 'Health status',
+  },
+  500: {
+    content: { 'application/json': { schema: InternalServerErrorSchema } },
+    description: 'Internal server error',
   },
 } as const
 
@@ -20,7 +27,7 @@ healthRoutes.openapi(
     summary: 'Health check',
     responses: healthResponse,
   }),
-  (c) => c.json({ status: 'ok' }),
+  (c) => c.json({ status: 'ok' as const }),
 )
 
 healthRoutes.openapi(
@@ -31,7 +38,7 @@ healthRoutes.openapi(
     summary: 'Liveness probe',
     responses: healthResponse,
   }),
-  (c) => c.json({ status: 'ok' }),
+  (c) => c.json({ status: 'ok' as const }),
 )
 
 healthRoutes.openapi(
@@ -40,7 +47,13 @@ healthRoutes.openapi(
     path: '/ready',
     tags: ['Health'],
     summary: 'Readiness probe',
-    responses: healthResponse,
+    responses: {
+      ...healthResponse,
+      503: {
+        content: { 'application/json': { schema: ServiceUnavailableSchema } },
+        description: 'Service unavailable',
+      },
+    },
   }),
   async (c) => {
     const db = c.get('db')
@@ -48,9 +61,9 @@ healthRoutes.openapi(
     
     const isDbReady = await repository.checkDatabase()
     if (!isDbReady) {
-      return c.json({ status: 'error' } as any, 503)
+      return c.json({ status: 'error' }, 503)
     }
 
-    return c.json({ status: 'ok' })
+    return c.json({ status: 'ok' as const })
   },
 )
