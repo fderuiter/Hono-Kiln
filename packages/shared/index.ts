@@ -9,26 +9,26 @@ export const ErrorResponseSchema = z
   })
   .openapi('ErrorResponse')
 
+export const ZodIssueSchema = z.object({
+  code: z.string().openapi({ description: 'The validation error code', example: 'invalid_type' }),
+  expected: z.string().optional().openapi({ description: 'The expected type', example: 'string' }),
+  received: z.string().optional().openapi({ description: 'The received type', example: 'undefined' }),
+  path: z.array(z.union([z.string(), z.number()])).openapi({ description: 'The path to the invalid field', example: ['body', 'email'] }),
+  message: z.string().openapi({ description: 'The validation error message', example: 'Required' }),
+}).openapi('ValidationErrorIssue')
+
+export const ValidationErrorDetailSchema = z.object({
+  issues: z.array(ZodIssueSchema).openapi({ description: 'The validation issues' }),
+  name: z.string().openapi({ description: 'The error name', example: 'ZodError' }),
+}).openapi('ValidationErrorDetail')
+
 export const UnprocessableEntitySchema = z
   .object({
     success: z.literal(false).openapi({
       description: 'Whether the request was successful',
       example: false,
     }),
-    error: z
-      .object({
-        issues: z.array(
-          z.object({
-            code: z.string().openapi({ description: 'The validation error code', example: 'invalid_type' }),
-            expected: z.string().optional().openapi({ description: 'The expected type', example: 'string' }),
-            received: z.string().optional().openapi({ description: 'The received type', example: 'undefined' }),
-            path: z.array(z.union([z.string(), z.number()])).openapi({ description: 'The path to the invalid field', example: ['body', 'email'] }),
-            message: z.string().openapi({ description: 'The validation error message', example: 'Required' }),
-          })
-        ).openapi({ description: 'The validation issues' }),
-        name: z.string().openapi({ description: 'The error name', example: 'ZodError' }),
-      })
-      .openapi({ description: 'The error details' }),
+    error: ValidationErrorDetailSchema.openapi({ description: 'The error details' }),
   })
   .openapi('UnprocessableEntity')
 

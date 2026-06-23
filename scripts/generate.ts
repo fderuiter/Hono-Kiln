@@ -49,13 +49,13 @@ function getTemplateFiles(moduleName: string) {
   return {
     routeName,
     files: {
-      'schema.ts': `import { z } from 'zod'
+      'schema.ts': `import { z } from '@hono/zod-openapi'
 
 export const entityName = '${moduleName}' as const
 
 export const ${schemaName} = z.object({
-  entity: z.string(),
-})
+  entity: z.string().openapi({ description: 'The entity name', example: '${moduleName}' }),
+}).openapi('${pascalName}')
 
 export type ${pascalName} = z.infer<typeof ${schemaName}>
 `,
