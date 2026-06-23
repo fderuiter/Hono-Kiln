@@ -63,7 +63,7 @@ export type ${pascalName} = z.infer<typeof ${schemaName}>
 import type { ${pascalName} } from './schema'
 import { entityName } from './schema'
 
-export function ${repositoryFnName}(db: Database) {
+export function ${repositoryFnName}(_db: Database) {
   return {
     list(): ${pascalName}[] {
       return [{ entity: entityName }]
