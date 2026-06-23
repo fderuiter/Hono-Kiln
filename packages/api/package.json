@@ -8,7 +8,7 @@
     "test": "bun test",
     "db:migrate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:seed": "bun db/seed.ts"
+    "db:seed": "bun ./db/seed.ts"
   },
   "dependencies": {
     "@hono/swagger-ui": "0.6.1",

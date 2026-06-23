@@ -2,7 +2,8 @@
   "name": "hono-kiln",
   "private": true,
   "scripts": {
-    "kiln": "bun ./scripts/generate.ts"
+    "kiln": "bun ./scripts/generate.ts",
+    "db:seed": "bun run --filter @hono-kiln/api db:seed"
   },
   "workspaces": [
     "packages/*"
