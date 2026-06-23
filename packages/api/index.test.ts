@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'bun:test'
+
+process.env.DATABASE_URL = 'file::memory:'
+
 import app from './index'
 
 describe('health routes', () => {

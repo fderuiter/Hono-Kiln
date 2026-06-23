@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
+import { createHealthRepository } from './repository'
 
 export const healthRoutes = new OpenAPIHono()
 
@@ -41,5 +42,15 @@ healthRoutes.openapi(
     summary: 'Readiness probe',
     responses: healthResponse,
   }),
-  (c) => c.json({ status: 'ok' }),
+  async (c) => {
+    const db = c.get('db')
+    const repository = createHealthRepository(db)
+    
+    const isDbReady = await repository.checkDatabase()
+    if (!isDbReady) {
+      return c.json({ status: 'error' } as any, 503)
+    }
+
+    return c.json({ status: 'ok' })
+  },
 )

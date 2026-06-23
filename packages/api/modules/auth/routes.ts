@@ -1,8 +1,7 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
-import { eq } from 'drizzle-orm'
 import { setCookie } from 'hono/cookie'
 
-import { users } from '../../db/schema'
+import { createAuthRepository } from './repository'
 import {
   AuthResponseSchema,
   ErrorResponseSchema,
@@ -48,11 +47,10 @@ const registerRoute = createRoute({
 authRoutes.openapi(registerRoute, async (c) => {
   const db = c.get('db')
   const auth = c.get('auth')
+  const repository = createAuthRepository(db)
   const { name, email, password } = c.req.valid('json')
 
-  const existingUser = await db.query.users.findFirst({
-    where: eq(users.email, email),
-  })
+  const existingUser = await repository.findUserByEmail(email)
 
   if (existingUser) {
     return c.json({ error: 'User already exists' }, 400)
@@ -60,14 +58,11 @@ authRoutes.openapi(registerRoute, async (c) => {
 
   const passwordHash = await Bun.password.hash(password)
 
-  const [newUser] = await db
-    .insert(users)
-    .values({
-      name,
-      email,
-      passwordHash,
-    })
-    .returning()
+  const newUser = await repository.createUser({
+    name,
+    email,
+    passwordHash,
+  })
 
   const session = await auth.createSession(newUser.id, {})
   const sessionCookie = auth.createSessionCookie(session.id)
@@ -122,11 +117,10 @@ const loginRoute = createRoute({
 authRoutes.openapi(loginRoute, async (c) => {
   const db = c.get('db')
   const auth = c.get('auth')
+  const repository = createAuthRepository(db)
   const { email, password } = c.req.valid('json')
 
-  const user = await db.query.users.findFirst({
-    where: eq(users.email, email),
-  })
+  const user = await repository.findUserByEmail(email)
 
   if (!user) {
     return c.json({ error: 'Invalid credentials' }, 401)
