@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
+import { Scrypt } from 'oslo/password'
 import { eq } from 'drizzle-orm'
 import { setCookie } from 'hono/cookie'
 
@@ -58,7 +59,7 @@ authRoutes.openapi(registerRoute, async (c) => {
     return c.json({ error: 'User already exists' }, 400)
   }
 
-  const passwordHash = await Bun.password.hash(password)
+  const passwordHash = await new Scrypt().hash(password)
 
   const [newUser] = await db
     .insert(users)
@@ -132,7 +133,7 @@ authRoutes.openapi(loginRoute, async (c) => {
     return c.json({ error: 'Invalid credentials' }, 401)
   }
 
-  const isPasswordValid = await Bun.password.verify(password, user.passwordHash)
+  const isPasswordValid = await new Scrypt().verify(user.passwordHash, password)
 
   if (!isPasswordValid) {
     return c.json({ error: 'Invalid credentials' }, 401)

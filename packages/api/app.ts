@@ -7,7 +7,13 @@ import { authRoutes } from './modules/auth/routes'
 import { healthRoutes } from './modules/health/routes'
 import { rootRoutes } from './modules/root/routes'
 
-const app = new OpenAPIHono()
+export type Bindings = {
+  DATABASE_URL?: string
+  DATABASE_AUTH_TOKEN?: string
+  NODE_ENV?: string
+}
+
+const app = new OpenAPIHono<{ Bindings: Bindings }>()
 
 app.use('*', initMiddleware)
 app.use('*', authMiddleware)
