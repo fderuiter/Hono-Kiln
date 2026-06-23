@@ -22,34 +22,35 @@ That's it. Your API is live, documented, and ready to extend.
 
 ## Architecture
 
-```
-hono-kiln/
-├── packages/
-│   └── api/                  # Hono API (Cloudflare Workers compatible)
-│       ├── app.ts            # App entry — routes + OpenAPI + Swagger UI
-│       ├── index.ts          # Bun server entry point
-│       ├── auth/             # Lucia session-based authentication
-│       ├── db/               # Drizzle ORM + LibSQL (SQLite-compatible)
-│       └── modules/
-│           ├── health/       # /health, /health/live, /health/ready
-│           └── root/         # / welcome route
-├── scripts/
-│   └── generate.ts           # Kiln CLI — scaffold new modules instantly
-└── Makefile                  # Convenience commands
+```mermaid
+flowchart LR
+    Root["hono-kiln/"] --> Packages["packages/"]
+    Root --> Scripts["scripts/"]
+    Root --> Makefile["Makefile (Convenience commands)"]
+
+    Packages --> API["api/ (Hono API, Cloudflare Workers compatible)"]
+
+    API --> AppTS["app.ts (App entry — routes + OpenAPI + Swagger UI)"]
+    API --> IndexTS["index.ts (Bun server entry point)"]
+    API --> Auth["auth/ (Lucia session-based authentication)"]
+    API --> DB["db/ (Drizzle ORM + LibSQL, SQLite-compatible)"]
+    API --> Modules["modules/"]
+
+    Modules --> Health["health/ (/health, /health/live, /health/ready)"]
+    Modules --> RootModule["root/ (/ welcome route)"]
+
+    Scripts --> GenerateTS["generate.ts (Kiln CLI — scaffold new modules instantly)"]
 ```
 
 ### Request lifecycle
 
-```
-HTTP request
-     │
-     ▼
- Auth middleware (Lucia session cookie)
-     │
-     ├─► / ──────────────────► root routes
-     ├─► /health ─────────────► health routes
-     ├─► /openapi.json ────────► auto-generated OpenAPI 3.0 spec
-     └─► /docs ────────────────► Swagger UI
+```mermaid
+flowchart TD
+    Req["HTTP request"] --> Auth["Auth middleware (Lucia session cookie)"]
+    Auth --> Root["/ (root routes)"]
+    Auth --> Health["/health (health routes)"]
+    Auth --> OpenAPI["/openapi.json (auto-generated OpenAPI 3.0 spec)"]
+    Auth --> Docs["/docs (Swagger UI)"]
 ```
 
 ---
