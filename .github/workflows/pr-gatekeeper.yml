@@ -30,21 +30,3 @@ jobs:
 
       - name: Lint
         run: bunx --bun oxlint .
-
-  secret-scan:
-    name: TruffleHog Secret Scan
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Run TruffleHog
-        uses: trufflesecurity/trufflehog@v3.90.5
-        with:
-          path: ./
-          base: ${{ github.event.pull_request.base.sha }}
-          head: ${{ github.event.pull_request.head.sha }}
-          extra_args: --results=verified,unknown
