@@ -76,7 +76,12 @@ flowchart TD
 
 ---
 
-## API Documentation
+## API Documentation & Authentication
+
+For full API details, including interactive examples of the authentication flow (registration and login), please visit the **interactive Swagger UI** at:
+👉 **[http://localhost:3000/docs](http://localhost:3000/docs)**
+
+This live, self-documenting interface provides detailed request/response schemas, error code definitions (e.g., duplicates, invalid credentials), and allows you to test endpoints directly.
 
 Every route is documented automatically. Start the server and visit:
 

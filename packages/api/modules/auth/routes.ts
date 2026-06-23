@@ -22,11 +22,17 @@ const registerRoute = createRoute({
   path: '/register',
   tags: ['Auth'],
   summary: 'Register a new user',
+  description: 'Registers a new user and logs them in. Session state is maintained via browser cookies.',
   request: {
     body: {
       content: {
         'application/json': {
           schema: RegisterRequestSchema,
+          example: {
+            name: 'John Doe',
+            email: 'john@example.com',
+            password: 'password123',
+          },
         },
       },
     },
@@ -36,6 +42,13 @@ const registerRoute = createRoute({
       content: {
         'application/json': {
           schema: AuthResponseSchema,
+          example: {
+            user: {
+              id: 1,
+              email: 'john@example.com',
+              name: 'John Doe',
+            },
+          },
         },
       },
       description: 'User registered successfully',
@@ -44,6 +57,9 @@ const registerRoute = createRoute({
       content: {
         'application/json': {
           schema: BadRequestSchema,
+          example: {
+            error: 'User already exists',
+          },
         },
       },
       description: 'User already exists',
@@ -109,11 +125,16 @@ const loginRoute = createRoute({
   path: '/login',
   tags: ['Auth'],
   summary: 'Login a user',
+  description: 'Logs in an existing user. Session state is maintained via browser cookies.',
   request: {
     body: {
       content: {
         'application/json': {
           schema: LoginRequestSchema,
+          example: {
+            email: 'john@example.com',
+            password: 'password123',
+          },
         },
       },
     },
@@ -123,6 +144,13 @@ const loginRoute = createRoute({
       content: {
         'application/json': {
           schema: AuthResponseSchema,
+          example: {
+            user: {
+              id: 1,
+              email: 'john@example.com',
+              name: 'John Doe',
+            },
+          },
         },
       },
       description: 'User logged in successfully',
@@ -131,6 +159,9 @@ const loginRoute = createRoute({
       content: {
         'application/json': {
           schema: UnauthorizedSchema,
+          example: {
+            error: 'Invalid credentials',
+          },
         },
       },
       description: 'Invalid credentials',
@@ -194,6 +225,7 @@ const logoutRoute = createRoute({
   path: '/logout',
   tags: ['Auth'],
   summary: 'Logout a user',
+  description: 'Logs out the current user by invalidating the session. Session state is maintained via browser cookies.',
   responses: {
     200: {
       content: {
