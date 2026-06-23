@@ -29,13 +29,17 @@ flowchart LR
     Root --> Makefile["Makefile (Convenience commands)"]
 
     Packages --> API["api/ (Hono API, Cloudflare Workers compatible)"]
+    Packages --> Shared["shared/ (Shared utilities)"]
 
     API --> AppTS["app.ts (App entry — routes + OpenAPI + Swagger UI)"]
     API --> IndexTS["index.ts (Bun server entry point)"]
     API --> Auth["auth/ (Lucia session-based authentication)"]
     API --> DB["db/ (Drizzle ORM + LibSQL, SQLite-compatible)"]
+    API --> Drizzle["drizzle/ (Database migration directory)"]
+    API --> Middleware["middleware/ (Request initialization & dependency injection)"]
     API --> Modules["modules/"]
 
+    Modules --> AuthModule["auth/ (Registration and login routes)"]
     Modules --> Health["health/ (/health, /health/live, /health/ready)"]
     Modules --> RootModule["root/ (/ welcome route)"]
 
@@ -46,12 +50,24 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    Req["HTTP request"] --> Auth["Auth middleware (Lucia session cookie)"]
+    Req["HTTP request"] --> Init["Initialization middleware (Dependency injection)"]
+    Init --> Auth["Auth middleware (Lucia session cookie)"]
     Auth --> Root["/ (root routes)"]
+    Auth --> AuthRoute["/auth (auth routes)"]
     Auth --> Health["/health (health routes)"]
     Auth --> OpenAPI["/openapi.json (auto-generated OpenAPI 3.0 spec)"]
     Auth --> Docs["/docs (Swagger UI)"]
 ```
+
+The request initialization phase leverages middleware to bootstrap core dependencies and inject them into the Hono context (`c.set`). This establishes the dependency injection flow, ensuring services like the database connection and authentication context are immediately available to all subsequent route handlers.
+
+### Active Modules
+
+| Module | Purpose |
+|---|---|
+| `auth` | Registration and login routes |
+| `health` | System health checks (`/health`, `/health/live`, `/health/ready`) |
+| `root` | Welcome route (`/`) |
 
 ---
 
@@ -128,6 +144,8 @@ Generates `packages/api/modules/products/` and mounts it at `/products`.
 ---
 
 ## Database
+
+The `packages/api/drizzle/` directory manages database migrations, tracking schema evolution and storing the SQL migration files generated from the Drizzle schema.
 
 Start a local LibSQL server:
 
