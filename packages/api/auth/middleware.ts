@@ -1,7 +1,7 @@
 import type { Context } from 'hono'
 import { setCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
-import type { Cookie as LuciaCookie, Lucia, Session, User } from 'lucia'
+import type { Cookie as LuciaCookie, Session, User } from 'lucia'
 
 declare module 'hono' {
   interface ContextVariableMap {
