@@ -74,6 +74,7 @@ export function ${repositoryFnName}(_db: Database) {
 export type ${pascalName}Repository = ReturnType<typeof ${repositoryFnName}>
 `,
       'routes.ts': `import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
+import { HttpStatusCodes, InternalServerErrorSchema, UnprocessableEntitySchema } from '@hono-kiln/shared'
 
 import { ${repositoryFnName} } from './repository'
 import { ${schemaName} } from './schema'
@@ -85,13 +86,29 @@ const listRoute = createRoute({
   path: '/',
   tags: ['${pascalName}'],
   responses: {
-    200: {
+    [HttpStatusCodes.OK]: {
       description: 'Respond with a list of ${moduleName}',
       content: {
         'application/json': {
           schema: z.object({
-            data: z.array(${schemaName}),
-          }),
+            data: z.array(${schemaName}).openapi({ description: 'List of ${moduleName}' }),
+          }).openapi('${pascalName}ListResponse'),
+        },
+      },
+    },
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: {
+      description: 'Validation Error',
+      content: {
+        'application/json': {
+          schema: UnprocessableEntitySchema,
+        },
+      },
+    },
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: {
+      description: 'Internal Server Error',
+      content: {
+        'application/json': {
+          schema: InternalServerErrorSchema,
         },
       },
     },
@@ -106,11 +123,12 @@ ${routeName}.openapi(listRoute, (c) => {
     {
       data: repository.list(),
     },
-    200,
+    HttpStatusCodes.OK,
   )
 })
 `,
       'routes.test.ts': `import { describe, expect, it } from 'bun:test'
+import { HttpStatusCodes } from '@hono-kiln/shared'
 
 import { ${routeName} } from './routes'
 
@@ -120,7 +138,7 @@ describe('${moduleName} routes', () => {
     const response = await ${routeName}.request('/', {
       // Mock request context here if needed
     })
-    expect(response.status).toBe(200)
+    expect(response.status).toBe(HttpStatusCodes.OK)
     expect(await response.json()).toEqual({
       data: [{ entity: '${moduleName}' }],
     })

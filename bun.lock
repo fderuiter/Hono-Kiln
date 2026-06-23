@@ -22,6 +22,10 @@
     },
     "packages/shared": {
       "name": "@hono-kiln/shared",
+      "dependencies": {
+        "@hono/zod-openapi": "^1.4.0",
+        "zod": "^4.4.3",
+      },
     },
   },
   "packages": {

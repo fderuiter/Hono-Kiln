@@ -1,5 +1,10 @@
 {
   "name": "@hono-kiln/shared",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "main": "index.ts",
+  "dependencies": {
+    "@hono/zod-openapi": "^1.4.0",
+    "zod": "^4.4.3"
+  }
 }

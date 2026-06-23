@@ -1,10 +1,15 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { setCookie } from 'hono/cookie'
+import {
+  BadRequestSchema,
+  InternalServerErrorSchema,
+  UnauthorizedSchema,
+  UnprocessableEntitySchema,
+} from '@hono-kiln/shared'
 
 import { createAuthRepository } from './repository'
 import {
   AuthResponseSchema,
-  ErrorResponseSchema,
   LoginRequestSchema,
   RegisterRequestSchema,
 } from './schema'
@@ -14,6 +19,7 @@ export const authRoutes = new OpenAPIHono()
 const registerRoute = createRoute({
   method: 'post',
   path: '/register',
+  tags: ['Auth'],
   summary: 'Register a new user',
   request: {
     body: {
@@ -36,10 +42,26 @@ const registerRoute = createRoute({
     400: {
       content: {
         'application/json': {
-          schema: ErrorResponseSchema,
+          schema: BadRequestSchema,
         },
       },
       description: 'User already exists',
+    },
+    422: {
+      content: {
+        'application/json': {
+          schema: UnprocessableEntitySchema,
+        },
+      },
+      description: 'Validation error',
+    },
+    500: {
+      content: {
+        'application/json': {
+          schema: InternalServerErrorSchema,
+        },
+      },
+      description: 'Internal server error',
     },
   },
 })
@@ -84,6 +106,7 @@ authRoutes.openapi(registerRoute, async (c) => {
 const loginRoute = createRoute({
   method: 'post',
   path: '/login',
+  tags: ['Auth'],
   summary: 'Login a user',
   request: {
     body: {
@@ -106,10 +129,26 @@ const loginRoute = createRoute({
     401: {
       content: {
         'application/json': {
-          schema: ErrorResponseSchema,
+          schema: UnauthorizedSchema,
         },
       },
       description: 'Invalid credentials',
+    },
+    422: {
+      content: {
+        'application/json': {
+          schema: UnprocessableEntitySchema,
+        },
+      },
+      description: 'Validation error',
+    },
+    500: {
+      content: {
+        'application/json': {
+          schema: InternalServerErrorSchema,
+        },
+      },
+      description: 'Internal server error',
     },
   },
 })
@@ -149,15 +188,20 @@ authRoutes.openapi(loginRoute, async (c) => {
   )
 })
 
+const LogoutResponseSchema = z.object({
+  message: z.string().openapi({ description: 'Logout success message', example: 'Logged out successfully' })
+}).openapi('LogoutResponse')
+
 const logoutRoute = createRoute({
   method: 'post',
   path: '/logout',
+  tags: ['Auth'],
   summary: 'Logout a user',
   responses: {
     200: {
       content: {
         'application/json': {
-          schema: z.object({ message: z.string() }),
+          schema: LogoutResponseSchema,
         },
       },
       description: 'User logged out successfully',
@@ -165,10 +209,18 @@ const logoutRoute = createRoute({
     401: {
       content: {
         'application/json': {
-          schema: ErrorResponseSchema,
+          schema: UnauthorizedSchema,
         },
       },
       description: 'Unauthorized',
+    },
+    500: {
+      content: {
+        'application/json': {
+          schema: InternalServerErrorSchema,
+        },
+      },
+      description: 'Internal server error',
     },
   },
 })
