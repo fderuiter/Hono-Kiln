@@ -44,7 +44,7 @@ function getTemplateFiles(moduleName: string) {
   const pascalName = toPascalCase(moduleName)
   const routeName = `${camelName}Routes`
   const schemaName = `${camelName}Schema`
-  const repositoryFnName = `list${pascalName}`
+  const repositoryFnName = `create${pascalName}Repository`
 
   return {
     routeName,
@@ -59,12 +59,19 @@ export const ${schemaName} = z.object({
 
 export type ${pascalName} = z.infer<typeof ${schemaName}>
 `,
-      'repository.ts': `import type { ${pascalName} } from './schema'
+      'repository.ts': `import type { Database } from '../../db'
+import type { ${pascalName} } from './schema'
 import { entityName } from './schema'
 
-export function ${repositoryFnName}(): ${pascalName}[] {
-  return [{ entity: entityName }]
+export function ${repositoryFnName}(db: Database) {
+  return {
+    list(): ${pascalName}[] {
+      return [{ entity: entityName }]
+    },
+  }
 }
+
+export type ${pascalName}Repository = ReturnType<typeof ${repositoryFnName}>
 `,
       'routes.ts': `import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 
@@ -92,9 +99,12 @@ const listRoute = createRoute({
 })
 
 ${routeName}.openapi(listRoute, (c) => {
+  const db = c.get('db')
+  const repository = ${repositoryFnName}(db)
+
   return c.json(
     {
-      data: ${repositoryFnName}(),
+      data: repository.list(),
     },
     200,
   )
@@ -106,7 +116,10 @@ import { ${routeName} } from './routes'
 
 describe('${moduleName} routes', () => {
   it('returns scaffolded payload', async () => {
-    const response = await ${routeName}.request('/')
+    // Note: Provide a mock db in the context for integration testing
+    const response = await ${routeName}.request('/', {
+      // Mock request context here if needed
+    })
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual({
       data: [{ entity: '${moduleName}' }],
