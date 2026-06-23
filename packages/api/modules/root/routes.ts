@@ -1,8 +1,8 @@
-import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
+import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
+
+import { WelcomeSchema } from './schema'
 
 export const rootRoutes = new OpenAPIHono()
-
-const WelcomeSchema = z.object({ message: z.literal('Hono Kiln API') })
 
 rootRoutes.openapi(
   createRoute({

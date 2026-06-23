@@ -11,10 +11,16 @@ export const LoginRequestSchema = z.object({
   password: z.string().min(1, 'Password is required').openapi({ description: 'User password', example: 'password123' }),
 }).openapi('LoginRequest')
 
+export const UserSchema = z.object({
+  id: z.number().openapi({ description: 'User ID', example: 1 }),
+  email: z.string().email().openapi({ description: 'User email', example: 'john@example.com' }),
+  name: z.string().openapi({ description: 'User name', example: 'John Doe' }),
+}).openapi('User')
+
 export const AuthResponseSchema = z.object({
-  user: z.object({
-    id: z.number().openapi({ description: 'User ID', example: 1 }),
-    email: z.string().email().openapi({ description: 'User email', example: 'john@example.com' }),
-    name: z.string().openapi({ description: 'User name', example: 'John Doe' }),
-  }).openapi({ description: 'User details' }),
+  user: UserSchema.openapi({ description: 'User details' }),
 }).openapi('AuthResponse')
+
+export const LogoutResponseSchema = z.object({
+  message: z.string().openapi({ description: 'Logout success message', example: 'Logged out successfully' })
+}).openapi('LogoutResponse')

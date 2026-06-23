@@ -11,6 +11,7 @@ import { createAuthRepository } from './repository'
 import {
   AuthResponseSchema,
   LoginRequestSchema,
+  LogoutResponseSchema,
   RegisterRequestSchema,
 } from './schema'
 
@@ -187,10 +188,6 @@ authRoutes.openapi(loginRoute, async (c) => {
     200
   )
 })
-
-const LogoutResponseSchema = z.object({
-  message: z.string().openapi({ description: 'Logout success message', example: 'Logged out successfully' })
-}).openapi('LogoutResponse')
 
 const logoutRoute = createRoute({
   method: 'post',

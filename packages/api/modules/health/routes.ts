@@ -1,12 +1,10 @@
-import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
+import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import { createHealthRepository } from './repository'
 import { InternalServerErrorSchema, ServiceUnavailableSchema } from '@hono-kiln/shared'
 
-export const healthRoutes = new OpenAPIHono()
+import { StatusSchema } from './schema'
 
-const StatusSchema = z.object({
-  status: z.literal('ok').openapi({ description: 'The service is healthy', example: 'ok' })
-}).openapi('HealthStatus')
+export const healthRoutes = new OpenAPIHono()
 
 const healthResponse = {
   200: {
