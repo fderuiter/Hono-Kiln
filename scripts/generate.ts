@@ -60,13 +60,14 @@ export const ${schemaName} = z.object({
 export type ${pascalName} = z.infer<typeof ${schemaName}>
 `,
       'repository.ts': `import type { Database } from '../../db'
-import type { ${pascalName} } from './schema'
+import { ${schemaName}, type ${pascalName} } from './schema'
 import { entityName } from './schema'
 
 export function ${repositoryFnName}(_db: Database) {
   return {
     list(): ${pascalName}[] {
-      return [{ entity: entityName }]
+      const rawData = [{ entity: entityName, internalField: 'hidden-value' }]
+      return rawData.map(item => ${schemaName}.parse(item))
     },
   }
 }

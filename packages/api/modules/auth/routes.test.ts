@@ -1,27 +1,32 @@
 import { describe, expect, it, mock } from 'bun:test'
 import { createTestApp } from '@hono-kiln/testing'
 
-const mockRepo = {
-  findUserByEmail: mock(async () => undefined),
-  createUser: mock(async (data: any) => ({
-    id: 'test-id',
-    email: data.email,
-    name: data.name,
-    passwordHash: data.passwordHash,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  })),
-}
-
-mock.module('./repository', () => ({
-  createAuthRepository: () => mockRepo,
-}))
-
 import { authRoutes } from './routes'
 
 describe('auth routes', () => {
-  it('registers a user successfully using mocked repository', async () => {
-    const app = createTestApp(authRoutes)
+  it('registers a user successfully and strips extra database fields from response', async () => {
+    const mockDb = {
+      query: {
+        users: {
+          findFirst: mock(async () => undefined),
+        },
+      },
+      insert: mock(() => ({
+        values: mock(() => ({
+          returning: mock(async () => [{
+            id: 1,
+            email: 'test@example.com',
+            name: 'Test',
+            passwordHash: 'hashed-password-string',
+            internalAuditFlag: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }])
+        }))
+      }))
+    }
+
+    const app = createTestApp(authRoutes, { db: mockDb })
 
     const response = await app.request('/register', {
       method: 'POST',
@@ -34,6 +39,16 @@ describe('auth routes', () => {
     })
 
     expect(response.status).toBe(201)
-    expect(mockRepo.createUser).toHaveBeenCalled()
+    
+    const body = await response.json()
+    expect(body).toEqual({
+      user: {
+        id: 1,
+        email: 'test@example.com',
+        name: 'Test',
+      }
+    })
+    expect(body.user).not.toHaveProperty('passwordHash')
+    expect(body.user).not.toHaveProperty('internalAuditFlag')
   })
 })

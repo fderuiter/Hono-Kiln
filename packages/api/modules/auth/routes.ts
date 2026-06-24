@@ -96,12 +96,10 @@ authRoutes.openapi(registerRoute, publicAccess(async (c) => {
     return c.json({ error: 'User already exists' }, 400 as const)
   }
 
-  const passwordHash = await Bun.password.hash(password)
-
   const newUser = await repository.createUser({
     name,
     email,
-    passwordHash,
+    password,
   })
 
   const session = await auth.createSession(newUser.id, {})
@@ -111,11 +109,7 @@ authRoutes.openapi(registerRoute, publicAccess(async (c) => {
 
   return c.json(
     {
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-      },
+      user: newUser,
     },
     201 as const
   )
@@ -192,15 +186,9 @@ authRoutes.openapi(loginRoute, publicAccess(async (c) => {
   const repository = createAuthRepository(db)
   const { email, password } = c.req.valid('json')
 
-  const user = await repository.findUserByEmail(email)
+  const user = await repository.verifyCredentials(email, password)
 
   if (!user) {
-    return c.json({ error: 'Invalid credentials' }, 401 as const)
-  }
-
-  const isPasswordValid = await Bun.password.verify(password, user.passwordHash)
-
-  if (!isPasswordValid) {
     return c.json({ error: 'Invalid credentials' }, 401 as const)
   }
 
@@ -211,11 +199,7 @@ authRoutes.openapi(loginRoute, publicAccess(async (c) => {
 
   return c.json(
     {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      },
+      user,
     },
     200 as const
   )
