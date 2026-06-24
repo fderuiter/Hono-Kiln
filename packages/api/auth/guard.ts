@@ -1,6 +1,6 @@
 import { createMiddleware } from 'hono/factory'
 
-export function publicAccess<T extends Function>(handler: T): T {
+export function publicAccess<T>(handler: T): T {
   (handler as any).isPublic = true
   return handler
 }

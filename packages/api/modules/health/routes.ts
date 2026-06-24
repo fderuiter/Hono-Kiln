@@ -26,7 +26,7 @@ healthRoutes.openapi(
     summary: 'Health check',
     responses: healthResponse,
   }),
-  publicAccess((c) => c.json({ status: 'ok' as const })),
+  publicAccess((c) => c.json({ status: 'ok' as const }, 200 as const)),
 )
 
 healthRoutes.openapi(
@@ -37,7 +37,7 @@ healthRoutes.openapi(
     summary: 'Liveness probe',
     responses: healthResponse,
   }),
-  publicAccess((c) => c.json({ status: 'ok' as const })),
+  publicAccess((c) => c.json({ status: 'ok' as const }, 200 as const)),
 )
 
 healthRoutes.openapi(
@@ -47,7 +47,14 @@ healthRoutes.openapi(
     tags: ['Health'],
     summary: 'Readiness probe',
     responses: {
-      ...healthResponse,
+      200: {
+        content: { 'application/json': { schema: StatusSchema } },
+        description: 'Health status',
+      },
+      500: {
+        content: { 'application/json': { schema: InternalServerErrorSchema } },
+        description: 'Internal server error',
+      },
       503: {
         content: { 'application/json': { schema: ServiceUnavailableSchema } },
         description: 'Service unavailable',
@@ -60,9 +67,9 @@ healthRoutes.openapi(
     
     const isDbReady = await repository.checkDatabase()
     if (!isDbReady) {
-      return c.json({ status: 'error' }, 503)
+      return c.json({ status: 'error' }, 503 as const)
     }
 
-    return c.json({ status: 'ok' as const })
+    return c.json({ status: 'ok' as const }, 200 as const)
   }),
 )

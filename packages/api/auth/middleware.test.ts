@@ -1,12 +1,9 @@
 import { describe, expect, it } from 'bun:test'
 import { Hono } from 'hono'
-import { Cookie, type Session, type User } from 'lucia'
+import type { Session, User } from 'lucia'
+import { createMockAuth, createTestApp as createHarnessApp } from '@hono-kiln/testing'
 
 import { authMiddleware } from './middleware'
-
-function createTestCookie(value: string, attributes: ConstructorParameters<typeof Cookie>[2]) {
-  return new Cookie('auth_session', value, attributes)
-}
 
 function createTestApp(
   validateSession: (sessionId: string) => Promise<{
@@ -14,51 +11,24 @@ function createTestApp(
     session: Session | null
   }>,
 ) {
-  const app = new Hono()
-  const auth = {
-    sessionCookieName: 'auth_session',
-    readSessionCookie(cookieHeader: string) {
-      return cookieHeader.match(/auth_session=([^;]+)/)?.[1] ?? null
-    },
-    validateSession,
-    createSessionCookie(sessionId: string) {
-      return createTestCookie(sessionId, {
-        httpOnly: true,
-        path: '/',
-        sameSite: 'lax',
-        secure: false,
-      })
-    },
-    createBlankSessionCookie() {
-      return createTestCookie('', {
-        httpOnly: true,
-        maxAge: 0,
-        path: '/',
-        sameSite: 'lax',
-        secure: false,
-      })
-    },
-  }
-
-  app.use('*', async (c, next) => {
-    c.set('auth', auth)
-    await next()
-  })
-  app.use('*', authMiddleware)
-  app.get('/me', (c) =>
+  const router = new Hono()
+  router.use('*', authMiddleware)
+  router.get('/me', (c) =>
     c.json({
       user: c.get('user'),
       session: c.get('session')
         ? {
-            id: c.get('session').id,
-            userId: c.get('session').userId,
-            fresh: c.get('session').fresh,
+            id: c.get('session')?.id,
+            userId: c.get('session')?.userId,
+            fresh: c.get('session')?.fresh,
           }
         : null,
     }),
   )
 
-  return app
+  return createHarnessApp(router, {
+    auth: createMockAuth({ validateSession }),
+  })
 }
 
 describe('auth middleware', () => {

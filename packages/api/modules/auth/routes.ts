@@ -93,7 +93,7 @@ authRoutes.openapi(registerRoute, publicAccess(async (c) => {
   const existingUser = await repository.findUserByEmail(email)
 
   if (existingUser) {
-    return c.json({ error: 'User already exists' }, 400)
+    return c.json({ error: 'User already exists' }, 400 as const)
   }
 
   const newUser = await repository.createUser({
@@ -111,7 +111,7 @@ authRoutes.openapi(registerRoute, publicAccess(async (c) => {
     {
       user: newUser,
     },
-    201
+    201 as const
   )
 }))
 
@@ -189,7 +189,7 @@ authRoutes.openapi(loginRoute, publicAccess(async (c) => {
   const user = await repository.verifyCredentials(email, password)
 
   if (!user) {
-    return c.json({ error: 'Invalid credentials' }, 401)
+    return c.json({ error: 'Invalid credentials' }, 401 as const)
   }
 
   const session = await auth.createSession(user.id, {})
@@ -201,7 +201,7 @@ authRoutes.openapi(loginRoute, publicAccess(async (c) => {
     {
       user,
     },
-    200
+    200 as const
   )
 }))
 
@@ -248,5 +248,5 @@ authRoutes.openapi(logoutRoute, async (c) => {
   const sessionCookie = auth.createBlankSessionCookie()
   setCookie(c, sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
 
-  return c.json({ message: 'Logged out successfully' }, 200)
+  return c.json({ message: 'Logged out successfully' }, 200 as const)
 })

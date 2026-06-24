@@ -18,5 +18,5 @@ rootRoutes.openapi(
       },
     },
   }),
-  publicAccess((c) => c.json({ message: 'Hono Kiln API' })),
+  publicAccess((c) => c.json({ message: 'Hono Kiln API' as const }, 200 as const)),
 )
