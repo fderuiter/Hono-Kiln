@@ -93,7 +93,7 @@ authRoutes.openapi(registerRoute, publicAccess(async (c) => {
   const existingUser = await repository.findUserByEmail(email)
 
   if (existingUser) {
-    return c.json({ error: 'User already exists' }, 400)
+    return c.json({ error: 'User already exists' }, 400 as const)
   }
 
   const passwordHash = await Bun.password.hash(password)
@@ -117,7 +117,7 @@ authRoutes.openapi(registerRoute, publicAccess(async (c) => {
         name: newUser.name,
       },
     },
-    201
+    201 as const
   )
 }))
 
@@ -195,13 +195,13 @@ authRoutes.openapi(loginRoute, publicAccess(async (c) => {
   const user = await repository.findUserByEmail(email)
 
   if (!user) {
-    return c.json({ error: 'Invalid credentials' }, 401)
+    return c.json({ error: 'Invalid credentials' }, 401 as const)
   }
 
   const isPasswordValid = await Bun.password.verify(password, user.passwordHash)
 
   if (!isPasswordValid) {
-    return c.json({ error: 'Invalid credentials' }, 401)
+    return c.json({ error: 'Invalid credentials' }, 401 as const)
   }
 
   const session = await auth.createSession(user.id, {})
@@ -217,7 +217,7 @@ authRoutes.openapi(loginRoute, publicAccess(async (c) => {
         name: user.name,
       },
     },
-    200
+    200 as const
   )
 }))
 
@@ -264,5 +264,5 @@ authRoutes.openapi(logoutRoute, async (c) => {
   const sessionCookie = auth.createBlankSessionCookie()
   setCookie(c, sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
 
-  return c.json({ message: 'Logged out successfully' }, 200)
+  return c.json({ message: 'Logged out successfully' }, 200 as const)
 })

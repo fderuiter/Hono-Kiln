@@ -18,9 +18,9 @@ function createTestApp(
       user: c.get('user'),
       session: c.get('session')
         ? {
-            id: c.get('session').id,
-            userId: c.get('session').userId,
-            fresh: c.get('session').fresh,
+            id: c.get('session')?.id,
+            userId: c.get('session')?.userId,
+            fresh: c.get('session')?.fresh,
           }
         : null,
     }),
