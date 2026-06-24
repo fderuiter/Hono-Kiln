@@ -137,15 +137,14 @@ ${routeName}.openapi(listRoute, (c) => {
 `,
       'routes.test.ts': `import { describe, expect, it } from 'bun:test'
 import { HttpStatusCodes } from '@hono-kiln/shared'
+import { createTestApp } from '@hono-kiln/testing'
 
 import { ${routeName} } from './routes'
 
 describe('${moduleName} routes', () => {
   it('returns scaffolded payload', async () => {
-    // Note: Provide a mock db in the context for integration testing
-    const response = await ${routeName}.request('/', {
-      // Mock request context here if needed
-    })
+    const app = createTestApp(${routeName})
+    const response = await app.request('/')
     expect(response.status).toBe(HttpStatusCodes.OK)
     expect(await response.json()).toEqual({
       data: [{ entity: '${moduleName}' }],

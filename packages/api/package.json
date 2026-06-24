@@ -22,6 +22,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@hono-kiln/testing": "workspace:*",
     "drizzle-kit": "0.31.10"
   }
 }
