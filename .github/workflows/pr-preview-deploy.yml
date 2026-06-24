@@ -21,9 +21,7 @@ jobs:
     name: Guard
     if: secrets.CLOUDFLARE_API_TOKEN != ''
     uses: ./.github/workflows/rw-guard.yml
-    secrets:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    secrets: inherit
 
   deploy-preview:
     name: Deploy Preview
@@ -33,9 +31,7 @@ jobs:
     with:
       action: deploy
       worker_name: hono-kiln-pr-${{ github.event.pull_request.number }}
-    secrets:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    secrets: inherit
 
   remove-preview:
     name: Remove Preview
@@ -45,6 +41,4 @@ jobs:
     with:
       action: remove
       worker_name: hono-kiln-pr-${{ github.event.pull_request.number }}
-    secrets:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    secrets: inherit
