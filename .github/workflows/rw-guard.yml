@@ -1,0 +1,31 @@
+name: Guard
+
+on:
+  workflow_call:
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        required: false
+      CLOUDFLARE_ACCOUNT_ID:
+        required: false
+    outputs:
+      has-secrets:
+        description: "Whether all required secrets are present"
+        value: ${{ jobs.guard.outputs.has-secrets }}
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    outputs:
+      has-secrets: ${{ steps.check.outputs.has-secrets }}
+    steps:
+      - name: Check secrets
+        id: check
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$CF_API_TOKEN" ] && [ -n "$CF_ACCOUNT_ID" ]; then
+            echo "has-secrets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-secrets=false" >> "$GITHUB_OUTPUT"
+          fi
