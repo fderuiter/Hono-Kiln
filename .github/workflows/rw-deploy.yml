@@ -1,0 +1,72 @@
+name: Reusable Deploy
+
+on:
+  workflow_call:
+    inputs:
+      action:
+        required: true
+        type: string # 'deploy' or 'remove'
+      worker_name:
+        required: true
+        type: string
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        required: true
+      CLOUDFLARE_ACCOUNT_ID:
+        required: true
+
+jobs:
+  deploy:
+    if: inputs.action == 'deploy'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Deploy with Wrangler
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: >-
+            deploy packages/api/index.ts
+            --name ${{ inputs.worker_name }}
+            --compatibility-date 2026-05-13
+
+      - name: Comment preview URL
+        uses: actions/github-script@v7
+        env:
+          WRANGLER_OUTPUT: ${{ steps.deploy.outputs.command-output }}
+          WORKER_NAME: ${{ inputs.worker_name }}
+        with:
+          script: |
+            const output = process.env.WRANGLER_OUTPUT || '';
+            const match = output.match(/https:\/\/[^\s]+/);
+            const url = match ? match[0] : null;
+            const body = url
+              ? `✅ Preview deployment is live: ${url}`
+              : `✅ Preview deployment completed for worker \`${process.env.WORKER_NAME}\`.`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+  remove:
+    if: inputs.action == 'remove'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove worker deployment
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: delete ${{ inputs.worker_name }} --force

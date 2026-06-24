@@ -16,65 +16,34 @@ concurrency:
   group: pr-preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-env:
-  WORKER_NAME: hono-kiln-pr-${{ github.event.pull_request.number }}
-
 jobs:
+  guard:
+    name: Guard
+    uses: ./.github/workflows/rw-guard.yml
+    secrets:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
   deploy-preview:
     name: Deploy Preview
-    if: github.event.action != 'closed' && secrets.CLOUDFLARE_API_TOKEN != ''
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Deploy with Wrangler
-        id: deploy
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: >-
-            deploy packages/api/index.ts
-            --name ${{ env.WORKER_NAME }}
-            --compatibility-date 2026-05-13
-
-      - name: Comment preview URL
-        uses: actions/github-script@v7
-        env:
-          WRANGLER_OUTPUT: ${{ steps.deploy.outputs.command-output }}
-          WORKER_NAME: ${{ env.WORKER_NAME }}
-        with:
-          script: |
-            const output = process.env.WRANGLER_OUTPUT || '';
-            const match = output.match(/https:\/\/[^\s]+/);
-            const url = match ? match[0] : null;
-            const body = url
-              ? `✅ Preview deployment is live: ${url}`
-              : `✅ Preview deployment completed for worker \`${process.env.WORKER_NAME}\`.`;
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body,
-            });
+    needs: guard
+    if: github.event.action != 'closed' && needs.guard.outputs.has-secrets == 'true'
+    uses: ./.github/workflows/rw-deploy.yml
+    with:
+      action: deploy
+      worker_name: hono-kiln-pr-${{ github.event.pull_request.number }}
+    secrets:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   remove-preview:
     name: Remove Preview
-    if: github.event.action == 'closed' && secrets.CLOUDFLARE_API_TOKEN != ''
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Remove worker deployment
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: delete ${{ env.WORKER_NAME }} --force
+    needs: guard
+    if: github.event.action == 'closed' && needs.guard.outputs.has-secrets == 'true'
+    uses: ./.github/workflows/rw-deploy.yml
+    with:
+      action: remove
+      worker_name: hono-kiln-pr-${{ github.event.pull_request.number }}
+    secrets:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
