@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import type { Database } from '../../db'
 import { users } from '../../db/schema'
-import { UserSchema, type User } from './schema'
+import { UserSchema } from './schema'
 import { z } from 'zod'
 
 type UserType = z.infer<typeof UserSchema>
