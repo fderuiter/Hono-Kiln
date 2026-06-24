@@ -4,7 +4,7 @@ type DatabaseEnv = {
 }
 
 const runtimeEnv: DatabaseEnv =
-  typeof Bun !== 'undefined' ? Bun.env : process.env
+  typeof Bun !== 'undefined' ? (Bun.env as DatabaseEnv) : (process.env as DatabaseEnv)
 
 export const DEFAULT_DATABASE_URL = 'http://127.0.0.1:8080'
 

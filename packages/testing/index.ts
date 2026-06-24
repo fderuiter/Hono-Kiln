@@ -59,7 +59,15 @@ export function createTestApp<T extends Hono<any, any, any>>(
   router: T,
   options: TestAppOptions = {},
 ) {
-  const app = new OpenAPIHono()
+  type Env = {
+    Variables: {
+      db: any
+      auth: any
+      user: User | null
+      session: Session | null
+    }
+  }
+  const app = new OpenAPIHono<Env>()
 
   let authMock = options.auth
   if (!authMock) {
