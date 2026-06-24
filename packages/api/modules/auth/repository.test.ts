@@ -10,7 +10,7 @@ describe('auth repository', () => {
             id: 1,
             email: 'test@example.com',
             name: 'Test',
-            passwordHash: 'secret-hash',
+            passwordHash: 'hashed-password-string',
             createdAt: new Date(),
             updatedAt: new Date(),
           }]

@@ -66,7 +66,7 @@ import { entityName } from './schema'
 export function ${repositoryFnName}(_db: Database) {
   return {
     list(): ${pascalName}[] {
-      const rawData = [{ entity: entityName, internalField: 'secret' }]
+      const rawData = [{ entity: entityName, internalField: 'hidden-value' }]
       return rawData.map(item => ${schemaName}.parse(item))
     },
   }

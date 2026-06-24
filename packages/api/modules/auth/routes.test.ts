@@ -32,7 +32,7 @@ describe('auth routes', () => {
             id: 1,
             email: 'test@example.com',
             name: 'Test',
-            passwordHash: 'hashedpassword',
+            passwordHash: 'hashed-password-string',
             internalAuditFlag: true,
             createdAt: new Date(),
             updatedAt: new Date(),
