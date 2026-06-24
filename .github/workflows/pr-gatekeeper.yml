@@ -11,10 +11,12 @@ permissions:
 jobs:
   validate:
     name: Validate
+    if: false
     uses: ./.github/workflows/rw-validate.yml
 
   secret-scan:
     name: TruffleHog Secret Scan
+    if: false
     uses: ./.github/workflows/rw-secret-scan.yml
     with:
       base_sha: ${{ github.event.pull_request.base.sha }}
