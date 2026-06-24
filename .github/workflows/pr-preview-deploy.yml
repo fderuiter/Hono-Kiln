@@ -19,6 +19,7 @@ concurrency:
 jobs:
   guard:
     name: Guard
+    if: secrets.CLOUDFLARE_API_TOKEN != ''
     uses: ./.github/workflows/rw-guard.yml
     secrets:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
