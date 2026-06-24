@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import { createHealthRepository } from './repository'
 import { InternalServerErrorSchema, ServiceUnavailableSchema } from '@hono-kiln/shared'
+import { publicAccess } from '../../auth/guard'
 
 import { StatusSchema } from './schema'
 
@@ -25,7 +26,7 @@ healthRoutes.openapi(
     summary: 'Health check',
     responses: healthResponse,
   }),
-  (c) => c.json({ status: 'ok' as const }),
+  publicAccess((c) => c.json({ status: 'ok' as const })),
 )
 
 healthRoutes.openapi(
@@ -36,7 +37,7 @@ healthRoutes.openapi(
     summary: 'Liveness probe',
     responses: healthResponse,
   }),
-  (c) => c.json({ status: 'ok' as const }),
+  publicAccess((c) => c.json({ status: 'ok' as const })),
 )
 
 healthRoutes.openapi(
@@ -53,7 +54,7 @@ healthRoutes.openapi(
       },
     },
   }),
-  async (c) => {
+  publicAccess(async (c) => {
     const db = c.get('db')
     const repository = createHealthRepository(db)
     
@@ -63,5 +64,5 @@ healthRoutes.openapi(
     }
 
     return c.json({ status: 'ok' as const })
-  },
+  }),
 )

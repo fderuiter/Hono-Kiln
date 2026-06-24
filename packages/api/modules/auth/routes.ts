@@ -6,6 +6,7 @@ import {
   UnauthorizedSchema,
   UnprocessableEntitySchema,
 } from '@hono-kiln/shared'
+import { publicAccess } from '../../auth/guard'
 
 import { createAuthRepository } from './repository'
 import {
@@ -83,7 +84,7 @@ const registerRoute = createRoute({
   },
 })
 
-authRoutes.openapi(registerRoute, async (c) => {
+authRoutes.openapi(registerRoute, publicAccess(async (c) => {
   const db = c.get('db')
   const auth = c.get('auth')
   const repository = createAuthRepository(db)
@@ -118,7 +119,7 @@ authRoutes.openapi(registerRoute, async (c) => {
     },
     201
   )
-})
+}))
 
 const loginRoute = createRoute({
   method: 'post',
@@ -185,7 +186,7 @@ const loginRoute = createRoute({
   },
 })
 
-authRoutes.openapi(loginRoute, async (c) => {
+authRoutes.openapi(loginRoute, publicAccess(async (c) => {
   const db = c.get('db')
   const auth = c.get('auth')
   const repository = createAuthRepository(db)
@@ -218,7 +219,7 @@ authRoutes.openapi(loginRoute, async (c) => {
     },
     200
   )
-})
+}))
 
 const logoutRoute = createRoute({
   method: 'post',
@@ -256,11 +257,7 @@ const logoutRoute = createRoute({
 
 authRoutes.openapi(logoutRoute, async (c) => {
   const auth = c.get('auth')
-  const session = c.get('session')
-
-  if (!session) {
-    return c.json({ error: 'Unauthorized' }, 401)
-  }
+  const session = c.get('session')!
 
   await auth.invalidateSession(session.id)
 
