@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
+import { publicAccess } from '../../auth/guard'
 
 import { WelcomeSchema } from './schema'
 
@@ -17,5 +18,5 @@ rootRoutes.openapi(
       },
     },
   }),
-  (c) => c.json({ message: 'Hono Kiln API' }),
+  publicAccess((c) => c.json({ message: 'Hono Kiln API' })),
 )

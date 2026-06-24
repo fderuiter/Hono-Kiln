@@ -74,7 +74,7 @@ export function ${repositoryFnName}(_db: Database) {
 export type ${pascalName}Repository = ReturnType<typeof ${repositoryFnName}>
 `,
       'routes.ts': `import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
-import { HttpStatusCodes, InternalServerErrorSchema, UnprocessableEntitySchema } from '@hono-kiln/shared'
+import { HttpStatusCodes, InternalServerErrorSchema, UnauthorizedSchema, UnprocessableEntitySchema } from '@hono-kiln/shared'
 
 import { ${repositoryFnName} } from './repository'
 import { ${schemaName} } from './schema'
@@ -93,6 +93,14 @@ const listRoute = createRoute({
           schema: z.object({
             data: z.array(${schemaName}).openapi({ description: 'List of ${moduleName}' }),
           }).openapi('${pascalName}ListResponse'),
+        },
+      },
+    },
+    [HttpStatusCodes.UNAUTHORIZED]: {
+      description: 'Unauthorized',
+      content: {
+        'application/json': {
+          schema: UnauthorizedSchema,
         },
       },
     },
