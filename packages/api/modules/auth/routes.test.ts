@@ -1,26 +1,10 @@
 import { describe, expect, it, mock } from 'bun:test'
 import { OpenAPIHono } from '@hono/zod-openapi'
 
-const mockRepo = {
-  findUserByEmail: mock(async () => undefined),
-  createUser: mock(async (data: any) => ({
-    id: 'test-id',
-    email: data.email,
-    name: data.name,
-    passwordHash: data.passwordHash,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  })),
-}
-
-mock.module('./repository', () => ({
-  createAuthRepository: () => mockRepo,
-}))
-
 import { authRoutes } from './routes'
 
 describe('auth routes', () => {
-  it('registers a user successfully using mocked repository', async () => {
+  it('registers a user successfully and strips extra database fields from response', async () => {
     const mockAuth = {
       createSession: mock(async () => ({ id: 'session-id' })),
       createSessionCookie: mock(() => ({
@@ -36,9 +20,30 @@ describe('auth routes', () => {
       })),
     }
 
+    const mockDb = {
+      query: {
+        users: {
+          findFirst: mock(async () => undefined),
+        },
+      },
+      insert: mock(() => ({
+        values: mock(() => ({
+          returning: mock(async () => [{
+            id: 1,
+            email: 'test@example.com',
+            name: 'Test',
+            passwordHash: 'hashedpassword',
+            internalAuditFlag: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }])
+        }))
+      }))
+    }
+
     const app = new OpenAPIHono()
     app.use('*', (c, next) => {
-      c.set('db', {}) // Ignored by mock
+      c.set('db', mockDb)
       c.set('auth', mockAuth)
       return next()
     })
@@ -55,6 +60,16 @@ describe('auth routes', () => {
     })
 
     expect(response.status).toBe(201)
-    expect(mockRepo.createUser).toHaveBeenCalled()
+    
+    const body = await response.json()
+    expect(body).toEqual({
+      user: {
+        id: 1,
+        email: 'test@example.com',
+        name: 'Test',
+      }
+    })
+    expect(body.user).not.toHaveProperty('passwordHash')
+    expect(body.user).not.toHaveProperty('internalAuditFlag')
   })
 })

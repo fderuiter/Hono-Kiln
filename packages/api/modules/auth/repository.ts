@@ -1,21 +1,43 @@
 import { eq } from 'drizzle-orm'
 import type { Database } from '../../db'
 import { users } from '../../db/schema'
+import { UserSchema, type User } from './schema'
+import { z } from 'zod'
+
+type UserType = z.infer<typeof UserSchema>
 
 export function createAuthRepository(db: Database) {
   return {
-    async findUserByEmail(email: string) {
-      return db.query.users.findFirst({
+    async findUserByEmail(email: string): Promise<UserType | null> {
+      const user = await db.query.users.findFirst({
         where: eq(users.email, email),
       })
+      return user ? UserSchema.parse(user) : null
     },
 
-    async createUser(data: { name: string; email: string; passwordHash: string }) {
+    async verifyCredentials(email: string, password: string): Promise<UserType | null> {
+      const user = await db.query.users.findFirst({
+        where: eq(users.email, email),
+      })
+      if (!user) return null
+      
+      const isPasswordValid = await Bun.password.verify(password, user.passwordHash)
+      if (!isPasswordValid) return null
+      
+      return UserSchema.parse(user)
+    },
+
+    async createUser(data: { name: string; email: string; password: string }): Promise<UserType> {
+      const passwordHash = await Bun.password.hash(data.password)
       const [newUser] = await db
         .insert(users)
-        .values(data)
+        .values({
+          name: data.name,
+          email: data.email,
+          passwordHash,
+        })
         .returning()
-      return newUser
+      return UserSchema.parse(newUser)
     },
   }
 }
