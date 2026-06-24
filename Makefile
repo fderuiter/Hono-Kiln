@@ -7,10 +7,10 @@ dev:
 	bun run --filter @hono-kiln/api dev
 
 db-migrate:
-	cd packages/api && bunx drizzle-kit generate
+	cd packages/api && bun x drizzle-kit generate
 
 db-push:
-	cd packages/api && bunx drizzle-kit push
+	cd packages/api && bun x drizzle-kit push
 
 db-seed:
 	cd packages/api && bun run db:seed
