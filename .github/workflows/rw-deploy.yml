@@ -14,6 +14,10 @@ on:
         required: true
       CLOUDFLARE_ACCOUNT_ID:
         required: true
+      DATABASE_URL:
+        required: true
+      DATABASE_AUTH_TOKEN:
+        required: true
 
 jobs:
   deploy:
@@ -34,10 +38,16 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: packages/api
+          secrets: |
+            DATABASE_URL
+            DATABASE_AUTH_TOKEN
           command: >-
-            deploy packages/api/index.ts
+            deploy
             --name ${{ inputs.worker_name }}
-            --compatibility-date 2026-05-13
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_AUTH_TOKEN: ${{ secrets.DATABASE_AUTH_TOKEN }}
 
       - name: Comment preview URL
         uses: actions/github-script@v7
@@ -69,4 +79,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: packages/api
           command: delete ${{ inputs.worker_name }} --force

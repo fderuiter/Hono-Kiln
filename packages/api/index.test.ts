@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 
 process.env.DATABASE_URL = 'file::memory:'
+process.env.DATABASE_AUTH_TOKEN = 'test-token'
 
 import app from './index'
 
