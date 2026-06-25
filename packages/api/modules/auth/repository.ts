@@ -43,4 +43,3 @@ export function createAuthRepository(db: Database) {
   }
 }
 
-export type AuthRepository = ReturnType<typeof createAuthRepository>

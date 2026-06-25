@@ -14,4 +14,3 @@ export function createHealthRepository(db: Database) {
   }
 }
 
-export type HealthRepository = ReturnType<typeof createHealthRepository>

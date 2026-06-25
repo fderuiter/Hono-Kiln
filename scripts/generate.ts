@@ -6,7 +6,10 @@ type GenerateModuleResult = {
   routeName: string
 }
 
-const usage = 'Usage: bun kiln generate module <name>'
+const usage = `Usage:
+  bun kiln generate module <name>
+  bun kiln audit
+`
 
 function toIdentifierSegment(input: string) {
   return input
@@ -71,8 +74,6 @@ export function ${repositoryFnName}(_db: Database) {
     },
   }
 }
-
-export type ${pascalName}Repository = ReturnType<typeof ${repositoryFnName}>
 `,
       'routes.ts': `import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { HttpStatusCodes, InternalServerErrorSchema, UnauthorizedSchema, UnprocessableEntitySchema } from '@hono-kiln/shared'
@@ -264,6 +265,16 @@ export async function generateModule(moduleInputName: string, repoRoot = process
 
 export async function run(argv: string[], repoRoot = process.cwd()) {
   const [action, type, name] = argv
+
+  if (action === 'audit') {
+    const { spawnSync } = await import('node:child_process')
+    const result = spawnSync('bun', ['run', 'knip'], { stdio: 'inherit', cwd: repoRoot })
+    if (result.status !== 0) {
+      return result.status ?? 1
+    }
+    console.log('Audit passed successfully.')
+    return 0
+  }
 
   if (action !== 'generate' || type !== 'module' || !name) {
     console.error(usage)

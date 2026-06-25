@@ -23,3 +23,6 @@ jobs:
 
       - name: Lint
         run: bun x --bun oxlint .
+
+      - name: Audit codebase health
+        run: bun kiln audit
