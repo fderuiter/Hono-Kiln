@@ -21,7 +21,17 @@ type EnvBindings = {
 export const initMiddleware = createMiddleware(async (c, next) => {
   const { DATABASE_URL, DATABASE_AUTH_TOKEN, NODE_ENV } = env<EnvBindings>(c)
 
-  const dbUrl = DATABASE_URL ?? DEFAULT_DATABASE_URL
+  if (!DATABASE_URL) {
+    throw new Error('Missing required environment variable: DATABASE_URL')
+  }
+  if (!DATABASE_AUTH_TOKEN) {
+    throw new Error('Missing required environment variable: DATABASE_AUTH_TOKEN')
+  }
+  if (!NODE_ENV) {
+    throw new Error('Missing required environment variable: NODE_ENV')
+  }
+
+  const dbUrl = DATABASE_URL
   const db = createDatabase(dbUrl, DATABASE_AUTH_TOKEN)
   const isProd = NODE_ENV === 'production'
   const auth = createAuth(db, isProd)

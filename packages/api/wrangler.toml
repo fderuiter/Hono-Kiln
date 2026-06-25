@@ -1,0 +1,6 @@
+name = "hono-kiln-api"
+main = "index.ts"
+compatibility_date = "2026-05-13"
+
+[vars]
+NODE_ENV = "production"
