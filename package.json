@@ -2,7 +2,8 @@
   "name": "hono-kiln",
   "private": true,
   "scripts": {
-    "kiln": "bun ./scripts/generate.ts"
+    "kiln": "bun ./scripts/generate.ts",
+    "setup": "bun ./scripts/setup.ts"
   },
   "workspaces": [
     "packages/*"
