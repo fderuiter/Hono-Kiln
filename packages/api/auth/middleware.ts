@@ -1,17 +1,13 @@
 import type { Context } from 'hono'
-import { setCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
-import type { Cookie as LuciaCookie, Session, User } from 'lucia'
+import type { Session, User } from 'lucia'
+import { sessionHelpers } from '@hono-kiln/shared'
 
 declare module 'hono' {
   interface ContextVariableMap {
     user: User | null
     session: Session | null
   }
-}
-
-function applyCookie(c: Context, cookie: LuciaCookie) {
-  setCookie(c, cookie.name, cookie.value, cookie.attributes)
 }
 
 export const authMiddleware = createMiddleware(async (c, next) => {
@@ -29,11 +25,11 @@ export const authMiddleware = createMiddleware(async (c, next) => {
   const { session, user } = await auth.validateSession(sessionId)
 
   if (session?.fresh) {
-    applyCookie(c, auth.createSessionCookie(session.id))
+    sessionHelpers.setSessionCookie(c, auth.createSessionCookie(session.id))
   }
 
   if (!session) {
-    applyCookie(c, auth.createBlankSessionCookie())
+    sessionHelpers.setSessionCookie(c, auth.createBlankSessionCookie())
   }
 
   c.set('user', user)

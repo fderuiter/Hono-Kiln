@@ -1,10 +1,10 @@
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
-import { setCookie } from 'hono/cookie'
 import {
   BadRequestSchema,
   InternalServerErrorSchema,
   UnauthorizedSchema,
   UnprocessableEntitySchema,
+  sessionHelpers,
 } from '@hono-kiln/shared'
 import { publicAccess } from '../../auth/guard'
 
@@ -105,7 +105,7 @@ authRoutes.openapi(registerRoute, publicAccess(async (c) => {
   const session = await auth.createSession(newUser.id, {})
   const sessionCookie = auth.createSessionCookie(session.id)
 
-  setCookie(c, sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
+  sessionHelpers.setSessionCookie(c, sessionCookie)
 
   return c.json(
     {
@@ -195,7 +195,7 @@ authRoutes.openapi(loginRoute, publicAccess(async (c) => {
   const session = await auth.createSession(user.id, {})
   const sessionCookie = auth.createSessionCookie(session.id)
 
-  setCookie(c, sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
+  sessionHelpers.setSessionCookie(c, sessionCookie)
 
   return c.json(
     {
@@ -246,7 +246,7 @@ authRoutes.openapi(logoutRoute, async (c) => {
   await auth.invalidateSession(session.id)
 
   const sessionCookie = auth.createBlankSessionCookie()
-  setCookie(c, sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
+  sessionHelpers.setSessionCookie(c, sessionCookie)
 
   return c.json({ message: 'Logged out successfully' }, 200 as const)
 })

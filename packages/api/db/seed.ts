@@ -1,6 +1,7 @@
 import { getDatabaseAuthToken, getDatabaseUrl } from './config'
 import { createDatabase } from './index'
 import * as schema from './schema'
+import { passwordHelpers } from '@hono-kiln/shared'
 
 async function seed() {
   console.log('🌱 Seeding database...')
@@ -13,7 +14,7 @@ async function seed() {
 
     // Insert dummy user
     console.log('Inserting dummy user...')
-    const passwordHash = await Bun.password.hash('password123')
+    const passwordHash = await passwordHelpers.hash('password123')
 
     await db.insert(schema.users).values({
       email: 'test@example.com',
