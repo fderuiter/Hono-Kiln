@@ -3,6 +3,7 @@ import type { Database } from '../../db'
 import { users } from '../../db/schema'
 import { UserSchema } from './schema'
 import { z } from 'zod'
+import { passwordHelpers } from '@hono-kiln/shared'
 
 type UserType = z.infer<typeof UserSchema>
 
@@ -21,14 +22,14 @@ export function createAuthRepository(db: Database) {
       })
       if (!user) return null
       
-      const isPasswordValid = await Bun.password.verify(password, user.passwordHash)
+      const isPasswordValid = await passwordHelpers.verify(password, user.passwordHash)
       if (!isPasswordValid) return null
       
       return UserSchema.parse(user)
     },
 
     async createUser(data: { name: string; email: string; password: string }): Promise<UserType> {
-      const passwordHash = await Bun.password.hash(data.password)
+      const passwordHash = await passwordHelpers.hash(data.password)
       const [newUser] = await db
         .insert(users)
         .values({
