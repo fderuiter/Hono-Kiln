@@ -1,4 +1,5 @@
-import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
+import { Project, SyntaxKind } from 'ts-morph'
 import path from 'node:path'
 import * as readline from 'node:readline/promises'
 
@@ -9,6 +10,7 @@ type GenerateModuleResult = {
 
 const usage = `Usage:
   bun kiln generate module <name>
+  bun kiln remove module <name>
   bun kiln audit
 `
 
@@ -338,6 +340,93 @@ export async function generateModule(moduleInputName: string, repoRoot = process
   }
 }
 
+
+export async function unmountModule(moduleName: string, repoRoot: string) {
+  const indexPath = path.join(repoRoot, 'packages', 'api', 'index.ts')
+  const appPath = path.join(repoRoot, 'packages', 'api', 'app.ts')
+  let mountPath = ''
+
+  if (await exists(indexPath)) {
+    const content = await readFile(indexPath, 'utf8')
+    if (content.includes('app.route(')) {
+      mountPath = indexPath
+    }
+  }
+  if (!mountPath) {
+    mountPath = appPath
+  }
+
+  const project = new Project()
+  const sourceFile = project.addSourceFileAtPath(mountPath)
+
+  const importDecls = sourceFile.getImportDeclarations().filter(decl => {
+    return decl.getModuleSpecifierValue() === `./modules/${moduleName}/routes`
+  })
+
+  if (importDecls.length !== 1) {
+    throw new Error(`Could not uniquely identify import statement for module "${moduleName}".`)
+  }
+
+  const callExprs = sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression)
+  const toRemove: any[] = []
+  for (const callExpr of callExprs) {
+    const propAccess = callExpr.getExpressionIfKind(SyntaxKind.PropertyAccessExpression)
+    if (propAccess && propAccess.getName() === 'route') {
+      const args = callExpr.getArguments()
+      if (args.length >= 2 && args[0].getKind() === SyntaxKind.StringLiteral) {
+        if (args[0].getText() === `'/${moduleName}'` || args[0].getText() === `"/${moduleName}"`) {
+          const stmt = callExpr.getFirstAncestorByKind(SyntaxKind.ExpressionStatement)
+          if (stmt) {
+            toRemove.push(stmt)
+          }
+        }
+      }
+    }
+  }
+
+  if (toRemove.length !== 1) {
+    throw new Error(`Could not uniquely identify route registration for module "${moduleName}".`)
+  }
+
+  const importStart = importDecls[0].getStartLineNumber()
+  const importEnd = importDecls[0].getEndLineNumber()
+  
+  const routeStart = toRemove[0].getStartLineNumber()
+  const routeEnd = toRemove[0].getEndLineNumber()
+
+  const rawContent = await readFile(mountPath, 'utf8')
+  const lines = rawContent.split('\n')
+
+  const ranges = [
+    { start: importStart - 1, end: importEnd - 1 },
+    { start: routeStart - 1, end: routeEnd - 1 }
+  ].sort((a, b) => b.start - a.start)
+
+  for (const range of ranges) {
+    lines.splice(range.start, range.end - range.start + 1)
+  }
+
+  await writeFile(mountPath, lines.join('\n'))
+}
+
+export async function removeModule(moduleInputName: string, repoRoot = process.cwd()) {
+  const moduleName = normalizeModuleName(moduleInputName)
+
+  if (!moduleName || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(moduleName)) {
+    throw new Error('Module name must start with a letter and contain only letters, numbers, and hyphens')
+  }
+
+  const modulePath = path.join(repoRoot, 'packages', 'api', 'modules', moduleName)
+
+  if (!(await exists(modulePath))) {
+    throw new Error(`Module "${moduleName}" does not exist`)
+  }
+
+  await unmountModule(moduleName, repoRoot)
+  
+  await rm(modulePath, { recursive: true, force: true })
+}
+
 export async function run(argv: string[], repoRoot = process.cwd()) {
   const [action, type, name] = argv
 
@@ -349,6 +438,18 @@ export async function run(argv: string[], repoRoot = process.cwd()) {
     }
     console.log('Audit passed successfully.')
     return 0
+  }
+
+  if (action === 'remove' && type === 'module' && name) {
+    try {
+      await removeModule(name, repoRoot)
+      console.log(`Removed module ${name}`)
+      return 0
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      console.error(message)
+      return 1
+    }
   }
 
   if (action !== 'generate' || type !== 'module' || !name) {

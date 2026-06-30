@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'bun:test'
-import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -114,4 +114,54 @@ describe('generate module script', () => {
 import { usersRoutes } from './modules/users/routes'
 `)
   })
+
+  it('removes scaffold files and unmounts the generated route', async () => {
+    const repoRoot = await createRepoFixture()
+    await generateModule('users', repoRoot)
+    
+    // now we remove it
+    await run(['remove', 'module', 'users'], repoRoot)
+
+    const moduleRoot = path.join(repoRoot, 'packages', 'api', 'modules', 'users')
+    let exists = true
+    try {
+      await stat(moduleRoot)
+    } catch {
+      exists = false
+    }
+    expect(exists).toBe(false)
+
+    const appContent = await readFile(path.join(repoRoot, 'packages', 'api', 'app.ts'), 'utf8')
+    expect(appContent).not.toContain("import { usersRoutes }")
+    expect(appContent).not.toContain("app.route('/users'")
+  })
+
+  it('fails if removal target does not exist', async () => {
+    const repoRoot = await createRepoFixture()
+    expect(await run(['remove', 'module', 'ghost'], repoRoot)).toBe(1)
+  })
+
+  it('fails if removal route cannot be uniquely identified', async () => {
+    const repoRoot = await createRepoFixture()
+    await generateModule('users', repoRoot)
+    
+    // corrupt app.ts by adding another route with same name
+    const appPath = path.join(repoRoot, 'packages', 'api', 'app.ts')
+    let content = await readFile(appPath, 'utf8')
+    content += "\napp.route('/users', somethingElse)"
+    await writeFile(appPath, content)
+
+    expect(await run(['remove', 'module', 'users'], repoRoot)).toBe(1)
+    
+    // files should remain intact due to rollback
+    const moduleRoot = path.join(repoRoot, 'packages', 'api', 'modules', 'users')
+    let exists = true
+    try {
+      await stat(moduleRoot)
+    } catch {
+      exists = false
+    }
+    expect(exists).toBe(true)
+  })
+
 })
