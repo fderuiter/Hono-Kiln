@@ -17,28 +17,114 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  guard:
-    name: Guard
-    if: false
-    uses: ./.github/workflows/rw-guard.yml
-    secrets: inherit
+  secret-scan:
+    name: TruffleHog Secret Scan
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@v3.90.5
+        with:
+          path: ./
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
+          extra_args: --results=verified,unknown
 
   deploy-preview:
     name: Deploy Preview
-    needs: guard
-    if: github.event.action != 'closed' && needs.guard.outputs.has-secrets == 'true'
-    uses: ./.github/workflows/rw-deploy.yml
-    with:
-      action: deploy
-      worker_name: hono-kiln-pr-${{ github.event.pull_request.number }}
-    secrets: inherit
+    needs: secret-scan
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check secrets
+        id: check
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$CF_API_TOKEN" ] && [ -n "$CF_ACCOUNT_ID" ]; then
+            echo "has-secrets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-secrets=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: steps.check.outputs.has-secrets == 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        if: steps.check.outputs.has-secrets == 'true'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Deploy with Wrangler
+        if: steps.check.outputs.has-secrets == 'true'
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: packages/api
+          secrets: |
+            DATABASE_URL
+            DATABASE_AUTH_TOKEN
+          command: >-
+            deploy
+            --name hono-kiln-pr-${{ github.event.pull_request.number }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_AUTH_TOKEN: ${{ secrets.DATABASE_AUTH_TOKEN }}
+
+      - name: Comment preview URL
+        if: steps.check.outputs.has-secrets == 'true'
+        uses: actions/github-script@v7
+        env:
+          WRANGLER_OUTPUT: ${{ steps.deploy.outputs.command-output }}
+          WORKER_NAME: hono-kiln-pr-${{ github.event.pull_request.number }}
+        with:
+          script: |
+            const output = process.env.WRANGLER_OUTPUT || '';
+            const match = output.match(/https:\/\/[^\s]+/);
+            const url = match ? match[0] : null;
+            const body = url
+              ? `✅ Preview deployment is live: ${url}`
+              : `✅ Preview deployment completed for worker \`${process.env.WORKER_NAME}\`.`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
 
   remove-preview:
     name: Remove Preview
-    needs: guard
-    if: github.event.action == 'closed' && needs.guard.outputs.has-secrets == 'true'
-    uses: ./.github/workflows/rw-deploy.yml
-    with:
-      action: remove
-      worker_name: hono-kiln-pr-${{ github.event.pull_request.number }}
-    secrets: inherit
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check secrets
+        id: check
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$CF_API_TOKEN" ] && [ -n "$CF_ACCOUNT_ID" ]; then
+            echo "has-secrets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-secrets=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Remove worker deployment
+        if: steps.check.outputs.has-secrets == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: packages/api
+          command: delete hono-kiln-pr-${{ github.event.pull_request.number }} --force
