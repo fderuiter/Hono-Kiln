@@ -1,5 +1,6 @@
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import * as readline from 'node:readline/promises'
 
 type GenerateModuleResult = {
   modulePath: string
@@ -42,7 +43,13 @@ async function exists(filePath: string) {
   }
 }
 
-function getTemplateFiles(moduleName: string) {
+type ModuleMetadata = {
+  moduleDescription: string
+  primaryRouteSummary: string
+  mainSchemaDescription: string
+}
+
+function getTemplateFiles(moduleName: string, meta: ModuleMetadata) {
   const camelName = toCamelCase(moduleName)
   const pascalName = toPascalCase(moduleName)
   const routeName = `${camelName}Routes`
@@ -57,7 +64,7 @@ function getTemplateFiles(moduleName: string) {
 export const entityName = '${moduleName}' as const
 
 export const ${schemaName} = z.object({
-  entity: z.string().openapi({ description: 'The entity name', example: '${moduleName}' }),
+  entity: z.string().openapi({ description: '${meta.mainSchemaDescription}', example: '${moduleName}' }),
 }).openapi('${pascalName}')
 
 export type ${pascalName} = z.infer<typeof ${schemaName}>
@@ -87,13 +94,15 @@ const listRoute = createRoute({
   method: 'get',
   path: '/',
   tags: ['${pascalName}'],
+  summary: '${meta.primaryRouteSummary}',
+  description: '${meta.moduleDescription}',
   responses: {
     [HttpStatusCodes.OK]: {
-      description: 'Respond with a list of ${moduleName}',
+      description: 'Successful response',
       content: {
         'application/json': {
           schema: z.object({
-            data: z.array(${schemaName}).openapi({ description: 'List of ${moduleName}' }),
+            data: z.array(${schemaName}).openapi({ description: 'List of ${pascalName} objects' }),
           }).openapi('${pascalName}ListResponse'),
         },
       },
@@ -233,6 +242,26 @@ function isImportStatementTerminator(trimmedLine: string) {
   )
 }
 
+
+async function promptWithValidation(
+  rl: readline.Interface,
+  questionText: string,
+  genericPlaceholder: string,
+  smartDefault: string
+): Promise<string> {
+  while (true) {
+    const answer = await rl.question(`${questionText} [${smartDefault}]: `);
+    const trimmed = answer.trim();
+    const finalAnswer = trimmed || smartDefault;
+    
+    if (finalAnswer.toLowerCase() === genericPlaceholder.toLowerCase()) {
+      console.log(`Error: Input cannot be identical to the generic placeholder ("${genericPlaceholder}"). Please provide a meaningful description.`);
+      continue;
+    }
+    return finalAnswer;
+  }
+}
+
 export async function generateModule(moduleInputName: string, repoRoot = process.cwd()): Promise<GenerateModuleResult> {
   const moduleName = normalizeModuleName(moduleInputName)
 
@@ -246,7 +275,53 @@ export async function generateModule(moduleInputName: string, repoRoot = process
     throw new Error(`Module "${moduleName}" already exists`)
   }
 
-  const { files, routeName } = getTemplateFiles(moduleName)
+  const genericModuleDesc = `The ${moduleName} module`
+  const genericRouteSummary = `Respond with a list of ${moduleName}`
+  const genericSchemaDesc = `The entity name`
+
+  const defaultModuleDesc = `API endpoints for managing ${moduleName}s.`
+  const defaultRouteSummary = `Retrieve a list of ${moduleName}s.`
+  const defaultSchemaDesc = `Represents a single ${moduleName} record.`
+
+  let meta: ModuleMetadata = {
+    moduleDescription: defaultModuleDesc,
+    primaryRouteSummary: defaultRouteSummary,
+    mainSchemaDescription: defaultSchemaDesc,
+  }
+
+  const isTTY = process.stdout.isTTY && process.stdin.isTTY;
+  const isCI = process.env.CI === 'true' || process.env.CI === '1';
+
+  if (isTTY && !isCI) {
+    console.log(`\nGathering metadata for the new "${moduleName}" module...`);
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    
+    try {
+      meta.moduleDescription = await promptWithValidation(
+        rl,
+        'Module Description',
+        genericModuleDesc,
+        defaultModuleDesc
+      );
+      meta.primaryRouteSummary = await promptWithValidation(
+        rl,
+        'Primary Route Summary',
+        genericRouteSummary,
+        defaultRouteSummary
+      );
+      meta.mainSchemaDescription = await promptWithValidation(
+        rl,
+        'Main Schema Description',
+        genericSchemaDesc,
+        defaultSchemaDesc
+      );
+    } finally {
+      rl.close();
+    }
+    console.log();
+  }
+
+  const { files, routeName } = getTemplateFiles(moduleName, meta)
   await mkdir(modulePath, { recursive: true })
 
   await Promise.all(
