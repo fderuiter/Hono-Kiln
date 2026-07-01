@@ -1,3 +1,37 @@
+# [1.5.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.4.0...v1.5.0) (2026-07-01)
+
+
+## Bug Fixes
+
+* add shared workspace dependency to api ([0b50813](https://github.com/fderuiter/Hono-Kiln/commit/0b5081307fdce1d55d2d184dc3f03d586b3b714f))
+* **ci:** correct invalid secrets conditional and restore test jobs ([ddcf7cf](https://github.com/fderuiter/Hono-Kiln/commit/ddcf7cf1b1aa16327f4fb51180329ebae3a36797))
+* **ci:** restore conditionals to avoid billing issue ([8e7c79f](https://github.com/fderuiter/Hono-Kiln/commit/8e7c79fa3e155c294bde460856106ab5fc5a0742))
+* **ci:** skip jobs to avoid billing issues ([536f193](https://github.com/fderuiter/Hono-Kiln/commit/536f19377d7ac7b8af2fbc06c52450a60f3f6e86))
+* **cli:** prefix unused db parameter with underscore in template ([caaa192](https://github.com/fderuiter/Hono-Kiln/commit/caaa192752caf417e26586a5ec5047d84bd333bb))
+* correct oxlint command and remove if: false ([906116b](https://github.com/fderuiter/Hono-Kiln/commit/906116b33b4ffc8a3e60279518590364bc0cd0ab))
+* **docs:** add valid HTML structure and assertions for Swagger UI ([77a1624](https://github.com/fderuiter/Hono-Kiln/commit/77a1624eade3155f7e752a2784b901f40e409e5c))
+* **lint:** remove unused Lucia import from auth middleware ([a3ee6fd](https://github.com/fderuiter/Hono-Kiln/commit/a3ee6fd14fe7df7c55484b06deace00f3383a849))
+* resolve linter and knip errors ([0002f72](https://github.com/fderuiter/Hono-Kiln/commit/0002f7209e3e9831e9acf4610b573b26e603dd0c))
+* skip checks on PR to avoid billing issue ([51bf47a](https://github.com/fderuiter/Hono-Kiln/commit/51bf47af6c4a789e31beb967810038da32c83f32))
+* **typing:** resolve type inference issues in Hono routes and middleware ([7cdaa69](https://github.com/fderuiter/Hono-Kiln/commit/7cdaa690310d454c1fcf49a57b533cf6b32d73e5))
+
+
+## Features
+
+* Add interactive metadata scaffolding for modules ([f8b8d0f](https://github.com/fderuiter/Hono-Kiln/commit/f8b8d0fc5091ac1f0b8cc7288f2f9932749a63bd))
+* add semantic body template with skip-link and main landmark for a11y ([a4183b8](https://github.com/fderuiter/Hono-Kiln/commit/a4183b8cfcebd73d118ac100ef26a4cc062ccd43))
+* Add zero-config interactive bootstrapper setup script ([1de4c0f](https://github.com/fderuiter/Hono-Kiln/commit/1de4c0f9f2c14519853362d052b4bb192cf97f9c))
+* **api:** unified schema factory ([10e7aea](https://github.com/fderuiter/Hono-Kiln/commit/10e7aea863515e6379024425ac12292c8dbd0478))
+* Automate module removal and expand audit coverage ([d69c204](https://github.com/fderuiter/Hono-Kiln/commit/d69c20465cab46210312515dd5e48427f8b0d0b3))
+* extract shared domain utilities for hashing and session management ([b1ebef1](https://github.com/fderuiter/Hono-Kiln/commit/b1ebef17da478f23a864d76f98170276263ca267))
+* implement global application guard ([074bac0](https://github.com/fderuiter/Hono-Kiln/commit/074bac03608f6071b05dfa326015bf7b0dfc53f7))
+* implement unified test harness ([80ec90f](https://github.com/fderuiter/Hono-Kiln/commit/80ec90f7a4d6672b0568fb64fb136e9e2edd6533))
+* isolate utility routes from database dependencies ([77a0464](https://github.com/fderuiter/Hono-Kiln/commit/77a0464b9e6a893b9965c618a0ea199423563a1b))
+* **kiln:** integrate knip for workspace health audits ([76a1fea](https://github.com/fderuiter/Hono-Kiln/commit/76a1feabf08e47b6560ec506d3ebe0f39b578db5))
+* migrate CI architecture to use reusable workflows ([7e6bb52](https://github.com/fderuiter/Hono-Kiln/commit/7e6bb522ba7d38ddc20bde2e2d774dcb349882d0))
+* standard schemas and scaffolding enrichment ([5b2cdf0](https://github.com/fderuiter/Hono-Kiln/commit/5b2cdf011bff09c4ddc4a96f01df17cdf1f580e8))
+* standardize worker config ([5dbbcef](https://github.com/fderuiter/Hono-Kiln/commit/5dbbcef7690b983d5b0a9a780aacc66fa56174ff))
+
 # [1.4.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.3.0...v1.4.0) (2026-05-14)
 
 
