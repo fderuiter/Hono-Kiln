@@ -184,38 +184,112 @@ describe('${moduleName} routes', () => {
   }
 }
 
+function findHonoApp(repoRoot: string) {
+  const project = new Project()
+  project.addSourceFilesAtPaths(path.join(repoRoot, 'packages/api/**/*.ts'))
+
+  let mainApp: { filePath: string; varName: string; sourceFile: import('ts-morph').SourceFile; instanceEndLine: number } | null = null
+
+  for (const sourceFile of project.getSourceFiles()) {
+    const posixPath = sourceFile.getFilePath().replace(/\\/g, '/')
+    if (posixPath.includes('/packages/api/modules/')) {
+      continue
+    }
+
+    const newExprs = sourceFile.getDescendantsOfKind(SyntaxKind.NewExpression)
+    for (const newExpr of newExprs) {
+      const text = newExpr.getExpression().getText()
+      if (text === 'Hono' || text === 'OpenAPIHono') {
+        const varDecl = newExpr.getFirstAncestorByKind(SyntaxKind.VariableDeclaration)
+        if (varDecl) {
+          const stmt = varDecl.getFirstAncestorByKind(SyntaxKind.VariableStatement) || varDecl.getFirstAncestorByKind(SyntaxKind.ExpressionStatement)
+          mainApp = {
+            filePath: sourceFile.getFilePath(),
+            varName: varDecl.getName(),
+            sourceFile,
+            instanceEndLine: stmt ? stmt.getEndLineNumber() : varDecl.getEndLineNumber()
+          }
+          break
+        }
+      }
+    }
+    if (mainApp) break
+  }
+
+  if (!mainApp) {
+    throw new Error("Could not find a valid application instance to register the module against.")
+  }
+
+  return mainApp
+}
+
 export async function mountModule(moduleName: string, routeName: string, repoRoot: string) {
-  const indexPath = path.join(repoRoot, 'packages', 'api', 'index.ts')
-  const appPath = path.join(repoRoot, 'packages', 'api', 'app.ts')
-  const mountPath =
-    (await exists(indexPath)) && (await readFile(indexPath, 'utf8')).includes('app.route(')
-      ? indexPath
-      : appPath
-  const importLine = `import { ${routeName} } from './modules/${moduleName}/routes'`
-  const routeLine = `app.route('/${moduleName}', ${routeName})`
+  const { filePath: mountPath, varName, sourceFile } = findHonoApp(repoRoot)
+
+  const targetRoutesDir = path.join(repoRoot, 'packages', 'api', 'modules', moduleName)
+  const mountDir = path.dirname(mountPath)
+  let relPath = path.relative(mountDir, targetRoutesDir).replace(/\\/g, '/')
+  relPath = path.posix.join(relPath, 'routes')
+  if (!relPath.startsWith('.')) {
+    relPath = './' + relPath
+  }
+
+  const importLine = `import { ${routeName} } from '${relPath}'`
+  const routeLine = `${varName}.route('/${moduleName}', ${routeName})`
 
   const appContent = await readFile(mountPath, 'utf8')
   let updatedContent = appContent
+  let lines = updatedContent.split('\n')
 
   if (!updatedContent.includes(importLine)) {
-    const lines = updatedContent.split('\n')
-    const importInsertIndex = findImportInsertIndex(lines)
-    lines.splice(importInsertIndex, 0, importLine)
+    const importDecls = sourceFile.getImportDeclarations()
+    let insertIndex = 0
+    if (importDecls.length > 0) {
+      insertIndex = importDecls[importDecls.length - 1].getEndLineNumber()
+    }
+    lines.splice(insertIndex, 0, importLine)
     updatedContent = lines.join('\n')
   }
 
   if (!updatedContent.includes(routeLine)) {
-    const lines = updatedContent.split('\n')
-    const lastRouteIndex = lines.reduce(
-      (index, line, currentIndex) =>
-        line.trim().startsWith('app.route(') ? currentIndex : index,
-      -1,
-    )
-    if (lastRouteIndex >= 0) {
-      lines.splice(lastRouteIndex + 1, 0, routeLine)
+    lines = updatedContent.split('\n')
+    
+    sourceFile.replaceWithText(updatedContent)
+
+    let lastRouteCallEndLine = -1
+    const callExprs = sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression)
+    for (const callExpr of callExprs) {
+      const propAccess = callExpr.getExpressionIfKind(SyntaxKind.PropertyAccessExpression)
+      if (propAccess && propAccess.getName() === 'route' && propAccess.getExpression().getText() === varName) {
+        const stmt = callExpr.getFirstAncestorByKind(SyntaxKind.ExpressionStatement)
+        if (stmt) {
+          lastRouteCallEndLine = Math.max(lastRouteCallEndLine, stmt.getEndLineNumber())
+        }
+      }
+    }
+
+    if (lastRouteCallEndLine !== -1) {
+      lines.splice(lastRouteCallEndLine, 0, routeLine)
     } else {
-      const exportIndex = lines.findIndex((line) => line.trim().startsWith('export default '))
-      lines.splice(exportIndex >= 0 ? exportIndex : lines.length, 0, routeLine)
+      let newInstanceEndLine = -1
+      const newNewExprs = sourceFile.getDescendantsOfKind(SyntaxKind.NewExpression)
+      for (const newExpr of newNewExprs) {
+        const text = newExpr.getExpression().getText()
+        if (text === 'Hono' || text === 'OpenAPIHono') {
+          const varDecl = newExpr.getFirstAncestorByKind(SyntaxKind.VariableDeclaration)
+          if (varDecl && varDecl.getName() === varName) {
+             const stmt = varDecl.getFirstAncestorByKind(SyntaxKind.VariableStatement) || varDecl.getFirstAncestorByKind(SyntaxKind.ExpressionStatement)
+             newInstanceEndLine = stmt ? stmt.getEndLineNumber() : varDecl.getEndLineNumber()
+          }
+        }
+      }
+
+      if (newInstanceEndLine !== -1) {
+        lines.splice(newInstanceEndLine, 0, routeLine)
+      } else {
+        const exportIndex = lines.findIndex((line) => line.trim().startsWith('export default '))
+        lines.splice(exportIndex >= 0 ? exportIndex : lines.length, 0, routeLine)
+      }
     }
     updatedContent = lines.join('\n')
   }
@@ -224,41 +298,6 @@ export async function mountModule(moduleName: string, routeName: string, repoRoo
     await writeFile(mountPath, updatedContent)
   }
 }
-
-function findImportInsertIndex(lines: string[]) {
-  let lastImportLine = -1
-  let inImportStatement = false
-
-  for (let index = 0; index < lines.length; index++) {
-    const trimmedLine = lines[index].trim()
-
-    if (trimmedLine.startsWith('import ')) {
-      lastImportLine = index
-      inImportStatement = true
-    } else if (inImportStatement) {
-      if (trimmedLine !== '') {
-        lastImportLine = index
-      }
-    } else if (lastImportLine >= 0 && trimmedLine !== '') {
-      break
-    }
-
-    if (inImportStatement && isImportStatementTerminator(trimmedLine)) {
-      inImportStatement = false
-    }
-  }
-
-  return lastImportLine + 1
-}
-
-function isImportStatementTerminator(trimmedLine: string) {
-  return (
-    /^import\s+.+\s+from\s+['"].+['"];?$/.test(trimmedLine) ||
-    /^}\s+from\s+['"].+['"];?$/.test(trimmedLine) ||
-    /^import\s+['"].+['"];?$/.test(trimmedLine)
-  )
-}
-
 
 async function promptWithValidation(
   questionText: string,
@@ -356,25 +395,11 @@ export async function generateModule(moduleInputName: string, repoRoot = process
 
 
 export async function unmountModule(moduleName: string, repoRoot: string) {
-  const indexPath = path.join(repoRoot, 'packages', 'api', 'index.ts')
-  const appPath = path.join(repoRoot, 'packages', 'api', 'app.ts')
-  let mountPath = ''
-
-  if (await exists(indexPath)) {
-    const content = await readFile(indexPath, 'utf8')
-    if (content.includes('app.route(')) {
-      mountPath = indexPath
-    }
-  }
-  if (!mountPath) {
-    mountPath = appPath
-  }
-
-  const project = new Project()
-  const sourceFile = project.addSourceFileAtPath(mountPath)
+  const { filePath: mountPath, sourceFile, varName } = findHonoApp(repoRoot)
 
   const importDecls = sourceFile.getImportDeclarations().filter(decl => {
-    return decl.getModuleSpecifierValue() === `./modules/${moduleName}/routes`
+    const val = decl.getModuleSpecifierValue()
+    return val.endsWith(`modules/${moduleName}/routes`) || val.endsWith(`modules/${moduleName}/routes.ts`)
   })
 
   if (importDecls.length !== 1) {
@@ -385,7 +410,7 @@ export async function unmountModule(moduleName: string, repoRoot: string) {
   const toRemove: any[] = []
   for (const callExpr of callExprs) {
     const propAccess = callExpr.getExpressionIfKind(SyntaxKind.PropertyAccessExpression)
-    if (propAccess && propAccess.getName() === 'route') {
+    if (propAccess && propAccess.getName() === 'route' && propAccess.getExpression().getText() === varName) {
       const args = callExpr.getArguments()
       if (args.length >= 2 && args[0].getKind() === SyntaxKind.StringLiteral) {
         if (args[0].getText() === `'/${moduleName}'` || args[0].getText() === `"/${moduleName}"`) {
