@@ -6,11 +6,6 @@ export function publicAccess<T>(handler: T): T {
 }
 
 export const globalGuard = createMiddleware(async (c, next) => {
-  const path = c.req.path
-  if (path === '/openapi.json' || path === '/docs') {
-    return next()
-  }
-
   const routes = c.req.matchedRoutes
   const target = routes[routes.length - 1]
   const isPublic = target && (target.handler as any).isPublic
