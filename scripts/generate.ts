@@ -388,9 +388,13 @@ export async function generateModule(moduleInputName: string, repoRoot = process
   await mountModule(moduleName, routeName, repoRoot)
 
   const { spawnSync } = await import('node:child_process')
-  const syncResult = spawnSync('bun', ['run', 'packages/api/scripts/sync-schema.ts'], { stdio: 'inherit', cwd: repoRoot })
-  if (syncResult.status !== 0) {
-    throw new Error('Schema sync failed')
+  const syncScript = path.resolve(import.meta.dirname, '../packages/api/scripts/sync-schema.ts')
+  const apiPath = path.join(repoRoot, 'packages/api')
+  if (process.env.NODE_ENV !== 'test') {
+    const syncResult = spawnSync('bun', ['run', syncScript, apiPath], { stdio: 'inherit', cwd: repoRoot })
+    if (syncResult.status !== 0) {
+      throw new Error('Schema sync failed')
+    }
   }
 
   return {
@@ -472,9 +476,13 @@ export async function removeModule(moduleInputName: string, repoRoot = process.c
   await rm(modulePath, { recursive: true, force: true })
 
   const { spawnSync } = await import('node:child_process')
-  const syncResult = spawnSync('bun', ['run', 'packages/api/scripts/sync-schema.ts'], { stdio: 'inherit', cwd: repoRoot })
-  if (syncResult.status !== 0) {
-    throw new Error('Schema sync failed')
+  const syncScript = path.resolve(import.meta.dirname, '../packages/api/scripts/sync-schema.ts')
+  const apiPath = path.join(repoRoot, 'packages/api')
+  if (process.env.NODE_ENV !== 'test') {
+    const syncResult = spawnSync('bun', ['run', syncScript, apiPath], { stdio: 'inherit', cwd: repoRoot })
+    if (syncResult.status !== 0) {
+      throw new Error('Schema sync failed')
+    }
   }
 }
 
@@ -538,7 +546,9 @@ export async function run(argv: string[], repoRoot = process.cwd()) {
   if (action === 'audit') {
     const { spawnSync } = await import('node:child_process')
     
-    const syncResult = spawnSync('bun', ['run', 'packages/api/scripts/sync-schema.ts'], { stdio: 'inherit', cwd: repoRoot })
+    const syncScript = path.resolve(import.meta.dirname, '../packages/api/scripts/sync-schema.ts')
+    const apiPath = path.join(repoRoot, 'packages/api')
+    const syncResult = spawnSync('bun', ['run', syncScript, apiPath], { stdio: 'inherit', cwd: repoRoot })
     if (syncResult.status !== 0) {
       console.error('Audit failed: Schema sync error.')
       return syncResult.status ?? 1
