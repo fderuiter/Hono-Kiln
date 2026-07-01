@@ -51,6 +51,23 @@ That's it. Your API is live, documented, and ready to extend.
 
 ---
 
+## Environment Validation
+
+To ensure a reliable local development experience, this project uses a blocking, defensive pre-flight model. Before the server starts in development mode (`NODE_ENV !== 'production'`), it performs mandatory pre-flight checks to validate the environment prerequisites:
+
+1. **Docker Daemon Status:** Verifies that the Docker daemon is active (`docker info`).
+2. **Database Container Presence:** Checks that the required database container (e.g., `libsql`) is running (`docker compose ps`).
+3. **Database Connectivity:** Ensures the application can establish an active connection to the database.
+
+If any check fails and the environment supports an interactive terminal (TTY), an interactive prompt will guide you to resolve the issue (e.g., by automatically running `docker compose up -d` or updating the database configuration). These prompts feature a 30-second timeout; if there is no response, the server process defaults to a graceful exit. In non-interactive environments, the server process exits immediately with a non-zero code to prevent the application from entering a broken state.
+
+All automated checks can also be executed manually:
+- `docker info`
+- `docker compose ps --services --filter status=running`
+- `make db-push` (to verify schema/connectivity)
+
+---
+
 ## Architecture
 
 ```mermaid
