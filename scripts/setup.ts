@@ -208,6 +208,7 @@ async function main() {
       // Wait a bit for db to be ready
       execSync('sleep 2');
 
+      execSync(`bun run --filter @${packageScope}/api db:squash`, { cwd: rootDir, stdio: 'inherit' });
       execSync(`bun run --filter @${packageScope}/api db:push`, { cwd: rootDir, stdio: 'inherit' });
       execSync(`bun run --filter @${packageScope}/api db:seed`, { cwd: rootDir, stdio: 'inherit' });
       s.stop('Started Docker services and ran migrations.');
