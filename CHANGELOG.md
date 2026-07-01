@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.10.0...v1.11.0) (2026-07-01)
+
+
+## Features
+
+* Add developer migration squash utility ([4e600b7](https://github.com/fderuiter/Hono-Kiln/commit/4e600b7b0d21adf2769c3eb0aee4d6d4ba7fb51f))
+
 # [1.10.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.9.0...v1.10.0) (2026-07-01)
 
 
