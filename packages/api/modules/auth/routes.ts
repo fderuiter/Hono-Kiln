@@ -16,7 +16,9 @@ import {
   RegisterRequestSchema,
 } from './schema'
 
-export const authRoutes = new OpenAPIHono()
+import type { AppEnv } from '../../env';
+
+export const authRoutes = new OpenAPIHono<AppEnv>()
 
 const registerRoute = createRoute({
   method: 'post',

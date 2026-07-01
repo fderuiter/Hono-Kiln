@@ -3,7 +3,9 @@ import { publicAccess } from '../../auth/guard'
 
 import { WelcomeSchema } from './schema'
 
-export const rootRoutes = new OpenAPIHono()
+import type { AppEnv } from '../../env';
+
+export const rootRoutes = new OpenAPIHono<AppEnv>()
 
 rootRoutes.openapi(
   createRoute({

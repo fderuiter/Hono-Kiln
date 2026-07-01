@@ -3,7 +3,9 @@ import { InternalServerErrorSchema } from '@hono-kiln/shared'
 
 import { StatusSchema } from './schema'
 
-export const healthRoutes = new OpenAPIHono()
+import type { AppEnv } from '../../env';
+
+export const healthRoutes = new OpenAPIHono<AppEnv>()
 
 const healthResponse = {
   200: {

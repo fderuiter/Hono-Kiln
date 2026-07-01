@@ -5,7 +5,7 @@ import type { Database } from '../db'
 import { sessions, users } from '../db/schema'
 
 export function createAuth(db: Database, isProd: boolean) {
-  const adapter = new DrizzleSQLiteAdapter(db, sessions, users)
+  const adapter = new DrizzleSQLiteAdapter(db, sessions as any, users as any)
 
   return new Lucia(adapter, {
     sessionExpiresIn: new TimeSpan(30, 'd'),

@@ -1,15 +1,8 @@
 import { createMiddleware } from 'hono/factory'
-import type { Session, User } from 'lucia'
 import { sessionHelpers } from '@hono-kiln/shared'
+import type { AppEnv } from '../env'
 
-declare module 'hono' {
-  interface ContextVariableMap {
-    user: User | null
-    session: Session | null
-  }
-}
-
-export const authMiddleware = createMiddleware(async (c, next) => {
+export const authMiddleware = createMiddleware<AppEnv>(async (c, next) => {
   c.set('user', null)
   c.set('session', null)
 
