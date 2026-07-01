@@ -427,14 +427,80 @@ export async function removeModule(moduleInputName: string, repoRoot = process.c
   await rm(modulePath, { recursive: true, force: true })
 }
 
+export async function checkDocumentation(repoRoot: string): Promise<boolean> {
+  const project = new Project({
+    tsConfigFilePath: path.join(repoRoot, 'tsconfig.typedoc.json'),
+  })
+
+  let allDocumented = true
+
+  const entryPoints = [
+    'packages/api/index.ts',
+    'packages/api/app.ts',
+    'packages/shared/index.ts',
+    'packages/testing/index.ts',
+  ]
+
+  for (const entryPoint of entryPoints) {
+    const sourceFile = project.getSourceFile(path.join(repoRoot, entryPoint))
+    if (!sourceFile) continue
+
+    const exportedDecls = sourceFile.getExportedDeclarations()
+    for (const [name, decls] of exportedDecls) {
+      for (const decl of decls) {
+        // Find if the declaration has a JSDoc comment.
+        let hasJSDoc = false
+
+        if ('getJsDocs' in decl && typeof decl.getJsDocs === 'function') {
+          const jsdocs = decl.getJsDocs()
+          if (jsdocs.length > 0) hasJSDoc = true
+        }
+
+        if (!hasJSDoc) {
+          let current = decl.getParent()
+          while (current) {
+            if ('getJsDocs' in current && typeof current.getJsDocs === 'function') {
+              const currentJsDocs = (current.getJsDocs as () => any[])()
+              if (currentJsDocs.length > 0) {
+                hasJSDoc = true
+                break
+              }
+            }
+            current = current.getParent()
+          }
+        }
+
+        if (!hasJSDoc) {
+          console.error(`Missing JSDoc documentation for export '${name}' in ${entryPoint}`)
+          allDocumented = false
+        }
+      }
+    }
+  }
+
+  return allDocumented
+}
+
 export async function run(argv: string[], repoRoot = process.cwd()) {
   const [action, type, name] = argv
 
   if (action === 'audit') {
     const { spawnSync } = await import('node:child_process')
-    const result = spawnSync('bun', ['run', 'knip'], { stdio: 'inherit', cwd: repoRoot })
-    if (result.status !== 0) {
-      return result.status ?? 1
+    const knipResult = spawnSync('bun', ['run', 'knip'], { stdio: 'inherit', cwd: repoRoot })
+    if (knipResult.status !== 0) {
+      return knipResult.status ?? 1
+    }
+    
+    const docsPassed = await checkDocumentation(repoRoot)
+    if (!docsPassed) {
+      console.error('Audit failed: Missing documentation.')
+      return 1
+    }
+
+    const typedocResult = spawnSync('bun', ['run', 'docs'], { stdio: 'inherit', cwd: repoRoot })
+    if (typedocResult.status !== 0) {
+      console.error('Audit failed: typedoc error.')
+      return typedocResult.status ?? 1
     }
     console.log('Audit passed successfully.')
     return 0

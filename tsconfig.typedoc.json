@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "noEmit": true,
+    "module": "esnext",
+    "target": "esnext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": false
+  },
+  "include": [
+    "packages/**/*.ts"
+  ]
+}

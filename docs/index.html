@@ -1,0 +1,300 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="./"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Hono Kiln Architecture</title><meta name="description" content="Documentation for Hono Kiln Architecture"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script defer src="assets/main.js"></script><script async src="assets/icons.js" id="tsd-icons-script"></script><script async src="assets/search.js" id="tsd-search-script"></script><script async src="assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><a href="index.html" class="title">Hono Kiln Architecture</a><div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/><ul role="listbox" id="tsd-search-results"></ul><div id="tsd-search-status" aria-live="polite" aria-atomic="true"><div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-menu"></use></svg></a></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><h1>Hono Kiln Architecture</h1></div><div class="tsd-panel tsd-typography"><h1 id="hono-kiln-🔥" class="tsd-anchor-link">Hono Kiln 🔥<a href="#hono-kiln-🔥" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<blockquote>
+<p><strong>A production-ready Hono API starter with batteries included.</strong><br>
+Authentication, database, auto-generated modules, live API docs — all in one opinionated template.</p>
+</blockquote>
+<hr>
+<h2 id="prerequisites" class="tsd-anchor-link">Prerequisites<a href="#prerequisites" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Before getting started, ensure you have the following installed in your system <code>PATH</code> (Unix-like environment recommended):</p>
+<ul>
+<li><strong><a href="https://bun.sh/">Bun</a></strong> — Primary package manager and script runner.</li>
+<li><strong><a href="https://www.docker.com/">Docker</a></strong> — For running the local database services.</li>
+<li><strong><a href="https://git-scm.com/">Git</a></strong> — For version control.</li>
+</ul>
+<hr>
+<h2 id="⚡-getting-started" class="tsd-anchor-link">⚡ Getting Started<a href="#⚡-getting-started" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<h3 id="1-interactive-bootstrapper" class="tsd-anchor-link">1. Interactive Bootstrapper<a href="#1-interactive-bootstrapper" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>To quickly rebrand and configure this template for your own use, we provide an interactive bootstrapper. After cloning the repository, run:</p>
+<pre><code class="sh"><span class="hl-0">bun</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">setup</span>
+</code><button type="button">Copy</button></pre>
+
+<p><strong>The setup script will automate the following:</strong></p>
+<ul>
+<li><strong>Rebranding:</strong> Prompts for a new project name and package scope, then executes a project-wide find-and-replace (e.g., replacing <code>@hono-kiln</code>). This modifies your project files, so review the changes to avoid accidental data loss.</li>
+<li><strong>Boilerplate Removal:</strong> Optionally deletes the example <code>root</code> module and removes its references to provide a clean slate.</li>
+<li><strong>Git History Purging:</strong> Optionally deletes the existing <code>.git</code> directory and initializes a fresh repository with a new initial commit.</li>
+<li><strong>Environment Initialization:</strong> Starts Docker services (<code>docker compose up -d</code>) and runs database commands to push the schema (<code>db:push</code>) and populate initial data (<code>db:seed</code>).</li>
+</ul>
+<h3 id="2-manual-quick-start" class="tsd-anchor-link">2. Manual Quick Start<a href="#2-manual-quick-start" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>If you prefer to set up manually without the bootstrapper:</p>
+<pre><code class="sh"><span class="hl-0">git</span><span class="hl-1"> </span><span class="hl-2">clone</span><span class="hl-1"> </span><span class="hl-2">https://github.com/fderuiter/Hono-Kiln.git</span><span class="hl-1"> </span><span class="hl-2">my-api</span><br/><span class="hl-0">cd</span><span class="hl-1"> </span><span class="hl-2">my-api</span><br/><span class="hl-0">bun</span><span class="hl-1"> </span><span class="hl-2">install</span><br/><span class="hl-0">docker</span><span class="hl-1"> </span><span class="hl-2">compose</span><span class="hl-1"> </span><span class="hl-2">up</span><span class="hl-1"> </span><span class="hl-3">-d</span><br/><span class="hl-0">make</span><span class="hl-1"> </span><span class="hl-2">db-push</span><br/><span class="hl-0">make</span><span class="hl-1"> </span><span class="hl-2">db-seed</span><br/><span class="hl-0">bun</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-3">--filter</span><span class="hl-1"> </span><span class="hl-2">@hono-kiln/api</span><span class="hl-1"> </span><span class="hl-2">dev</span><br/><span class="hl-4"># → API running at http://localhost:3000</span><br/><span class="hl-4"># → Swagger UI at http://localhost:3000/docs</span>
+</code><button type="button">Copy</button></pre>
+
+<p>That's it. Your API is live, documented, and ready to extend.</p>
+<hr>
+<h2 id="architecture" class="tsd-anchor-link">Architecture<a href="#architecture" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<pre><code class="mermaid"><span class="hl-1">flowchart LR</span><br/><span class="hl-1">    Root[&quot;hono-kiln/&quot;] --&gt; Packages[&quot;packages/&quot;]</span><br/><span class="hl-1">    Root --&gt; Scripts[&quot;scripts/&quot;]</span><br/><span class="hl-1">    Root --&gt; Makefile[&quot;Makefile (Convenience commands)&quot;]</span><br/><br/><span class="hl-1">    Packages --&gt; API[&quot;api/ (Hono API, Cloudflare Workers compatible)&quot;]</span><br/><span class="hl-1">    Packages --&gt; Shared[&quot;shared/ (Shared utilities)&quot;]</span><br/><br/><span class="hl-1">    API --&gt; AppTS[&quot;app.ts (App entry — routes + OpenAPI + Swagger UI)&quot;]</span><br/><span class="hl-1">    API --&gt; IndexTS[&quot;index.ts (Bun server entry point)&quot;]</span><br/><span class="hl-1">    API --&gt; Auth[&quot;auth/ (Lucia session-based authentication)&quot;]</span><br/><span class="hl-1">    API --&gt; DB[&quot;db/ (Drizzle ORM + LibSQL, SQLite-compatible)&quot;]</span><br/><span class="hl-1">    API --&gt; Drizzle[&quot;drizzle/ (Database migration directory)&quot;]</span><br/><span class="hl-1">    API --&gt; Middleware[&quot;middleware/ (Request initialization &amp; dependency injection)&quot;]</span><br/><span class="hl-1">    API --&gt; Modules[&quot;modules/&quot;]</span><br/><br/><span class="hl-1">    Modules --&gt; AuthModule[&quot;auth/ (Registration and login routes)&quot;]</span><br/><span class="hl-1">    Modules --&gt; Health[&quot;health/ (/health, /health/live, /health/ready)&quot;]</span><br/><span class="hl-1">    Modules --&gt; RootModule[&quot;root/ (/ welcome route)&quot;]</span><br/><br/><span class="hl-1">    Scripts --&gt; GenerateTS[&quot;generate.ts (Kiln CLI — scaffold new modules instantly)&quot;]</span>
+</code><button type="button">Copy</button></pre>
+
+<h3 id="request-lifecycle" class="tsd-anchor-link">Request lifecycle<a href="#request-lifecycle" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<pre><code class="mermaid"><span class="hl-1">flowchart TD</span><br/><span class="hl-1">    Req[&quot;HTTP request&quot;] --&gt; Init[&quot;Initialization middleware (Dependency injection)&quot;]</span><br/><span class="hl-1">    Init --&gt; Auth[&quot;Auth middleware (Lucia session cookie)&quot;]</span><br/><span class="hl-1">    Auth --&gt; Root[&quot;/ (root routes)&quot;]</span><br/><span class="hl-1">    Auth --&gt; AuthRoute[&quot;/auth (auth routes)&quot;]</span><br/><span class="hl-1">    Auth --&gt; Health[&quot;/health (health routes)&quot;]</span><br/><span class="hl-1">    Auth --&gt; OpenAPI[&quot;/openapi.json (auto-generated OpenAPI 3.0 spec)&quot;]</span><br/><span class="hl-1">    Auth --&gt; Docs[&quot;/docs (Swagger UI)&quot;]</span>
+</code><button type="button">Copy</button></pre>
+
+<p>The request initialization phase leverages middleware to bootstrap core dependencies and inject them into the Hono context (<code>c.set</code>). This establishes the dependency injection flow, ensuring services like the database connection and authentication context are immediately available to all subsequent route handlers.</p>
+<h3 id="active-modules" class="tsd-anchor-link">Active Modules<a href="#active-modules" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auth</code></td>
+<td>Registration and login routes</td>
+</tr>
+<tr>
+<td><code>health</code></td>
+<td>System health checks (<code>/health</code>, <code>/health/live</code>, <code>/health/ready</code>)</td>
+</tr>
+<tr>
+<td><code>root</code></td>
+<td>Welcome route (<code>/</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="feature-matrix" class="tsd-anchor-link">Feature Matrix<a href="#feature-matrix" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Stack</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HTTP framework</strong></td>
+<td><a href="https://hono.dev">Hono</a></td>
+<td>Ultra-fast, edge-compatible</td>
+</tr>
+<tr>
+<td><strong>Runtime</strong></td>
+<td><a href="https://bun.sh">Bun</a></td>
+<td>Dev &amp; test runner</td>
+</tr>
+<tr>
+<td><strong>Deployment target</strong></td>
+<td>Cloudflare Workers</td>
+<td>PR preview deployments included</td>
+</tr>
+<tr>
+<td><strong>Database</strong></td>
+<td>LibSQL (Turso)</td>
+<td>SQLite-compatible, edge-ready</td>
+</tr>
+<tr>
+<td><strong>ORM</strong></td>
+<td><a href="https://orm.drizzle.team">Drizzle ORM</a></td>
+<td>Type-safe, zero-overhead</td>
+</tr>
+<tr>
+<td><strong>Authentication</strong></td>
+<td><a href="https://lucia-auth.com">Lucia</a></td>
+<td>Session-based auth out of the box</td>
+</tr>
+<tr>
+<td><strong>API documentation</strong></td>
+<td><a href="https://github.com/honojs/middleware/tree/main/packages/zod-openapi">@hono/zod-openapi</a> + <a href="https://github.com/honojs/middleware/tree/main/packages/swagger-ui">@hono/swagger-ui</a></td>
+<td>Live Swagger UI at <code>/docs</code></td>
+</tr>
+<tr>
+<td><strong>Schema validation</strong></td>
+<td><a href="https://zod.dev">Zod</a></td>
+<td>Request/response types inferred automatically</td>
+</tr>
+<tr>
+<td><strong>Module scaffolding</strong></td>
+<td>Kiln CLI</td>
+<td>One command generates routes, schema, repository &amp; tests</td>
+</tr>
+<tr>
+<td><strong>Testing</strong></td>
+<td>Bun test</td>
+<td>Co-located tests per module</td>
+</tr>
+<tr>
+<td><strong>Linting</strong></td>
+<td>oxlint</td>
+<td>Fast Rust-based linter</td>
+</tr>
+<tr>
+<td><strong>Secret scanning</strong></td>
+<td>TruffleHog</td>
+<td>Runs on every PR</td>
+</tr>
+<tr>
+<td><strong>Releases</strong></td>
+<td>semantic-release</td>
+<td>Auto-versioning from Conventional Commits</td>
+</tr>
+<tr>
+<td><strong>CI / CD</strong></td>
+<td>GitHub Actions</td>
+<td>PR gatekeeper + preview deployments + automated releases</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="api-documentation-authentication" class="tsd-anchor-link">API Documentation &amp; Authentication<a href="#api-documentation-authentication" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>For full API details, including interactive examples of the authentication flow (registration and login), please visit the <strong>interactive Swagger UI</strong> at:
+👉 <strong><a href="http://localhost:3000/docs">http://localhost:3000/docs</a></strong></p>
+<p>This live, self-documenting interface provides detailed request/response schemas, error code definitions (e.g., duplicates, invalid credentials), and allows you to test endpoints directly.</p>
+<p>Every route is documented automatically. Start the server and visit:</p>
+<pre><code><span class="hl-5">http</span><span class="hl-1">:</span><span class="hl-4">//localhost:3000/docs           # Swagger UI</span><br/><span class="hl-5">http</span><span class="hl-1">:</span><span class="hl-4">//localhost:3000/openapi.json   # Raw OpenAPI 3.0 spec</span>
+</code><button>Copy</button></pre>
+
+<p>Routes are defined with <code>@hono/zod-openapi</code>, giving you:</p>
+<ul>
+<li><strong>Compile-time type safety</strong> — request and response shapes are inferred from Zod schemas.</li>
+<li><strong>Zero-config docs</strong> — the spec is generated at runtime; no separate YAML/JSON to maintain.</li>
+<li><strong>Auto-validation</strong> — invalid requests return structured 422 errors.</li>
+</ul>
+<hr>
+<h2 id="kiln-cli" class="tsd-anchor-link">Kiln CLI<a href="#kiln-cli" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Scaffold a complete new module in one command:</p>
+<pre><code class="sh"><span class="hl-0">bun</span><span class="hl-1"> </span><span class="hl-2">kiln</span><span class="hl-1"> </span><span class="hl-2">generate</span><span class="hl-1"> </span><span class="hl-2">module</span><span class="hl-1"> &lt;</span><span class="hl-2">nam</span><span class="hl-1">e&gt;</span>
+</code><button type="button">Copy</button></pre>
+
+<p>This creates <code>packages/api/modules/&lt;name&gt;/</code> with four files:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>schema.ts</code></td>
+<td>Zod-ready entity constants</td>
+</tr>
+<tr>
+<td><code>repository.ts</code></td>
+<td>Data access function</td>
+</tr>
+<tr>
+<td><code>routes.ts</code></td>
+<td>Hono route handlers</td>
+</tr>
+<tr>
+<td><code>routes.test.ts</code></td>
+<td>Co-located Bun tests</td>
+</tr>
+</tbody>
+</table>
+<p>The module is also automatically mounted in <code>app.ts</code> at <code>/&lt;name&gt;</code>.</p>
+<h3 id="example" class="tsd-anchor-link">Example<a href="#example" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<pre><code class="sh"><span class="hl-0">bun</span><span class="hl-1"> </span><span class="hl-2">kiln</span><span class="hl-1"> </span><span class="hl-2">generate</span><span class="hl-1"> </span><span class="hl-2">module</span><span class="hl-1"> </span><span class="hl-2">products</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Generates <code>packages/api/modules/products/</code> and mounts it at <code>/products</code>.</p>
+<hr>
+<h2 id="database" class="tsd-anchor-link">Database<a href="#database" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>The <code>packages/api/drizzle/</code> directory manages database migrations, tracking schema evolution and storing the SQL migration files generated from the Drizzle schema.</p>
+<p>Start a local LibSQL server:</p>
+<pre><code class="sh"><span class="hl-0">docker</span><span class="hl-1"> </span><span class="hl-2">compose</span><span class="hl-1"> </span><span class="hl-2">up</span><span class="hl-1"> </span><span class="hl-3">-d</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Generate a migration from the Drizzle schema:</p>
+<pre><code class="sh"><span class="hl-0">make</span><span class="hl-1"> </span><span class="hl-2">db-migrate</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Push the schema directly to the local LibSQL server:</p>
+<pre><code class="sh"><span class="hl-0">make</span><span class="hl-1"> </span><span class="hl-2">db-push</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Populate the database with initial development data (seeding):</p>
+<pre><code class="sh"><span class="hl-0">make</span><span class="hl-1"> </span><span class="hl-2">db-seed</span>
+</code><button type="button">Copy</button></pre>
+
+<p>(Alternatively, you can run these database commands via Bun within the API workspace: <code>cd packages/api &amp;&amp; bun run db:seed</code>).</p>
+<p>The API defaults to <code>http://127.0.0.1:8080</code> when <code>DATABASE_URL</code> is not set.</p>
+<hr>
+<h2 id="testing" class="tsd-anchor-link">Testing<a href="#testing" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<pre><code class="sh"><span class="hl-0">bun</span><span class="hl-1"> </span><span class="hl-2">install</span><span class="hl-1">          </span><span class="hl-4"># install deps</span><br/><span class="hl-0">bun</span><span class="hl-1"> </span><span class="hl-2">test</span><span class="hl-1">             </span><span class="hl-4"># run all tests across all packages</span><br/><span class="hl-0">bun</span><span class="hl-1"> </span><span class="hl-2">test</span><span class="hl-1"> </span><span class="hl-2">packages/api</span><span class="hl-1">  </span><span class="hl-4"># run API tests only</span>
+</code><button type="button">Copy</button></pre>
+
+<hr>
+<h2 id="maintenance-code-audit" class="tsd-anchor-link">Maintenance &amp; Code Audit<a href="#maintenance-code-audit" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>To maintain a clean codebase, this project uses <a href="https://knip.dev/">Knip</a> to detect unused files, dependencies, and unreferenced exports across the monorepo workspace.</p>
+<p>Run the code audit tool from the root directory:</p>
+<pre><code class="sh"><span class="hl-0">bun</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">knip</span>
+</code><button type="button">Copy</button></pre>
+
+<p>This command will scan the workspace based on the <code>knip.json</code> configuration and report any unreferenced code, helping you identify what can be safely removed or refactored.</p>
+<hr>
+<h2 id="ci-cd" class="tsd-anchor-link">CI / CD<a href="#ci-cd" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<h3 id="pr-gatekeeper" class="tsd-anchor-link">PR Gatekeeper<a href="#pr-gatekeeper" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>On every pull request targeting <code>main</code>, the <strong>PR Gatekeeper</strong> workflow runs:</p>
+<ul>
+<li><strong>Tests</strong> – <code>bun test</code> across all packages</li>
+<li><strong>Lint</strong> – <code>oxlint</code> on the full source tree</li>
+<li><strong>Secret scan</strong> – TruffleHog scans the commits changed by the PR</li>
+</ul>
+<p>No secrets are required for this workflow.</p>
+<h3 id="pr-preview-deployments" class="tsd-anchor-link">PR Preview Deployments<a href="#pr-preview-deployments" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>On every pull request, the <strong>PR Preview Deployment</strong> workflow deploys a
+temporary Cloudflare Worker named <code>hono-kiln-pr-&lt;number&gt;</code> and posts the
+preview URL as a PR comment. The worker is deleted when the PR is closed.</p>
+<blockquote>
+<p><strong>Note:</strong> When the required secrets are not configured the deployment jobs
+are automatically skipped, so the workflow will pass without deploying
+anything. This is the expected behaviour for forks and template instances.</p>
+</blockquote>
+<p>Required repository secrets:</p>
+<table>
+<thead>
+<tr>
+<th>Secret</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CLOUDFLARE_API_TOKEN</code></td>
+<td>Cloudflare API token with <em>Workers Scripts: Edit</em> permission</td>
+</tr>
+<tr>
+<td><code>CLOUDFLARE_ACCOUNT_ID</code></td>
+<td>Your Cloudflare account ID</td>
+</tr>
+</tbody>
+</table>
+<h3 id="automated-releases" class="tsd-anchor-link">Automated Releases<a href="#automated-releases" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>When a commit is pushed (or merged) to <code>main</code>, the <strong>Release</strong> workflow runs
+<a href="https://semantic-release.gitbook.io">semantic-release</a> to:</p>
+<ol>
+<li>Determine the next version from <a href="https://www.conventionalcommits.org">Conventional Commits</a></li>
+<li>Bump the version in <code>package.json</code></li>
+<li>Generate / update <code>CHANGELOG.md</code></li>
+<li>Create a GitHub Release with auto-generated release notes</li>
+</ol>
+<p>Required repository secret:</p>
+<table>
+<thead>
+<tr>
+<th>Secret</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GITHUB_TOKEN</code></td>
+<td>Automatically provided by GitHub Actions – no manual setup needed</td>
+</tr>
+</tbody>
+</table>
+</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-chevronDown"></use></svg><h3>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-chevronDown"></use></svg><h3>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#hono-kiln-🔥"><span>Hono <wbr/>Kiln 🔥</span></a><ul><li><a href="#prerequisites"><span>Prerequisites</span></a></li><li><a href="#⚡-getting-started"><span>⚡ <wbr/>Getting <wbr/>Started</span></a></li><li><ul><li><a href="#1-interactive-bootstrapper"><span>1. <wbr/>Interactive <wbr/>Bootstrapper</span></a></li><li><a href="#2-manual-quick-start"><span>2. <wbr/>Manual <wbr/>Quick <wbr/>Start</span></a></li></ul></li><li><a href="#architecture"><span>Architecture</span></a></li><li><ul><li><a href="#request-lifecycle"><span>Request lifecycle</span></a></li><li><a href="#active-modules"><span>Active <wbr/>Modules</span></a></li></ul></li><li><a href="#feature-matrix"><span>Feature <wbr/>Matrix</span></a></li><li><a href="#api-documentation-authentication"><span>API <wbr/>Documentation &amp; <wbr/>Authentication</span></a></li><li><a href="#kiln-cli"><span>Kiln <wbr/>CLI</span></a></li><li><ul><li><a href="#example"><span>Example</span></a></li></ul></li><li><a href="#database"><span>Database</span></a></li><li><a href="#testing"><span>Testing</span></a></li><li><a href="#maintenance-code-audit"><span>Maintenance &amp; <wbr/>Code <wbr/>Audit</span></a></li><li><a href="#ci-cd"><span>CI / <wbr/>CD</span></a></li><li><ul><li><a href="#pr-gatekeeper"><span>PR <wbr/>Gatekeeper</span></a></li><li><a href="#pr-preview-deployments"><span>PR <wbr/>Preview <wbr/>Deployments</span></a></li><li><a href="#automated-releases"><span>Automated <wbr/>Releases</span></a></li></ul></li></ul></div></details></div><div class="site-menu"><nav class="tsd-navigation"><a href="modules.html">Hono Kiln Architecture</a><ul class="tsd-small-nested-navigation" id="tsd-nav-container"><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer><div class="overlay"></div></body></html>

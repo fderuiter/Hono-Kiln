@@ -1,5 +1,6 @@
 import { z } from '@hono/zod-openapi'
 
+/** Standard error response schema */
 export const ErrorResponseSchema = z
   .object({
     error: z.string().openapi({
@@ -9,6 +10,7 @@ export const ErrorResponseSchema = z
   })
   .openapi('ErrorResponse')
 
+/** Schema representing a single Zod validation issue */
 export const ZodIssueSchema = z.object({
   code: z.string().openapi({ description: 'The validation error code', example: 'invalid_type' }),
   expected: z.string().optional().openapi({ description: 'The expected type', example: 'string' }),
@@ -17,11 +19,13 @@ export const ZodIssueSchema = z.object({
   message: z.string().openapi({ description: 'The validation error message', example: 'Required' }),
 }).openapi('ValidationErrorIssue')
 
+/** Detailed schema for validation errors */
 export const ValidationErrorDetailSchema = z.object({
   issues: z.array(ZodIssueSchema).openapi({ description: 'The validation issues' }),
   name: z.string().openapi({ description: 'The error name', example: 'ZodError' }),
 }).openapi('ValidationErrorDetail')
 
+/** Schema for 422 Unprocessable Entity responses */
 export const UnprocessableEntitySchema = z
   .object({
     success: z.literal(false).openapi({
@@ -32,6 +36,7 @@ export const UnprocessableEntitySchema = z
   })
   .openapi('UnprocessableEntity')
 
+/** Schema for 500 Internal Server Error responses */
 export const InternalServerErrorSchema = z
   .object({
     error: z.string().openapi({
@@ -41,6 +46,7 @@ export const InternalServerErrorSchema = z
   })
   .openapi('InternalServerError')
 
+/** Schema for 401 Unauthorized responses */
 export const UnauthorizedSchema = z
   .object({
     error: z.string().openapi({
@@ -50,6 +56,7 @@ export const UnauthorizedSchema = z
   })
   .openapi('Unauthorized')
 
+/** Schema for 404 Not Found responses */
 export const NotFoundSchema = z
   .object({
     error: z.string().openapi({
@@ -59,6 +66,7 @@ export const NotFoundSchema = z
   })
   .openapi('NotFound')
 
+/** Schema for 400 Bad Request responses */
 export const BadRequestSchema = z
   .object({
     error: z.string().openapi({
@@ -68,6 +76,7 @@ export const BadRequestSchema = z
   })
   .openapi('BadRequest')
 
+/** Schema for 503 Service Unavailable responses */
 export const ServiceUnavailableSchema = z
   .object({
     status: z.string().openapi({
@@ -77,6 +86,7 @@ export const ServiceUnavailableSchema = z
   })
   .openapi('ServiceUnavailable')
 
+/** Enumeration of standard HTTP status codes used in the application */
 export const HttpStatusCodes = {
   OK: 200,
   CREATED: 201,
