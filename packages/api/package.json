@@ -23,6 +23,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@hono-kiln/testing": "workspace:*",
     "drizzle-kit": "0.31.10"
   }

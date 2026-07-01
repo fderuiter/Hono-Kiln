@@ -2,7 +2,7 @@ import { z } from '@hono/zod-openapi'
 import { integer, text } from 'drizzle-orm/sqlite-core'
 import { createEntity } from '../../utils/factory'
 
-export const userEntity = createEntity('users', {
+const userEntity = createEntity('users', {
   id: {
     db: integer('id').primaryKey({ autoIncrement: true }),
     openapi: { description: 'User ID', example: 1 }
@@ -22,7 +22,7 @@ export const userEntity = createEntity('users', {
   }
 });
 
-export const sessionEntity = createEntity('sessions', {
+const sessionEntity = createEntity('sessions', {
   id: {
     db: text('id').primaryKey(),
     openapi: { description: 'Session ID' }
