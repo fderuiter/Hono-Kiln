@@ -1,9 +1,10 @@
-import { swaggerUI } from '@hono/swagger-ui'
+import { SwaggerUI } from '@hono/swagger-ui'
 import { OpenAPIHono } from '@hono/zod-openapi'
 
 import { authMiddleware } from './auth/middleware'
 import { globalGuard } from './auth/guard'
 import { initMiddleware } from './middleware/init'
+import { localeMiddleware } from './middleware/locale'
 import { authRoutes } from './modules/auth/routes'
 import { healthRoutes } from './modules/health/routes'
 import { rootRoutes } from './modules/root/routes'
@@ -13,6 +14,8 @@ import { generateSwaggerUIHtml } from './utils/swagger-ui'
  * The initialized Hono application containing all mounted API routes.
  */
 const app = new OpenAPIHono()
+
+app.use('*', localeMiddleware)
 
 const infraApp = new OpenAPIHono()
 const coreApp = new OpenAPIHono()
@@ -28,10 +31,13 @@ infraApp.doc('/openapi.json', {
   },
 })
 
-infraApp.get('/docs', swaggerUI({
-  url: '/openapi.json',
-  manuallySwaggerUIHtml: generateSwaggerUIHtml
-}))
+infraApp.get('/docs', async (c) => {
+  const html = SwaggerUI({
+    url: '/openapi.json',
+    manuallySwaggerUIHtml: (asset) => generateSwaggerUIHtml(asset, c.var.locale)
+  })
+  return c.html(html)
+})
 
 coreApp.use('*', initMiddleware)
 coreApp.use('*', authMiddleware)

@@ -9,10 +9,10 @@
  * @param asset.js - Array of JS asset URLs
  * @returns The manually constructed HTML string for Swagger UI
  */
-export function generateSwaggerUIHtml(asset: { css: string[]; js: string[] }): string {
+export function generateSwaggerUIHtml(asset: { css: string[]; js: string[] }, locale: string = 'en'): string {
   return `
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="${locale}">
     <head>
       <meta charset="utf-8" />
       <title>API Documentation</title>
