@@ -1,3 +1,17 @@
+# [1.10.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.9.0...v1.10.0) (2026-07-01)
+
+
+## Bug Fixes
+
+* skip sync-schema script in temp test environments ([a7528f3](https://github.com/fderuiter/Hono-Kiln/commit/a7528f31b141bd7c782e41102aafb5023b8f4933))
+
+
+## Features
+
+* **a11y:** implement automated accessibility compliance framework ([ec0f284](https://github.com/fderuiter/Hono-Kiln/commit/ec0f28481fb81c9b1926d41b156019201a1d6c8a))
+* automate zero-config schema discovery ([e2e4c06](https://github.com/fderuiter/Hono-Kiln/commit/e2e4c060977a603341b9e3dca4a2b937b22186d5))
+* Implement unified environment guardrails ([c4fc9d0](https://github.com/fderuiter/Hono-Kiln/commit/c4fc9d0cbe9617310be31113d1fffca70d805646))
+
 # [1.9.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.8.0...v1.9.0) (2026-07-01)
 
 
