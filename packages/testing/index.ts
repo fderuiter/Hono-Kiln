@@ -3,10 +3,29 @@ import { mock } from 'bun:test'
 import type { Hono } from 'hono'
 import { Cookie, type Session, type User } from 'lucia'
 
+/**
+ * Options for creating a mock authentication environment.
+ */
 export type MockAuthOptions = {
+  /**
+   * Override the default session validation behavior.
+   */
   validateSession?: (sessionId: string) => Promise<{ user: User | null; session: Session | null }>
 }
 
+/**
+ * Creates a mocked authentication utility for testing purposes.
+ * 
+ * @example
+ * ```ts
+ * const auth = createMockAuth({
+ *   validateSession: async (id) => ({ user: myMockUser, session: myMockSession })
+ * });
+ * ```
+ * 
+ * @param options - Configuration options for the mock auth instance.
+ * @returns An object containing mocked auth methods matching the expected auth interface.
+ */
 export function createMockAuth(options: MockAuthOptions = {}) {
   const validateSession =
     options.validateSession ??
@@ -47,14 +66,29 @@ export function createMockAuth(options: MockAuthOptions = {}) {
   }
 }
 
+/**
+ * Options for configuring the test application wrapper.
+ */
 export type TestAppOptions = {
+  /** Mocked database instance */
   db?: any
+  /** Mocked authentication instance */
   auth?: any
+  /** Optional user to inject into the test context */
   user?: User | null
+  /** Optional session to inject into the test context */
   session?: Session | null
+  /** Whether the mock app should simulate an authenticated state by default */
   authenticated?: boolean
 }
 
+/**
+ * Wraps a router with a test application context, injecting mock dependencies.
+ * 
+ * @param router - The Hono router to mount.
+ * @param options - Configuration options for mocks and context data.
+ * @returns A new OpenAPIHono instance ready for testing.
+ */
 export function createTestApp<T extends Hono<any, any, any>>(
   router: T,
   options: TestAppOptions = {},

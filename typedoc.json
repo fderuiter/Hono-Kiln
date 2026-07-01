@@ -1,0 +1,22 @@
+{
+  "entryPoints": [
+    "packages/api/index.ts",
+    "packages/api/app.ts",
+    "packages/shared/index.ts",
+    "packages/testing/index.ts"
+  ],
+  "out": "docs",
+  "name": "Hono Kiln Architecture",
+  "plugin": [],
+  "validation": {
+    "notExported": true,
+    "notDocumented": true
+  },
+  "requiredToBeDocumented": ["Class", "Enum", "Function", "Interface", "TypeAlias", "Variable"],
+  "treatWarningsAsErrors": true,
+  "treatValidationWarningsAsErrors": true,
+  "tsconfig": "tsconfig.typedoc.json",
+  "exclude": ["**/node_modules/**"],
+  "skipErrorChecking": true,
+  "highlightLanguages": ["bash", "typescript", "ts", "javascript", "js", "html", "css", "json", "yaml", "md", "mermaid"]
+}

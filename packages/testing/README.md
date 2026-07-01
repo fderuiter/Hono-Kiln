@@ -1,15 +1,16 @@
-# testing
+# @hono-kiln/testing
 
-To install dependencies:
+This package provides internal utilities and helpers for testing the Hono Kiln architecture.
 
-```bash
-bun install
-```
+## Overview
 
-To run:
+It simplifies the process of creating mock instances of core services such as authentication and database connections, enabling isolated testing of API routes and modules.
 
-```bash
-bun run index.ts
-```
+## Features
 
-This project was created using `bun init` in bun v1.2.14. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+- **`createMockAuth`**: Quickly scaffold a mock Lucia authentication instance with preset valid or invalid sessions.
+- **`createTestApp`**: Wrap any Hono router with a mock environment tailored for integration testing.
+
+## Usage
+
+See the internal reference portal for full API documentation and examples.
