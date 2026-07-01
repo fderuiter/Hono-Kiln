@@ -1,4 +1,5 @@
 import app from './app'
+import { runPreflightChecks } from './preflight'
 
 export default app
 
@@ -11,6 +12,8 @@ if (import.meta.main) {
     console.error(`Missing required environment variables: ${missingVars.join(', ')}`)
     process.exit(1)
   }
+
+  await runPreflightChecks()
 
   const port = Number(Bun.env.PORT ?? 3000)
   console.log(`API server running on http://localhost:${port}`)
