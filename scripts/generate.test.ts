@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
-import { generateModule, mountModule, unmountModule, run } from './generate'
+import { generateModule, mountModule, unmountModule, run, validatePrompt } from './generate'
 
 const tempDirs: string[] = []
 
@@ -210,3 +210,34 @@ describe('Robust AST Registration', () => {
     expect(content).not.toContain('paymentsRoutes')
   })
 })
+
+describe('Prompt Validation', () => {
+  const originalEnv = process.env.AUDIBLE_BELL
+
+  afterEach(() => {
+    if (originalEnv === undefined) {
+      delete process.env.AUDIBLE_BELL
+    } else {
+      process.env.AUDIBLE_BELL = originalEnv
+    }
+  })
+
+  it('returns undefined if input is valid', () => {
+    expect(validatePrompt('custom desc', 'generic', 'default')).toBeUndefined()
+  })
+
+  it('returns error with auditory bell by default if input matches generic placeholder', () => {
+    delete process.env.AUDIBLE_BELL
+    const error = validatePrompt('generic', 'generic', 'default')
+    expect(error).toContain('\x07')
+    expect(error).toContain('Input cannot be identical to the generic placeholder')
+  })
+
+  it('returns error without auditory bell if AUDIBLE_BELL is false', () => {
+    process.env.AUDIBLE_BELL = 'false'
+    const error = validatePrompt('generic', 'generic', 'default')
+    expect(error).not.toContain('\x07')
+    expect(error).toContain('Input cannot be identical to the generic placeholder')
+  })
+})
+

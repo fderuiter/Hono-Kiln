@@ -299,7 +299,16 @@ export async function mountModule(moduleName: string, routeName: string, repoRoo
   }
 }
 
-async function promptWithValidation(
+export function validatePrompt(value: string, genericPlaceholder: string, smartDefault: string): string | undefined {
+  const finalValue = value.trim() || smartDefault;
+  if (finalValue.toLowerCase() === genericPlaceholder.toLowerCase()) {
+    const bell = process.env.AUDIBLE_BELL !== 'false' ? '\x07' : '';
+    return `${bell}Input cannot be identical to the generic placeholder ("${genericPlaceholder}"). Please provide a meaningful description.`;
+  }
+  return undefined;
+}
+
+export async function promptWithValidation(
   questionText: string,
   genericPlaceholder: string,
   smartDefault: string
@@ -309,10 +318,7 @@ async function promptWithValidation(
     defaultValue: smartDefault,
     placeholder: smartDefault,
     validate(value) {
-      const finalValue = value.trim() || smartDefault;
-      if (finalValue.toLowerCase() === genericPlaceholder.toLowerCase()) {
-        return `\x07Input cannot be identical to the generic placeholder ("${genericPlaceholder}"). Please provide a meaningful description.`;
-      }
+      return validatePrompt(value, genericPlaceholder, smartDefault);
     }
   });
 

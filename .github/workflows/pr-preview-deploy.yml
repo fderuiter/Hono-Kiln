@@ -40,6 +40,8 @@ jobs:
     needs: secret-scan
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
+    outputs:
+      preview_url: ${{ steps.extract-url.outputs.url }}
     steps:
       - name: Check secrets
         id: check
@@ -81,17 +83,24 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DATABASE_AUTH_TOKEN: ${{ secrets.DATABASE_AUTH_TOKEN }}
 
+      - name: Extract URL
+        if: steps.check.outputs.has-secrets == 'true'
+        id: extract-url
+        env:
+          WRANGLER_OUTPUT: ${{ steps.deploy.outputs.command-output }}
+        run: |
+          URL=$(echo "$WRANGLER_OUTPUT" | grep -Eo 'https://[^ ]+' | head -n 1)
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
       - name: Comment preview URL
         if: steps.check.outputs.has-secrets == 'true'
         uses: actions/github-script@v7
         env:
-          WRANGLER_OUTPUT: ${{ steps.deploy.outputs.command-output }}
+          PREVIEW_URL: ${{ steps.extract-url.outputs.url }}
           WORKER_NAME: hono-kiln-pr-${{ github.event.pull_request.number }}
         with:
           script: |
-            const output = process.env.WRANGLER_OUTPUT || '';
-            const match = output.match(/https:\/\/[^\s]+/);
-            const url = match ? match[0] : null;
+            const url = process.env.PREVIEW_URL;
             const body = url
               ? `✅ Preview deployment is live: ${url}`
               : `✅ Preview deployment completed for worker \`${process.env.WORKER_NAME}\`.`;
@@ -102,6 +111,41 @@ jobs:
               issue_number: context.issue.number,
               body,
             });
+
+  a11y-scan:
+    name: Accessibility Scan
+    needs: deploy-preview
+    if: github.event.action != 'closed' && needs.deploy-preview.outputs.preview_url != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run pa11y-ci
+        id: pa11y
+        run: |
+          echo '{"defaults":{"standard":"WCAG2AA","runners":["axe","htmlcs"]}}' > .pa11yci
+          npx pa11y-ci "${{ needs.deploy-preview.outputs.preview_url }}/docs" > a11y-report.txt || echo "A11Y_FAILED=true" >> "$GITHUB_ENV"
+          cat a11y-report.txt
+      - name: Comment accessibility report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('a11y-report.txt', 'utf8');
+            const body = `### ♿ Accessibility Report\n\n\`\`\`\n${report}\n\`\`\``;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+      - name: Check for violations
+        if: env.A11Y_FAILED == 'true'
+        run: |
+          echo "Accessibility violations found! Please check the report."
+          exit 1
 
   remove-preview:
     name: Remove Preview
