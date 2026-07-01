@@ -68,6 +68,7 @@ describe('generate module script', () => {
     const moduleRoot = path.join(repoRoot, 'packages', 'api', 'modules', 'users')
     expect(await readFile(path.join(moduleRoot, 'schema.ts'), 'utf8')).toContain('users')
     expect(await readFile(path.join(moduleRoot, 'repository.ts'), 'utf8')).toContain('createUsersRepository')
+    expect(await readFile(path.join(moduleRoot, 'service.ts'), 'utf8')).toContain('createUsersService')
     expect(await readFile(path.join(moduleRoot, 'routes.ts'), 'utf8')).toContain('usersRoutes')
     expect(await readFile(path.join(moduleRoot, 'routes.test.ts'), 'utf8')).toContain(
       "describe('users routes'",
