@@ -53,4 +53,27 @@ describe('openapi routes', () => {
     expect(html).toContain('<body>')
     expect(html).toContain('swagger')
   })
+
+  it('serves the Swagger UI with different locale based on Accept-Language header', async () => {
+    const response = await app.request('/docs', {
+      headers: {
+        'Accept-Language': 'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5'
+      }
+    })
+    expect(response.status).toBe(200)
+    const html = await response.text()
+    expect(html).toContain('<html lang="fr-CH">')
+  })
+
+  it('serves the Swagger UI with DEFAULT_LOCALE environment configuration when no header is present', async () => {
+    // We can test this by setting c.env.DEFAULT_LOCALE, wait how does hono env() work in tests?
+    // Let's set process.env.DEFAULT_LOCALE just in case it reads from process.env
+    const prev = process.env.DEFAULT_LOCALE
+    process.env.DEFAULT_LOCALE = 'es'
+    const response = await app.request('/docs')
+    expect(response.status).toBe(200)
+    const html = await response.text()
+    expect(html).toContain('<html lang="es">')
+    process.env.DEFAULT_LOCALE = prev
+  })
 })

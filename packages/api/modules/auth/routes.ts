@@ -8,7 +8,7 @@ import {
 } from '@hono-kiln/shared'
 import { publicAccess } from '../../auth/guard'
 
-import { createAuthRepository } from './repository'
+import { createAuthService } from './service'
 import {
   AuthResponseSchema,
   LoginRequestSchema,
@@ -89,29 +89,21 @@ const registerRoute = createRoute({
 authRoutes.openapi(registerRoute, publicAccess(async (c) => {
   const db = c.get('db')
   const auth = c.get('auth')
-  const repository = createAuthRepository(db)
+  const service = createAuthService(db, auth)
   const { name, email, password } = c.req.valid('json')
 
-  const existingUser = await repository.findUserByEmail(email)
+  const result = await service.register(name, email, password)
 
-  if (existingUser) {
-    return c.json({ error: 'User already exists' }, 400 as const)
+  if ('error' in result) {
+    return c.json({ error: result.error }, 400 as const)
   }
 
-  const newUser = await repository.createUser({
-    name,
-    email,
-    password,
-  })
-
-  const session = await auth.createSession(newUser.id, {})
-  const sessionCookie = auth.createSessionCookie(session.id)
-
+  const sessionCookie = auth.createSessionCookie(result.session.id)
   sessionHelpers.setSessionCookie(c, sessionCookie)
 
   return c.json(
     {
-      user: newUser,
+      user: result.user,
     },
     201 as const
   )
@@ -185,23 +177,21 @@ const loginRoute = createRoute({
 authRoutes.openapi(loginRoute, publicAccess(async (c) => {
   const db = c.get('db')
   const auth = c.get('auth')
-  const repository = createAuthRepository(db)
+  const service = createAuthService(db, auth)
   const { email, password } = c.req.valid('json')
 
-  const user = await repository.verifyCredentials(email, password)
+  const result = await service.login(email, password)
 
-  if (!user) {
-    return c.json({ error: 'Invalid credentials' }, 401 as const)
+  if ('error' in result) {
+    return c.json({ error: result.error }, 401 as const)
   }
 
-  const session = await auth.createSession(user.id, {})
-  const sessionCookie = auth.createSessionCookie(session.id)
-
+  const sessionCookie = auth.createSessionCookie(result.session.id)
   sessionHelpers.setSessionCookie(c, sessionCookie)
 
   return c.json(
     {
-      user,
+      user: result.user,
     },
     200 as const
   )

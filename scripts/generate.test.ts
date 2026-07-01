@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
-import { generateModule, mountModule, run } from './generate'
+import { generateModule, mountModule, unmountModule, run } from './generate'
 
 const tempDirs: string[] = []
 
@@ -68,6 +68,7 @@ describe('generate module script', () => {
     const moduleRoot = path.join(repoRoot, 'packages', 'api', 'modules', 'users')
     expect(await readFile(path.join(moduleRoot, 'schema.ts'), 'utf8')).toContain('users')
     expect(await readFile(path.join(moduleRoot, 'repository.ts'), 'utf8')).toContain('createUsersRepository')
+    expect(await readFile(path.join(moduleRoot, 'service.ts'), 'utf8')).toContain('createUsersService')
     expect(await readFile(path.join(moduleRoot, 'routes.ts'), 'utf8')).toContain('usersRoutes')
     expect(await readFile(path.join(moduleRoot, 'routes.test.ts'), 'utf8')).toContain(
       "describe('users routes'",
@@ -164,4 +165,48 @@ import { usersRoutes } from './modules/users/routes'
     expect(exists).toBe(true)
   })
 
+})
+
+describe('Robust AST Registration', () => {
+  it('mounts and unmounts properly when Hono instance variable is renamed', async () => {
+    const repoRoot = await createRepoFixture()
+    const appPath = path.join(repoRoot, 'packages', 'api', 'app.ts')
+    let content = await readFile(appPath, 'utf8')
+    content = content.replace(/const app = new Hono\(\)/g, 'const apiServer = new Hono()')
+    content = content.replace(/app\.route/g, 'apiServer.route')
+    content = content.replace(/export default app/g, 'export default apiServer')
+    await writeFile(appPath, content)
+
+    await mountModule('billing', 'billingRoutes', repoRoot)
+    content = await readFile(appPath, 'utf8')
+    expect(content).toContain("import { billingRoutes } from './modules/billing/routes'")
+    expect(content).toContain("apiServer.route('/billing', billingRoutes)")
+
+    await unmountModule('billing', repoRoot)
+    content = await readFile(appPath, 'utf8')
+    expect(content).not.toContain('billingRoutes')
+  })
+
+  it('locates and mounts correctly in refactored directory structures', async () => {
+    const repoRoot = await createRepoFixture()
+    const oldAppPath = path.join(repoRoot, 'packages', 'api', 'app.ts')
+    const newAppPath = path.join(repoRoot, 'packages', 'api', 'src', 'server.ts')
+    await mkdir(path.dirname(newAppPath), { recursive: true })
+    
+    let content = await readFile(oldAppPath, 'utf8')
+    // Fix imports for new depth
+    content = content.replace(/'.\/modules\//g, "'../modules/")
+    await writeFile(newAppPath, content)
+    await rm(oldAppPath)
+
+    await mountModule('payments', 'paymentsRoutes', repoRoot)
+    content = await readFile(newAppPath, 'utf8')
+    // Since server.ts is in packages/api/src, the relative path to packages/api/modules/payments/routes is ../modules/payments/routes
+    expect(content).toContain("import { paymentsRoutes } from '../modules/payments/routes'")
+    expect(content).toContain("app.route('/payments', paymentsRoutes)")
+
+    await unmountModule('payments', repoRoot)
+    content = await readFile(newAppPath, 'utf8')
+    expect(content).not.toContain('paymentsRoutes')
+  })
 })
