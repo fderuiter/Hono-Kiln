@@ -1,6 +1,5 @@
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
-import { createHealthRepository } from './repository'
-import { InternalServerErrorSchema, ServiceUnavailableSchema } from '@hono-kiln/shared'
+import { InternalServerErrorSchema } from '@hono-kiln/shared'
 import { publicAccess } from '../../auth/guard'
 
 import { StatusSchema } from './schema'
@@ -55,21 +54,9 @@ healthRoutes.openapi(
         content: { 'application/json': { schema: InternalServerErrorSchema } },
         description: 'Internal server error',
       },
-      503: {
-        content: { 'application/json': { schema: ServiceUnavailableSchema } },
-        description: 'Service unavailable',
-      },
     },
   }),
   publicAccess(async (c) => {
-    const db = c.get('db')
-    const repository = createHealthRepository(db)
-    
-    const isDbReady = await repository.checkDatabase()
-    if (!isDbReady) {
-      return c.json({ status: 'error' }, 503 as const)
-    }
-
     return c.json({ status: 'ok' as const }, 200 as const)
   }),
 )

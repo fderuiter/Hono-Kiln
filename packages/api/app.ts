@@ -10,11 +10,6 @@ import { rootRoutes } from './modules/root/routes'
 
 const app = new OpenAPIHono()
 
-app.use('*', initMiddleware)
-app.use('*', authMiddleware)
-app.use('*', globalGuard)
-app.route('/', rootRoutes)
-app.route('/auth', authRoutes)
 app.route('/health', healthRoutes)
 
 app.doc('/openapi.json', {
@@ -84,5 +79,11 @@ app.get('/docs', swaggerUI({
     </html>
   `
 }))
+
+app.use('*', initMiddleware)
+app.use('*', authMiddleware)
+app.use('*', globalGuard)
+app.route('/', rootRoutes)
+app.route('/auth', authRoutes)
 
 export default app
