@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "sync-schema": "bun run scripts/sync-schema.ts",
     "dev": "bun --watch index.ts",
     "start": "bun index.ts",
     "test": "bun test",

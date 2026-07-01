@@ -387,6 +387,12 @@ export async function generateModule(moduleInputName: string, repoRoot = process
 
   await mountModule(moduleName, routeName, repoRoot)
 
+  const { spawnSync } = await import('node:child_process')
+  const syncResult = spawnSync('bun', ['run', 'packages/api/scripts/sync-schema.ts'], { stdio: 'inherit', cwd: repoRoot })
+  if (syncResult.status !== 0) {
+    throw new Error('Schema sync failed')
+  }
+
   return {
     modulePath,
     routeName,
@@ -464,6 +470,12 @@ export async function removeModule(moduleInputName: string, repoRoot = process.c
   await unmountModule(moduleName, repoRoot)
   
   await rm(modulePath, { recursive: true, force: true })
+
+  const { spawnSync } = await import('node:child_process')
+  const syncResult = spawnSync('bun', ['run', 'packages/api/scripts/sync-schema.ts'], { stdio: 'inherit', cwd: repoRoot })
+  if (syncResult.status !== 0) {
+    throw new Error('Schema sync failed')
+  }
 }
 
 export async function checkDocumentation(repoRoot: string): Promise<boolean> {
@@ -525,6 +537,13 @@ export async function run(argv: string[], repoRoot = process.cwd()) {
 
   if (action === 'audit') {
     const { spawnSync } = await import('node:child_process')
+    
+    const syncResult = spawnSync('bun', ['run', 'packages/api/scripts/sync-schema.ts'], { stdio: 'inherit', cwd: repoRoot })
+    if (syncResult.status !== 0) {
+      console.error('Audit failed: Schema sync error.')
+      return syncResult.status ?? 1
+    }
+
     const knipResult = spawnSync('bun', ['run', 'knip'], { stdio: 'inherit', cwd: repoRoot })
     if (knipResult.status !== 0) {
       return knipResult.status ?? 1
