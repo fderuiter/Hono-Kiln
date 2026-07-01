@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.6.0...v1.7.0) (2026-07-01)
+
+
+## Features
+
+* implement architectural reference portal and documentation validation ([#50](https://github.com/fderuiter/Hono-Kiln/issues/50)) ([1076de1](https://github.com/fderuiter/Hono-Kiln/commit/1076de11d6494df0c893570d6b5f65a0fba76a89))
+
 # [1.6.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.5.0...v1.6.0) (2026-07-01)
 
 
