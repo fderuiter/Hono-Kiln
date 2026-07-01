@@ -1,3 +1,11 @@
+# [1.6.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.5.0...v1.6.0) (2026-07-01)
+
+
+## Features
+
+* **api:** add interactive pre-flight startup checks ([ee80220](https://github.com/fderuiter/Hono-Kiln/commit/ee80220aef1f912c2245b0a2e6b52b8820edd738))
+* migrate CLI interactions to @clack/prompts for screen reader accessibility ([6cc8a25](https://github.com/fderuiter/Hono-Kiln/commit/6cc8a25f6b92abbb2f9e2364ead145c7f896eb46))
+
 # [1.5.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.4.0...v1.5.0) (2026-07-01)
 
 
