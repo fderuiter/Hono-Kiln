@@ -2,6 +2,9 @@
  * Accessibility utility functions and plugins.
  */
 
+/**
+ * CSS styles for the swagger-ui skip link to ensure accessibility.
+ */
 export const swaggerA11yStyles = `
   .skip-link {
     position: absolute;
@@ -33,8 +36,14 @@ export const swaggerA11yStyles = `
   }
 `;
 
+/**
+ * HTML snippet for the skip link used in swagger-ui to improve accessibility for keyboard and screen reader users.
+ */
 export const swaggerA11ySkipLink = `<a href="#swagger-ui" class="skip-link">Skip to Content</a>`;
 
+/**
+ * JavaScript code for a Swagger UI plugin that adds live region announcements for requests and validations, improving screen reader experience.
+ */
 export const SwaggerA11yPluginCode = `
   const A11yStatusPlugin = function(system) {
     return {
