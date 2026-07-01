@@ -1,3 +1,13 @@
+# [1.9.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.8.0...v1.9.0) (2026-07-01)
+
+
+## Features
+
+* **api:** implement comprehensive status announcement system for swagger-ui ([bed6f3d](https://github.com/fderuiter/Hono-Kiln/commit/bed6f3de566bfc285f219b414138a385a25ad353))
+* Centralized localization middleware and dynamic swagger docs locale ([903e9ea](https://github.com/fderuiter/Hono-Kiln/commit/903e9ea3f909734703a5cd5e7494e9ea1ef5662d))
+* implement robust AST-based module registration ([a6ec566](https://github.com/fderuiter/Hono-Kiln/commit/a6ec56650e40af4fac8157f544d40940709f2098))
+* implement standardized domain orchestration layer ([11b2d9b](https://github.com/fderuiter/Hono-Kiln/commit/11b2d9b404bea62fc7c39776ab16dde05a34111c))
+
 # [1.8.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.7.0...v1.8.0) (2026-07-01)
 
 
