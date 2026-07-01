@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import { InternalServerErrorSchema } from '@hono-kiln/shared'
 import { publicAccess } from '../../auth/guard'
+import { checkDatabaseConnectivity } from '../../db/check'
 
 import { StatusSchema } from './schema'
 
@@ -57,6 +58,10 @@ healthRoutes.openapi(
     },
   }),
   publicAccess(async (c) => {
+    const dbStatus = await checkDatabaseConnectivity()
+    if (!dbStatus.success) {
+      return c.json({ status: 'error', message: dbStatus.error || 'Database connection failed' }, 500 as const)
+    }
     return c.json({ status: 'ok' as const }, 200 as const)
   }),
 )

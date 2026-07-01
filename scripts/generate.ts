@@ -1,7 +1,7 @@
 import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { Project, SyntaxKind } from 'ts-morph'
 import path from 'node:path'
-import * as readline from 'node:readline/promises'
+import { text, intro, outro, isCancel, cancel } from '@clack/prompts'
 
 type GenerateModuleResult = {
   modulePath: string
@@ -246,22 +246,28 @@ function isImportStatementTerminator(trimmedLine: string) {
 
 
 async function promptWithValidation(
-  rl: readline.Interface,
   questionText: string,
   genericPlaceholder: string,
   smartDefault: string
 ): Promise<string> {
-  while (true) {
-    const answer = await rl.question(`${questionText} [${smartDefault}]: `);
-    const trimmed = answer.trim();
-    const finalAnswer = trimmed || smartDefault;
-    
-    if (finalAnswer.toLowerCase() === genericPlaceholder.toLowerCase()) {
-      console.log(`Error: Input cannot be identical to the generic placeholder ("${genericPlaceholder}"). Please provide a meaningful description.`);
-      continue;
+  const answer = await text({
+    message: `${questionText} [${smartDefault}]`,
+    defaultValue: smartDefault,
+    placeholder: smartDefault,
+    validate(value) {
+      const finalValue = value.trim() || smartDefault;
+      if (finalValue.toLowerCase() === genericPlaceholder.toLowerCase()) {
+        return `\x07Input cannot be identical to the generic placeholder ("${genericPlaceholder}"). Please provide a meaningful description.`;
+      }
     }
-    return finalAnswer;
+  });
+
+  if (isCancel(answer)) {
+    cancel('Operation cancelled');
+    process.exit(1);
   }
+
+  return (answer as string).trim() || smartDefault;
 }
 
 export async function generateModule(moduleInputName: string, repoRoot = process.cwd()): Promise<GenerateModuleResult> {
@@ -295,32 +301,25 @@ export async function generateModule(moduleInputName: string, repoRoot = process
   const isCI = process.env.CI === 'true' || process.env.CI === '1';
 
   if (isTTY && !isCI) {
-    console.log(`\nGathering metadata for the new "${moduleName}" module...`);
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    intro(`Gathering metadata for the new "${moduleName}" module...`);
     
-    try {
-      meta.moduleDescription = await promptWithValidation(
-        rl,
-        'Module Description',
-        genericModuleDesc,
-        defaultModuleDesc
-      );
-      meta.primaryRouteSummary = await promptWithValidation(
-        rl,
-        'Primary Route Summary',
-        genericRouteSummary,
-        defaultRouteSummary
-      );
-      meta.mainSchemaDescription = await promptWithValidation(
-        rl,
-        'Main Schema Description',
-        genericSchemaDesc,
-        defaultSchemaDesc
-      );
-    } finally {
-      rl.close();
-    }
-    console.log();
+    meta.moduleDescription = await promptWithValidation(
+      'Module Description',
+      genericModuleDesc,
+      defaultModuleDesc
+    );
+    meta.primaryRouteSummary = await promptWithValidation(
+      'Primary Route Summary',
+      genericRouteSummary,
+      defaultRouteSummary
+    );
+    meta.mainSchemaDescription = await promptWithValidation(
+      'Main Schema Description',
+      genericSchemaDesc,
+      defaultSchemaDesc
+    );
+    
+    outro('Metadata gathered.');
   }
 
   const { files, routeName } = getTemplateFiles(moduleName, meta)
@@ -502,34 +501,34 @@ export async function run(argv: string[], repoRoot = process.cwd()) {
       console.error('Audit failed: typedoc error.')
       return typedocResult.status ?? 1
     }
-    console.log('Audit passed successfully.')
+    outro('Audit passed successfully.')
     return 0
   }
 
   if (action === 'remove' && type === 'module' && name) {
     try {
       await removeModule(name, repoRoot)
-      console.log(`Removed module ${name}`)
+      outro(`Removed module ${name}`)
       return 0
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(message)
+      cancel(message)
       return 1
     }
   }
 
   if (action !== 'generate' || type !== 'module' || !name) {
-    console.error(usage)
+    cancel(usage)
     return 1
   }
 
   try {
     const { modulePath } = await generateModule(name, repoRoot)
-    console.log(`Generated module at ${modulePath}`)
+    outro(`Generated module at ${modulePath}`)
     return 0
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
-    console.error(message)
+    cancel(message)
     return 1
   }
 }
