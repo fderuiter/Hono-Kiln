@@ -4,3 +4,4 @@ libsql_data/
 *.db
 *.sqlite
 *.sqlite3
+docs/
