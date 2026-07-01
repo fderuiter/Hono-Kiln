@@ -57,6 +57,7 @@ function getTemplateFiles(moduleName: string, meta: ModuleMetadata) {
   const routeName = `${camelName}Routes`
   const schemaName = `${camelName}Schema`
   const repositoryFnName = `create${pascalName}Repository`
+  const serviceFnName = `create${pascalName}Service`
 
   return {
     routeName,
@@ -84,10 +85,24 @@ export function ${repositoryFnName}(_db: Database) {
   }
 }
 `,
+      'service.ts': `import type { Database } from '../../db'
+import { ${repositoryFnName} } from './repository'
+import type { ${pascalName} } from './schema'
+
+export function ${serviceFnName}(db: Database) {
+  const repository = ${repositoryFnName}(db)
+
+  return {
+    list(): ${pascalName}[] {
+      return repository.list()
+    }
+  }
+}
+`,
       'routes.ts': `import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { HttpStatusCodes, InternalServerErrorSchema, UnauthorizedSchema, UnprocessableEntitySchema } from '@hono-kiln/shared'
 
-import { ${repositoryFnName} } from './repository'
+import { ${serviceFnName} } from './service'
 import { ${schemaName} } from './schema'
 
 export const ${routeName} = new OpenAPIHono()
@@ -138,11 +153,11 @@ const listRoute = createRoute({
 
 ${routeName}.openapi(listRoute, (c) => {
   const db = c.get('db')
-  const repository = ${repositoryFnName}(db)
+  const service = ${serviceFnName}(db)
 
   return c.json(
     {
-      data: repository.list(),
+      data: service.list(),
     },
     HttpStatusCodes.OK,
   )
