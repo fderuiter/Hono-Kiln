@@ -3,7 +3,6 @@ import { env } from 'hono/adapter'
 
 import { createAuth, type Auth } from '../auth'
 import { createDatabase, type Database } from '../db'
-import { DEFAULT_DATABASE_URL } from '../db/config'
 
 declare module 'hono' {
   interface ContextVariableMap {

@@ -1,4 +1,3 @@
-import type { Context } from 'hono'
 import { createMiddleware } from 'hono/factory'
 import type { Session, User } from 'lucia'
 import { sessionHelpers } from '@hono-kiln/shared'

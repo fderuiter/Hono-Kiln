@@ -1,8 +1,8 @@
-import { sqliteTable, type SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core';
+import { sqliteTable } from 'drizzle-orm/sqlite-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from '@hono/zod-openapi';
 
-export type FieldDefinition<TBuilder = any> = {
+type FieldDefinition<TBuilder = any> = {
   db: TBuilder;
   validation?: z.ZodTypeAny;
   openapi?: {
@@ -29,8 +29,6 @@ export function createEntity<T extends string, C extends EntityConfig>(
 
   for (const [key, value] of Object.entries(config)) {
     if (value.validation || value.openapi) {
-      let schema: any = value.validation;
-      
       // We'll construct a generic refinement function
       const refine = (schemaBase: z.ZodTypeAny) => {
         let finalSchema = value.validation ?? schemaBase;
