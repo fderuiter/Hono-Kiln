@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { text, confirm, intro, outro, isCancel, cancel, spinner } from '@clack/prompts';
+import { text, confirm, intro, outro, isCancel, cancel, spinner, note } from '@clack/prompts';
 
 async function fileExists(filePath: string) {
   try {
@@ -44,6 +44,14 @@ async function main() {
     process.exit(1);
   }
 
+  let hasGit = true;
+  try {
+    execSync('git --version', { stdio: 'ignore' });
+  } catch {
+    hasGit = false;
+    note('Git is not installed or not in PATH. Git operations will be skipped.', 'Warning');
+  }
+
   // Interactive Prompts
   const pName = await text({
     message: 'Project Name',
@@ -70,6 +78,7 @@ async function main() {
     packageScope = packageScope.slice(1);
   }
 
+  note('Impact: Removes the example root module and its references to provide a clean slate.', 'Help');
   const removeBoilerplate = await confirm({
     message: 'Remove boilerplate example modules?',
     initialValue: true,
@@ -79,13 +88,18 @@ async function main() {
     process.exit(1);
   }
 
-  const purgeGit = await confirm({
-    message: 'Purge git history and initialize fresh repository?',
-    initialValue: true,
-  });
-  if (isCancel(purgeGit)) {
-    cancel('Operation cancelled');
-    process.exit(1);
+  let purgeGit = false;
+  if (hasGit) {
+    note('Impact: Deletes the existing .git directory and initializes a fresh repository with a new initial commit.', 'Help');
+    const pg = await confirm({
+      message: 'Purge git history and initialize fresh repository?',
+      initialValue: true,
+    });
+    if (isCancel(pg)) {
+      cancel('Operation cancelled');
+      process.exit(1);
+    }
+    purgeGit = pg as boolean;
   }
 
   const startServices = await confirm({
