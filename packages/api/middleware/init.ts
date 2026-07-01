@@ -1,23 +1,11 @@
 import { createMiddleware } from 'hono/factory'
 import { env } from 'hono/adapter'
 
-import { createAuth, type Auth } from '../auth'
-import { createDatabase, type Database } from '../db'
+import { createAuth } from '../auth'
+import { createDatabase } from '../db'
+import type { AppEnv, EnvBindings } from '../env'
 
-declare module 'hono' {
-  interface ContextVariableMap {
-    db: Database
-    auth: Auth
-  }
-}
-
-type EnvBindings = {
-  DATABASE_URL?: string
-  DATABASE_AUTH_TOKEN?: string
-  NODE_ENV?: string
-}
-
-export const initMiddleware = createMiddleware(async (c, next) => {
+export const initMiddleware = createMiddleware<AppEnv>(async (c, next) => {
   const { DATABASE_URL, DATABASE_AUTH_TOKEN, NODE_ENV } = env<EnvBindings>(c)
 
   if (!DATABASE_URL) {

@@ -1,5 +1,6 @@
 import { SwaggerUI } from '@hono/swagger-ui'
 import { OpenAPIHono } from '@hono/zod-openapi'
+import type { AppEnv } from './env'
 
 import { authMiddleware } from './auth/middleware'
 import { globalGuard } from './auth/guard'
@@ -13,12 +14,12 @@ import { generateSwaggerUIHtml } from './utils/swagger-ui'
 /**
  * The initialized Hono application containing all mounted API routes.
  */
-const app = new OpenAPIHono()
+const app = new OpenAPIHono<AppEnv>()
 
 app.use('*', localeMiddleware)
 
-const infraApp = new OpenAPIHono()
-const coreApp = new OpenAPIHono()
+const infraApp = new OpenAPIHono<AppEnv>()
+const coreApp = new OpenAPIHono<AppEnv>()
 
 infraApp.route('/health', healthRoutes)
 

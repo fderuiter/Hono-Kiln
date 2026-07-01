@@ -6,6 +6,7 @@ import { runPreflightChecks } from './preflight'
  */
 const exportedApp = app
 
+export type { AppEnv, EnvBindings } from './env'
 export default exportedApp
 
 if (import.meta.main) {

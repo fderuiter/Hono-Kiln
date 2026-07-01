@@ -2,6 +2,7 @@ import { OpenAPIHono } from '@hono/zod-openapi'
 import { mock } from 'bun:test'
 import type { Hono } from 'hono'
 import { Cookie, type Session, type User } from 'lucia'
+import type { AppEnv } from '@hono-kiln/api'
 
 /**
  * Options for creating a mock authentication environment.
@@ -26,7 +27,7 @@ export type MockAuthOptions = {
  * @param options - Configuration options for the mock auth instance.
  * @returns An object containing mocked auth methods matching the expected auth interface.
  */
-export function createMockAuth(options: MockAuthOptions = {}) {
+export function createMockAuth(options: MockAuthOptions = {}): AppEnv['Variables']['auth'] {
   const validateSession =
     options.validateSession ??
     mock(async () => ({ user: null, session: null }))
@@ -63,7 +64,7 @@ export function createMockAuth(options: MockAuthOptions = {}) {
       fresh: true,
     })),
     invalidateSession: mock(async () => {}),
-  }
+  } as unknown as AppEnv['Variables']['auth']
 }
 
 /**
@@ -71,9 +72,9 @@ export function createMockAuth(options: MockAuthOptions = {}) {
  */
 export type TestAppOptions = {
   /** Mocked database instance */
-  db?: any
+  db?: AppEnv['Variables']['db']
   /** Mocked authentication instance */
-  auth?: any
+  auth?: AppEnv['Variables']['auth']
   /** Optional user to inject into the test context */
   user?: User | null
   /** Optional session to inject into the test context */
@@ -93,15 +94,7 @@ export function createTestApp<T extends Hono<any, any, any>>(
   router: T,
   options: TestAppOptions = {},
 ) {
-  type Env = {
-    Variables: {
-      db: any
-      auth: any
-      user: User | null
-      session: Session | null
-    }
-  }
-  const app = new OpenAPIHono<Env>()
+  const app = new OpenAPIHono<AppEnv>()
 
   let authMock = options.auth
   if (!authMock) {
@@ -127,8 +120,8 @@ export function createTestApp<T extends Hono<any, any, any>>(
   }
 
   app.use('*', async (c, next) => {
-    c.set('db', options.db ?? {})
-    c.set('auth', authMock)
+    c.set('db', options.db ?? ({} as AppEnv['Variables']['db']))
+    c.set('auth', authMock!)
     if (options.user !== undefined) c.set('user', options.user)
     if (options.session !== undefined) c.set('session', options.session)
     await next()
