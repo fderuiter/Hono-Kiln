@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.7.0...v1.8.0) (2026-07-01)
+
+
+## Features
+
+* **api:** Implement infrastructure isolation ([4bf6ca6](https://github.com/fderuiter/Hono-Kiln/commit/4bf6ca65d8b646b7220744e50c640f5041e22203))
+
 # [1.7.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.6.0...v1.7.0) (2026-07-01)
 
 
