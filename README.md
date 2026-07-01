@@ -5,12 +5,43 @@
 
 ---
 
-## ⚡ 5-Second Start
+## Prerequisites
+
+Before getting started, ensure you have the following installed in your system `PATH` (Unix-like environment recommended):
+
+- **[Bun](https://bun.sh/)** — Primary package manager and script runner.
+- **[Docker](https://www.docker.com/)** — For running the local database services.
+- **[Git](https://git-scm.com/)** — For version control.
+
+---
+
+## ⚡ Getting Started
+
+### 1. Interactive Bootstrapper
+
+To quickly rebrand and configure this template for your own use, we provide an interactive bootstrapper. After cloning the repository, run:
+
+```sh
+bun run setup
+```
+
+**The setup script will automate the following:**
+- **Rebranding:** Prompts for a new project name and package scope, then executes a project-wide find-and-replace (e.g., replacing `@hono-kiln`). This modifies your project files, so review the changes to avoid accidental data loss.
+- **Boilerplate Removal:** Optionally deletes the example `root` module and removes its references to provide a clean slate.
+- **Git History Purging:** Optionally deletes the existing `.git` directory and initializes a fresh repository with a new initial commit.
+- **Environment Initialization:** Starts Docker services (`docker compose up -d`) and runs database commands to push the schema (`db:push`) and populate initial data (`db:seed`).
+
+### 2. Manual Quick Start
+
+If you prefer to set up manually without the bootstrapper:
 
 ```sh
 git clone https://github.com/fderuiter/Hono-Kiln.git my-api
 cd my-api
 bun install
+docker compose up -d
+make db-push
+make db-seed
 bun run --filter @hono-kiln/api dev
 # → API running at http://localhost:3000
 # → Swagger UI at http://localhost:3000/docs
@@ -165,6 +196,13 @@ Push the schema directly to the local LibSQL server:
 make db-push
 ```
 
+Populate the database with initial development data (seeding):
+
+```sh
+make db-seed
+```
+(Alternatively, you can run these database commands via Bun within the API workspace: `cd packages/api && bun run db:seed`).
+
 The API defaults to `http://127.0.0.1:8080` when `DATABASE_URL` is not set.
 
 ---
@@ -176,6 +214,20 @@ bun install          # install deps
 bun test             # run all tests across all packages
 bun test packages/api  # run API tests only
 ```
+
+---
+
+## Maintenance & Code Audit
+
+To maintain a clean codebase, this project uses [Knip](https://knip.dev/) to detect unused files, dependencies, and unreferenced exports across the monorepo workspace.
+
+Run the code audit tool from the root directory:
+
+```sh
+bun run knip
+```
+
+This command will scan the workspace based on the `knip.json` configuration and report any unreferenced code, helping you identify what can be safely removed or refactored.
 
 ---
 
