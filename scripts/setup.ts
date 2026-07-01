@@ -1,10 +1,7 @@
 import { execSync } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import * as readline from 'node:readline/promises';
-import { stdin as input, stdout as output } from 'node:process';
-
-const rl = readline.createInterface({ input, output });
+import { text, confirm, intro, outro, isCancel, cancel, spinner } from '@clack/prompts';
 
 async function fileExists(filePath: string) {
   try {
@@ -31,47 +28,80 @@ async function getFiles(dir: string, fileList: string[] = []) {
 }
 
 async function main() {
-  console.log('🔥 Zero-Config Interactive Bootstrapper 🔥');
+  intro('🔥 Zero-Config Interactive Bootstrapper 🔥');
 
   // Verify dependencies
   try {
     execSync('docker -v', { stdio: 'ignore' });
   } catch {
-    console.error('Error: Docker is not installed or not in PATH.');
+    cancel('Error: Docker is not installed or not in PATH.');
     process.exit(1);
   }
   try {
     execSync('bun -v', { stdio: 'ignore' });
   } catch {
-    console.error('Error: Bun is not installed or not in PATH.');
+    cancel('Error: Bun is not installed or not in PATH.');
     process.exit(1);
   }
 
   // Interactive Prompts
-  const projectNameInput = await rl.question('Project Name [my-project]: ');
-  const projectName = projectNameInput.trim() || 'my-project';
+  const pName = await text({
+    message: 'Project Name',
+    placeholder: 'my-project',
+    defaultValue: 'my-project',
+  });
+  if (isCancel(pName)) {
+    cancel('Operation cancelled');
+    process.exit(1);
+  }
+  const projectName = (pName as string).trim() || 'my-project';
 
-  let packageScopeInput = await rl.question('Package Scope (without @) [my-project]: ');
-  let packageScope = packageScopeInput.trim() || 'my-project';
+  const pScope = await text({
+    message: 'Package Scope (without @)',
+    placeholder: 'my-project',
+    defaultValue: 'my-project',
+  });
+  if (isCancel(pScope)) {
+    cancel('Operation cancelled');
+    process.exit(1);
+  }
+  let packageScope = (pScope as string).trim() || 'my-project';
   if (packageScope.startsWith('@')) {
     packageScope = packageScope.slice(1);
   }
 
-  const removeBoilerplateInput = await rl.question('Remove boilerplate example modules? (Y/n): ');
-  const removeBoilerplate = removeBoilerplateInput.trim().toLowerCase() !== 'n';
+  const removeBoilerplate = await confirm({
+    message: 'Remove boilerplate example modules?',
+    initialValue: true,
+  });
+  if (isCancel(removeBoilerplate)) {
+    cancel('Operation cancelled');
+    process.exit(1);
+  }
 
-  const purgeGitInput = await rl.question('Purge git history and initialize fresh repository? (Y/n): ');
-  const purgeGit = purgeGitInput.trim().toLowerCase() !== 'n';
+  const purgeGit = await confirm({
+    message: 'Purge git history and initialize fresh repository?',
+    initialValue: true,
+  });
+  if (isCancel(purgeGit)) {
+    cancel('Operation cancelled');
+    process.exit(1);
+  }
 
-  const startServicesInput = await rl.question('Start database and run migrations? (Y/n): ');
-  const startServices = startServicesInput.trim().toLowerCase() !== 'n';
-
-  rl.close();
+  const startServices = await confirm({
+    message: 'Start database and run migrations?',
+    initialValue: true,
+  });
+  if (isCancel(startServices)) {
+    cancel('Operation cancelled');
+    process.exit(1);
+  }
   
   const rootDir = process.cwd();
 
   // Replace Project Name and Scope
-  console.log('\n📦 Updating project name and package scope...');
+  const s = spinner();
+  s.start('Updating project name and package scope...');
   const files = await getFiles(rootDir);
   for (const file of files) {
     if (file === __filename || file.endsWith('scripts/setup.ts') || file.endsWith('scripts/bootstrap.ts')) continue;
@@ -85,14 +115,16 @@ async function main() {
       await fs.writeFile(file, newContent, 'utf8');
     }
   }
+  s.stop('Updated project name and package scope.');
 
   // Run bun install to update workspace symlinks
-  console.log('🔄 Running bun install to update workspace symlinks...');
+  s.start('Running bun install to update workspace symlinks...');
   execSync('bun install', { cwd: rootDir, stdio: 'ignore' });
+  s.stop('Ran bun install.');
 
   // Remove Boilerplate (Root Module)
   if (removeBoilerplate) {
-    console.log('🧹 Removing boilerplate modules...');
+    s.start('Removing boilerplate modules...');
     const rootModulePath = path.join(rootDir, 'packages/api/modules/root');
     if (await fileExists(rootModulePath)) {
       await fs.rm(rootModulePath, { recursive: true, force: true });
@@ -133,11 +165,12 @@ async function main() {
         let newContent = newLines.join('\n').replace(/\n{3,}/g, '\n\n');
         await fs.writeFile(indexTestTsPath, newContent, 'utf8');
     }
+    s.stop('Removed boilerplate modules.');
   }
 
   // Purge Git
   if (purgeGit) {
-    console.log('🗑️ Purging git history...');
+    s.start('Purging git history...');
     const gitDir = path.join(rootDir, '.git');
     if (await fileExists(gitDir)) {
       await fs.rm(gitDir, { recursive: true, force: true });
@@ -149,11 +182,12 @@ async function main() {
         execSync('git config user.email "bot@example.com" && git config user.name "Bot" && git commit -m "Initial commit"', { cwd: rootDir, stdio: 'ignore' });
       }
     }
+    s.stop('Purged git history.');
   }
 
   // Start DB and Migrations
   if (startServices) {
-    console.log('🐳 Starting Docker services and running migrations...');
+    s.start('Starting Docker services and running migrations...');
     try {
       execSync('docker compose up -d', { cwd: rootDir, stdio: 'inherit' });
       
@@ -162,12 +196,14 @@ async function main() {
 
       execSync(`bun run --filter @${packageScope}/api db:push`, { cwd: rootDir, stdio: 'inherit' });
       execSync(`bun run --filter @${packageScope}/api db:seed`, { cwd: rootDir, stdio: 'inherit' });
+      s.stop('Started Docker services and ran migrations.');
     } catch (e) {
-      console.log('Could not run DB migrations or start Docker services. This might be due to environment limitations.', e instanceof Error ? e.message : '');
+      s.stop('Failed to start Docker services or run migrations.');
+      cancel('Could not run DB migrations or start Docker services. This might be due to environment limitations.\n' + (e instanceof Error ? e.message : ''));
     }
   }
 
-  console.log('\n✨ Project setup complete! Run `bun run dev` to start developing.');
+  outro('✨ Project setup complete! Run `bun run dev` to start developing.');
 }
 
 main().catch(console.error);
