@@ -30,28 +30,18 @@ describe('preflight checks', () => {
     dbCheckSpy.mockRestore()
   })
 
-  it('exits in non-TTY environments if database connection fails', async () => {
+  it('does not exit in non-TTY environments if database connection fails', async () => {
     process.stdin.isTTY = false
     process.stdout.isTTY = false
 
     const dbCheckSpy = spyOn(dbCheck, 'checkDatabaseConnectivity').mockResolvedValue({ success: false, error: 'connection refused' })
-    const exitSpy = spyOn(process, 'exit').mockImplementation(() => {
-      throw new Error('Process exited')
-    })
+    const consoleSpy = spyOn(console, 'error').mockImplementation(() => {})
 
-    let errorThrown = false
-    try {
-      await runPreflightChecks()
-    } catch (e: any) {
-      if (e.message === 'Process exited') {
-        errorThrown = true
-      }
-    }
+    await runPreflightChecks()
 
-    expect(errorThrown).toBe(true)
-    expect(exitSpy).toHaveBeenCalledWith(1)
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Database connection failed'))
 
     dbCheckSpy.mockRestore()
-    exitSpy.mockRestore()
+    consoleSpy.mockRestore()
   })
 })

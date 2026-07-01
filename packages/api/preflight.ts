@@ -12,8 +12,7 @@ export async function runPreflightChecks(): Promise<void> {
   if (!isTTY) {
     const dbStatus = await checkDatabaseConnectivity()
     if (!dbStatus.success) {
-      console.error(`Database connection failed: ${dbStatus.error}. Exiting.`)
-      process.exit(1)
+      console.error(`Database connection failed: ${dbStatus.error}. Core application features will be unavailable.`)
     }
     return
   }
@@ -48,8 +47,8 @@ export async function runPreflightChecks(): Promise<void> {
       console.error('\n[Pre-flight] Docker daemon is not running.')
       const answer = await promptUser('Would you like to retry checking Docker daemon? (Y/n): ')
       if (answer.toLowerCase() === 'n') {
-        console.error('Cannot proceed without Docker. Exiting.')
-        process.exit(1)
+        console.error('Cannot proceed without Docker. Core application features will be unavailable.')
+        return
       }
       dockerInfo = spawnSync('docker', ['info'])
     }
@@ -59,8 +58,8 @@ export async function runPreflightChecks(): Promise<void> {
       console.error('\n[Pre-flight] Required Docker containers (libsql) are not running.')
       const answer = await promptUser("Would you like to run 'docker compose up -d' now? (Y/n): ")
       if (answer.toLowerCase() === 'n') {
-        console.error('Cannot proceed without database container. Exiting.')
-        process.exit(1)
+        console.error('Cannot proceed without database container. Core application features will be unavailable.')
+        return
       } else {
         console.log('Running docker compose up -d...')
         const upRes = spawnSync('docker', ['compose', 'up', '-d'], { stdio: 'inherit' })
@@ -89,8 +88,8 @@ export async function runPreflightChecks(): Promise<void> {
       } else if (answer.toLowerCase() === 'r') {
         // Just loop and retry
       } else {
-        console.error('Database is unreachable. Exiting.')
-        process.exit(1)
+        console.error('Database is unreachable. Core application features will be unavailable.')
+        return
       }
       dbStatus = await checkDatabaseConnectivity()
     }

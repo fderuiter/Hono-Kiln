@@ -14,9 +14,12 @@ import { generateSwaggerUIHtml } from './utils/swagger-ui'
  */
 const app = new OpenAPIHono()
 
-app.route('/health', healthRoutes)
+const infraApp = new OpenAPIHono()
+const coreApp = new OpenAPIHono()
 
-app.doc('/openapi.json', {
+infraApp.route('/health', healthRoutes)
+
+infraApp.doc('/openapi.json', {
   openapi: '3.0.0',
   info: {
     title: 'Hono Kiln API',
@@ -25,15 +28,18 @@ app.doc('/openapi.json', {
   },
 })
 
-app.get('/docs', swaggerUI({
+infraApp.get('/docs', swaggerUI({
   url: '/openapi.json',
   manuallySwaggerUIHtml: generateSwaggerUIHtml
 }))
 
-app.use('*', initMiddleware)
-app.use('*', authMiddleware)
-app.use('*', globalGuard)
-app.route('/', rootRoutes)
-app.route('/auth', authRoutes)
+coreApp.use('*', initMiddleware)
+coreApp.use('*', authMiddleware)
+coreApp.use('*', globalGuard)
+coreApp.route('/', rootRoutes)
+coreApp.route('/auth', authRoutes)
+
+app.route('/', infraApp)
+app.route('/', coreApp)
 
 export default app
