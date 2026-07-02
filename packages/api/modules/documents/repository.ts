@@ -1,7 +1,6 @@
 import type { Database } from '../../db'
 import { eq, and } from 'drizzle-orm'
-import { documentss, documentsSchema, type Documents } from './schema'
-import { entityName } from './schema'
+import { documentss, type Documents } from './schema'
 
 export function createDocumentsRepository(db: Database) {
   return {

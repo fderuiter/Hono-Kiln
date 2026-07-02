@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
-import { HttpStatusCodes, InternalServerErrorSchema, UnauthorizedSchema, UnprocessableEntitySchema } from '@hono-kiln/shared'
+import { HttpStatusCodes, UnauthorizedSchema } from '@hono-kiln/shared'
 
 import { createOrganizationsService } from './service'
 import { OrganizationSchema } from './schema'

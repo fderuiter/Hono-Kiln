@@ -33,4 +33,3 @@ export const OrganizationSchema = organizationEntity.selectSchema.openapi('Organ
 
 export type Organization = z.infer<typeof OrganizationSchema>
 export const entityName = 'organizations' as const
-export const organizationsSchema = OrganizationSchema
