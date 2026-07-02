@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.17.0...v1.18.0) (2026-07-02)
+
+
+## Features
+
+* **cloudflare:** implement full-lifecycle credential validation ([e9262ff](https://github.com/fderuiter/Hono-Kiln/commit/e9262fffd2006d9853661a7dae3458903240f1a8))
+
 # [1.17.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.16.0...v1.17.0) (2026-07-02)
 
 
