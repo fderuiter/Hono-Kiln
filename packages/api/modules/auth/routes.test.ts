@@ -46,6 +46,7 @@ describe('auth routes', () => {
         id: 1,
         email: 'test@example.com',
         name: 'Test',
+        permissions: [],
       }
     })
     expect(body.user).not.toHaveProperty('passwordHash')

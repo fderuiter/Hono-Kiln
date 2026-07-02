@@ -5,6 +5,13 @@ export function publicAccess<T>(handler: T): T {
   return handler
 }
 
+export function requirePermission<T>(permission: string): (handler: T) => T {
+  return (handler: T) => {
+    (handler as any).requiredPermission = permission
+    return handler
+  }
+}
+
 export const globalGuard = createMiddleware(async (c, next) => {
   const routes = c.req.matchedRoutes
   const target = routes[routes.length - 1]
@@ -20,5 +27,14 @@ export const globalGuard = createMiddleware(async (c, next) => {
     return c.json({ error: 'Unauthorized' }, 401)
   }
 
+  const requiredPermission = target && (target.handler as any).requiredPermission
+  if (requiredPermission) {
+    const user = c.get('user')
+    if (!user || !user.permissions || !user.permissions.includes(requiredPermission)) {
+      return c.json({ error: 'Forbidden' }, 403)
+    }
+  }
+
   await next()
 })
+

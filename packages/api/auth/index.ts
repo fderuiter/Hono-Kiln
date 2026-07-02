@@ -4,6 +4,18 @@ import { Lucia, TimeSpan } from 'lucia'
 import type { Database } from '../db'
 import { sessions, users } from '../db/schema'
 
+export type AuthProvider = {
+  id: string
+  name: string
+  handleCallback?: (request: Request) => Promise<any>
+}
+
+export const authProviders = new Map<string, AuthProvider>()
+
+export function registerAuthProvider(provider: AuthProvider) {
+  authProviders.set(provider.id, provider)
+}
+
 export function createAuth(db: Database, isProd: boolean) {
   const adapter = new DrizzleSQLiteAdapter(db, sessions as any, users as any)
 
@@ -20,6 +32,7 @@ export function createAuth(db: Database, isProd: boolean) {
     getUserAttributes: (attributes) => ({
       email: attributes.email,
       name: attributes.name,
+      permissions: attributes.permissions,
     }),
   })
 }
@@ -33,6 +46,7 @@ declare module 'lucia' {
     DatabaseUserAttributes: {
       email: string
       name: string
+      permissions: string[]
     }
   }
 }

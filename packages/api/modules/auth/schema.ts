@@ -19,6 +19,11 @@ const userEntity = createEntity('users', {
   },
   passwordHash: {
     db: text('password_hash').notNull()
+  },
+  permissions: {
+    db: text('permissions', { mode: 'json' }).$type<string[]>().notNull().default([]),
+    validation: z.array(z.string()).default([]),
+    openapi: { description: 'User permissions', example: ['documents:read'] }
   }
 });
 
@@ -43,7 +48,8 @@ export const sessions = sessionEntity.table;
 export const UserSchema = userEntity.selectSchema.pick({
   id: true,
   email: true,
-  name: true
+  name: true,
+  permissions: true
 }).openapi('User');
 
 export const RegisterRequestSchema = z.object({

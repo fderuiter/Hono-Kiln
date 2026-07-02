@@ -20,7 +20,7 @@ describe('database configuration', () => {
     const columns = getTableColumns(users)
 
     expect(getTableName(users)).toBe('users')
-    expect(Object.keys(columns)).toEqual(['id', 'email', 'name', 'passwordHash'])
+    expect(Object.keys(columns)).toEqual(['id', 'email', 'name', 'passwordHash', 'permissions'])
     expect(columns.id).toBeDefined()
     expect(columns.email).toBeDefined()
     expect(columns.name).toBeDefined()
