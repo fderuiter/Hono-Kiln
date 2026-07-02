@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.18.0...v1.19.0) (2026-07-02)
+
+
+## Features
+
+* unified api application architecture to include business routes in docs ([33d4efa](https://github.com/fderuiter/Hono-Kiln/commit/33d4efad5ece5369f88e0e898a220c61d4fc50b2))
+
 # [1.18.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.17.0...v1.18.0) (2026-07-02)
 
 
