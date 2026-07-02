@@ -31,6 +31,34 @@ export const swaggerA11yStyles = `
     z-index: 10000;
     text-decoration: none;
   }
+
+  #swagger-ui:focus-visible {
+    outline: 4px solid #005fcc;
+    outline-offset: 2px;
+    border-radius: 4px;
+    animation: focus-pulse 1s ease-out;
+  }
+
+  @keyframes focus-pulse {
+    0% { background-color: rgba(0, 95, 204, 0.15); }
+    100% { background-color: transparent; }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    #swagger-ui:focus-visible {
+      outline-color: #66b2ff;
+    }
+    @keyframes focus-pulse {
+      0% { background-color: rgba(102, 178, 255, 0.2); }
+      100% { background-color: transparent; }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #swagger-ui:focus-visible {
+      animation: none !important;
+    }
+  }
 `;
 
 /**
