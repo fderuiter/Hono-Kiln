@@ -11,7 +11,9 @@ export const initMiddleware = createMiddleware<AppEnv>(async (c, next) => {
   if (!DATABASE_URL) {
     throw new Error('Missing required environment variable: DATABASE_URL')
   }
-  if (!DATABASE_AUTH_TOKEN) {
+  const isLite = DATABASE_URL.startsWith('file:')
+
+  if (!isLite && !DATABASE_AUTH_TOKEN) {
     throw new Error('Missing required environment variable: DATABASE_AUTH_TOKEN')
   }
   if (!NODE_ENV) {
