@@ -6,7 +6,7 @@ export async function syncSchema(apiDir: string) {
   const modulesDir = join(apiDir, 'modules')
   
   const dirents = await readdir(modulesDir, { withFileTypes: true })
-  const moduleNames = dirents.filter(d => d.isDirectory()).map(d => d.name)
+  const moduleNames = dirents.filter(d => d.isDirectory()).map(d => d.name).sort()
   
   const tableNames = new Map<string, string>()
   const exportNames = new Map<string, string>()
