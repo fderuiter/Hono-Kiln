@@ -2,6 +2,7 @@ import { execSync } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { text, confirm, intro, outro, isCancel, cancel, spinner, note, select } from '@clack/prompts';
+import { checkDatabaseConnectivity } from '../packages/api/db/check';
 
 async function fileExists(filePath: string) {
   try {
@@ -128,8 +129,21 @@ async function main() {
     sDocker.start('Starting Docker services...');
     try {
       execSync('docker compose up -d', { cwd: rootDir, stdio: 'inherit' });
-      // Wait a bit for db to be ready
-      execSync('sleep 2');
+      sDocker.message('Waiting for service to become healthy...');
+      let isReady = false;
+      for (let i = 0; i < 30; i++) {
+        const dbStatus = await checkDatabaseConnectivity();
+        if (dbStatus.success) {
+          isReady = true;
+          break;
+        }
+        await new Promise((res) => setTimeout(res, 1000));
+      }
+      if (!isReady) {
+        sDocker.stop('Service failed to become ready.');
+        cancel('Database failed to become healthy within 30 seconds.');
+        process.exit(1);
+      }
       sDocker.stop('Started Docker services.');
     } catch (e) {
       sDocker.stop('Failed to start Docker services.');

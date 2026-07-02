@@ -25,6 +25,8 @@ export interface AppEnv {
     auth: Auth
     user: User | null
     session: Session | null
+    organizationId: number | null
+    organizationRole: 'admin' | 'member' | null
     requestId: string
     logger: import('pino').Logger
   }

@@ -16,6 +16,8 @@ import { authRoutes } from './modules/auth/routes'
 import { healthRoutes } from './modules/health/routes'
 import { rootRoutes } from './modules/root/routes'
 import { generateSwaggerUIHtml } from './utils/swagger-ui'
+import { organizationsRoutes } from './modules/organizations/routes'
+import { documentsRoutes } from './modules/documents/routes'
 
 const pinoLogger = pino()
 
@@ -73,6 +75,8 @@ coreApp.use('*', authMiddleware)
 coreApp.use('*', globalGuard)
 coreApp.route('/', rootRoutes)
 coreApp.route('/auth', authRoutes)
+coreApp.route('/organizations', organizationsRoutes)
+coreApp.route('/documents', documentsRoutes)
 
 app.route('/', infraApp)
 app.route('/', coreApp)

@@ -64,7 +64,21 @@ export async function runPreflightChecks(): Promise<void> {
           if (upRes.status !== 0) {
             console.error('Failed to start containers.')
           } else {
-            await new Promise((res) => setTimeout(res, 2000))
+            process.stdout.write('Waiting for service...')
+            let isReady = false
+            for (let i = 0; i < 30; i++) {
+              const dbStatus = await checkDatabaseConnectivity()
+              if (dbStatus.success) {
+                isReady = true
+                break
+              }
+              await new Promise((res) => setTimeout(res, 1000))
+            }
+            console.log()
+            if (!isReady) {
+              console.error('Database failed to become healthy within 30 seconds.')
+              process.exit(1)
+            }
           }
         }
         dockerPs = spawnSync('docker', ['compose', 'ps', '--services', '--filter', 'status=running'])

@@ -1,3 +1,36 @@
+# [1.15.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.14.0...v1.15.0) (2026-07-02)
+
+
+## Bug Fixes
+
+* resolve duplicate export and unused imports for CI ([f02c3cc](https://github.com/fderuiter/Hono-Kiln/commit/f02c3ccacdb15f9c71019aede38d045f7ba302e5))
+
+
+## Features
+
+* implement multi-tenancy foundation and scaffolding support ([7b3b6db](https://github.com/fderuiter/Hono-Kiln/commit/7b3b6db83db8610452b13e2874be126b954fc798))
+
+# [1.14.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.13.0...v1.14.0) (2026-07-02)
+
+
+## Features
+
+* implement robust sequential setup with active health polling ([54aebcd](https://github.com/fderuiter/Hono-Kiln/commit/54aebcdfa976a4c327ac0dc8b9d1331f03242cb9))
+
+# [1.13.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.12.0...v1.13.0) (2026-07-02)
+
+
+## Bug Fixes
+
+* ci validations (knip ignored binaries and oxlint warnings) ([f6612ef](https://github.com/fderuiter/Hono-Kiln/commit/f6612efba839c235483667fd14328e428f97be1b))
+
+
+## Features
+
+* automated distributed infrastructure & observability ([b04a418](https://github.com/fderuiter/Hono-Kiln/commit/b04a4185b923a387e6019d976466a6b6b25cae08))
+* implement zero-touch cloud onboarding ([2eb91dd](https://github.com/fderuiter/Hono-Kiln/commit/2eb91ddad16034303786baf296f93637ba0357d5))
+* secure-by-default scaffolding ([7f21e43](https://github.com/fderuiter/Hono-Kiln/commit/7f21e4350cbeda7b3b56a9857291fffba058df9e))
+
 # [1.12.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.11.0...v1.12.0) (2026-07-02)
 
 
