@@ -1,3 +1,21 @@
+# [1.16.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.15.0...v1.16.0) (2026-07-02)
+
+
+## Bug Fixes
+
+* **a11y:** restore native focus outline on Swagger UI container ([44cb449](https://github.com/fderuiter/Hono-Kiln/commit/44cb4495a04faf631b85477e874594bda3e577a9))
+* **ci:** make schema sync generation deterministic ([e1421cd](https://github.com/fderuiter/Hono-Kiln/commit/e1421cd8afdebe80787c4c7e5511422344134cb0))
+* **ci:** Resolve knip and typedoc audit failures by exporting public API variables and adding JSDoc comments ([b50f0e9](https://github.com/fderuiter/Hono-Kiln/commit/b50f0e99ea33c493e7175401827035981dc6085b))
+
+
+## Features
+
+* Add production Docker setup for Bun API ([571617f](https://github.com/fderuiter/Hono-Kiln/commit/571617ff452861b3703cf8d5e296a21c73412edb))
+* **ci:** unify PR-level accessibility verification for architecture docs ([75f8e67](https://github.com/fderuiter/Hono-Kiln/commit/75f8e67344ecce688f6a1ee642a9e9ff3ec9706c))
+* enhance API documentation orientation UX for keyboard users ([4893625](https://github.com/fderuiter/Hono-Kiln/commit/4893625153c501984ce0fb12c95f61275df5511f)), closes [hi#contrast](https://github.com/hi/issues/contrast) [#swagger-ui](https://github.com/fderuiter/Hono-Kiln/issues/swagger-ui)
+* Enterprise Permission Engine ([634a2b5](https://github.com/fderuiter/Hono-Kiln/commit/634a2b5c9b450a930318c20c98a7432019cabf05))
+* optimize production startup and bypass dev preflight checks ([9e81b23](https://github.com/fderuiter/Hono-Kiln/commit/9e81b23e924037c71b80cc6921e4418f7e521664))
+
 # [1.15.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.14.0...v1.15.0) (2026-07-02)
 
 
