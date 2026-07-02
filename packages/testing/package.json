@@ -2,7 +2,9 @@
   "name": "@hono-kiln/testing",
   "private": true,
   "type": "module",
-  "main": "index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

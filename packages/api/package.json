@@ -2,6 +2,9 @@
   "name": "@hono-kiln/api",
   "private": true,
   "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
   "scripts": {
     "sync-schema": "bun run scripts/sync-schema.ts",
     "dev": "bun --watch index.ts",
