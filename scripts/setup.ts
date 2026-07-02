@@ -34,9 +34,9 @@ async function main() {
   const envChoice = await select({
     message: 'Choose Environment',
     options: [
-      { value: 'lite', label: 'Lite (Local) - SQLite file, no Docker needed' },
-      { value: 'full', label: 'Full (Docker) - Production-parity environment' },
-      { value: 'cloud', label: 'Cloud (Zero-Touch) - Turso, Cloudflare, and GitHub Actions' },
+      { value: 'lite', label: 'Lite (Local)', hint: 'SQLite file, no Docker needed' },
+      { value: 'full', label: 'Full (Docker)', hint: 'Production-parity environment' },
+      { value: 'cloud', label: 'Cloud (Zero-Touch)', hint: 'Turso, Cloudflare, and GitHub Actions' },
     ],
   });
   if (isCancel(envChoice)) {
@@ -165,7 +165,8 @@ async function main() {
   const projectName = (pName as string).trim() || 'my-project';
 
   const pScope = await text({
-    message: 'Package Scope (without @)',
+    message: 'Package Scope',
+    hint: 'without @',
     placeholder: 'my-project',
     defaultValue: 'my-project',
   });
