@@ -56,6 +56,16 @@ export const UnauthorizedSchema = z
   })
   .openapi('Unauthorized')
 
+/** Schema for 403 Forbidden responses */
+export const ForbiddenSchema = z
+  .object({
+    error: z.string().openapi({
+      description: 'Forbidden error message',
+      example: 'Forbidden',
+    }),
+  })
+  .openapi('Forbidden')
+
 /** Schema for 404 Not Found responses */
 export const NotFoundSchema = z
   .object({

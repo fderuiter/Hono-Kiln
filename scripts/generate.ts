@@ -173,11 +173,12 @@ export function ${serviceFnName}(db: Database) {
 `
 
   const routesContent = `import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
-import { HttpStatusCodes, InternalServerErrorSchema, UnauthorizedSchema, UnprocessableEntitySchema } from '@hono-kiln/shared'
+import { HttpStatusCodes, InternalServerErrorSchema, UnauthorizedSchema, UnprocessableEntitySchema, ForbiddenSchema } from '@hono-kiln/shared'
 
 import { ${serviceFnName} } from './service'
 import { ${schemaName} } from './schema'
 import type { AppEnv } from '../../env'
+import { requirePermission } from '../../auth/guard'
 ${isWorker ? "import { inngest } from '../../inngest/client'\n" : ""}
 export const ${routeName} = new OpenAPIHono<AppEnv>()
 
@@ -206,6 +207,14 @@ const listRoute = createRoute({
         },
       },
     },
+    [HttpStatusCodes.FORBIDDEN]: {
+      description: 'Forbidden',
+      content: {
+        'application/json': {
+          schema: ForbiddenSchema,
+        },
+      },
+    },
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: {
       description: 'Validation Error',
       content: {
@@ -225,7 +234,7 @@ const listRoute = createRoute({
   },
 })
 
-${routeName}.openapi(listRoute, async (c) => {
+${routeName}.openapi(listRoute, requirePermission('${moduleName}:read')(async (c) => {
   const db = c.get('db')
   const service = ${serviceFnName}(db)
 ${isTenant ? `  const orgId = c.get('organizationId')
@@ -240,7 +249,7 @@ ${isTenant ? `  const orgId = c.get('organizationId')
     },
     HttpStatusCodes.OK as any,
   )
-`}})
+`}}))
 ${isWorker ? `
 const triggerRoute = createRoute({
   method: 'post',
@@ -254,13 +263,25 @@ const triggerRoute = createRoute({
         'application/json': { schema: z.object({ message: z.string() }) },
       },
     },
+    [HttpStatusCodes.UNAUTHORIZED]: {
+      description: 'Unauthorized',
+      content: {
+        'application/json': { schema: UnauthorizedSchema },
+      },
+    },
+    [HttpStatusCodes.FORBIDDEN]: {
+      description: 'Forbidden',
+      content: {
+        'application/json': { schema: ForbiddenSchema },
+      },
+    },
   }
 })
 
-${routeName}.openapi(triggerRoute, async (c) => {
+${routeName}.openapi(triggerRoute, requirePermission('${moduleName}:write')(async (c) => {
   await inngest.send({ name: '${moduleName}/process', data: {} })
   return c.json({ message: 'Worker triggered successfully' }, HttpStatusCodes.OK as any)
-})
+}))
 ` : ''}`
 
   const testContent = isTenant
