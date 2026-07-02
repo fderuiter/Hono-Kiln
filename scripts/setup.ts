@@ -35,6 +35,7 @@ async function main() {
     options: [
       { value: 'lite', label: 'Lite (Local) - SQLite file, no Docker needed' },
       { value: 'full', label: 'Full (Docker) - Production-parity environment' },
+      { value: 'cloud', label: 'Cloud (Zero-Touch) - Turso, Cloudflare, and GitHub Actions' },
     ],
   });
   if (isCancel(envChoice)) {
@@ -42,13 +43,14 @@ async function main() {
     process.exit(1);
   }
   const isLite = envChoice === 'lite';
+  const isCloud = envChoice === 'cloud';
 
   if (isLite) {
     note('Warning: Certain features like external integrations may be limited in Lite mode.', 'Environment Notice');
   }
 
   // Verify dependencies
-  if (!isLite) {
+  if (!isLite && !isCloud) {
     try {
       execSync('docker -v', { stdio: 'ignore' });
     } catch {
@@ -61,6 +63,45 @@ async function main() {
   } catch {
     cancel('Error: Bun is not installed or not in PATH.');
     process.exit(1);
+  }
+
+  if (isCloud) {
+    try {
+      execSync('turso --version', { stdio: 'ignore' });
+    } catch {
+      cancel('Error: Turso CLI is not installed. Please install it.');
+      process.exit(1);
+    }
+    try {
+      execSync('gh --version', { stdio: 'ignore' });
+    } catch {
+      cancel('Error: GitHub CLI (gh) is not installed. Please install it.');
+      process.exit(1);
+    }
+    
+    const sAuth = spinner();
+    sAuth.start('Checking Turso authorization...');
+    try {
+      const tursoStatus = execSync('turso auth token', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
+      if (!tursoStatus.trim()) {
+        throw new Error('Not logged in');
+      }
+      sAuth.stop('Turso is authorized.');
+    } catch {
+      sAuth.stop('Turso authorization required.');
+      note('You will be redirected to your browser to log in to Turso.', 'Authorization');
+      execSync('turso auth login', { stdio: 'inherit' });
+    }
+
+    sAuth.start('Checking GitHub authorization...');
+    try {
+      execSync('gh auth status', { stdio: 'ignore' });
+      sAuth.stop('GitHub is authorized.');
+    } catch {
+      sAuth.stop('GitHub authorization required.');
+      note('You will be prompted to log in to GitHub.', 'Authorization');
+      execSync('gh auth login -p https -w', { stdio: 'inherit' });
+    }
   }
 
   let hasGit = true;
@@ -218,15 +259,84 @@ async function main() {
     s.stop('Purged git history.');
   }
 
+  if (isCloud && hasGit) {
+    s.start('Pushing to GitHub repository...');
+    try {
+      const remotes = execSync('git remote -v', { cwd: rootDir, encoding: 'utf-8' });
+      if (!remotes.includes('origin')) {
+        execSync(`gh repo create ${projectName} --private --source=. --push`, { cwd: rootDir, stdio: 'ignore' });
+      } else {
+        execSync('git push -u origin main', { cwd: rootDir, stdio: 'ignore' });
+      }
+      s.stop('Pushed code to GitHub repository.');
+    } catch (e) {
+      s.stop('Skipped automatic GitHub push.');
+      note('Ensure your repository is pushed to GitHub before secrets can be synced.', 'Notice');
+    }
+  }
+
   // Write .env if necessary
   const envPath = path.join(rootDir, 'packages/api/.env');
   if (isLite) {
     const envContent = `DATABASE_URL=file:local.db\nDATABASE_AUTH_TOKEN=\nNODE_ENV=development\n`;
     await fs.writeFile(envPath, envContent, 'utf8');
+  } else if (isCloud) {
+    s.start('Provisioning remote Turso database...');
+    const dbName = `${projectName}-db`;
+    let dbUrlOutput = '';
+    let dbTokenOutput = '';
+    try {
+      const dbs = execSync('turso db list', { encoding: 'utf-8' });
+      if (!dbs.includes(dbName)) {
+        execSync(`turso db create ${dbName}`, { stdio: 'ignore' });
+      }
+      dbUrlOutput = execSync(`turso db show ${dbName} --url`, { encoding: 'utf-8' }).trim();
+      dbTokenOutput = execSync(`turso db tokens create ${dbName}`, { encoding: 'utf-8' }).trim();
+      s.stop('Provisioned Turso database.');
+      
+      const envContent = `DATABASE_URL=${dbUrlOutput}\nDATABASE_AUTH_TOKEN=${dbTokenOutput}\nNODE_ENV=production\n`;
+      await fs.writeFile(envPath, envContent, 'utf8');
+    } catch (e) {
+      s.stop('Failed to provision cloud resources.');
+      cancel('Cloud provisioning failed. Remediation: Check your network connection and ensure Turso organization limits are not exceeded.\n' + (e instanceof Error ? e.message : ''));
+      process.exit(1);
+    }
+    
+    s.start('Syncing secrets to GitHub...');
+    try {
+      execSync(`gh secret set DATABASE_URL --body "${dbUrlOutput}"`, { stdio: 'ignore' });
+      execSync(`gh secret set DATABASE_AUTH_TOKEN --body "${dbTokenOutput}"`, { stdio: 'ignore' });
+      s.stop('Synced secrets to GitHub Repository Secrets.');
+    } catch (e) {
+      s.stop('Failed to sync GitHub secrets.');
+      cancel('Failed to set GitHub secrets. Remediation: Check if the repository exists on GitHub and gh is authorized.\n' + (e instanceof Error ? e.message : ''));
+      process.exit(1);
+    }
   }
 
   // Start DB and Migrations
   if (startServices) {
+    if (isCloud) {
+      s.start('Running migrations to remote database...');
+      try {
+        execSync(`bun run --filter @${packageScope}/api db:squash`, { cwd: rootDir, stdio: 'inherit' });
+        execSync(`bun run --filter @${packageScope}/api db:push`, { cwd: rootDir, stdio: 'inherit' });
+        execSync(`bun run --filter @${packageScope}/api db:seed`, { cwd: rootDir, stdio: 'inherit' });
+        s.stop('Ran migrations to remote database.');
+      } catch (e) {
+        s.stop('Failed to run migrations.');
+        cancel('Could not run DB migrations to remote database.\n' + (e instanceof Error ? e.message : ''));
+      }
+
+      s.start('Triggering production deployment workflow...');
+      try {
+        execSync('gh workflow run deploy-production.yml --ref main', { stdio: 'ignore' });
+        s.stop('Triggered production deployment workflow.');
+      } catch (e) {
+        s.stop('Failed to trigger deployment.');
+        note('Workflow could not be triggered. Ensure deploy-production.yml exists on the remote main branch.', 'Warning');
+      }
+    } else 
     if (isLite) {
       s.start('Running migrations for local SQLite...');
       try {
