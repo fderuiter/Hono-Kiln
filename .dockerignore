@@ -1,0 +1,9 @@
+node_modules
+.git
+.github
+.devcontainer
+docker-compose.yml
+README.md
+CHANGELOG.md
+scripts
+Makefile

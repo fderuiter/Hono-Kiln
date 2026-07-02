@@ -30,9 +30,5 @@ if (import.meta.main) {
     process.exit(1)
   }
 
-  console.log(`API server running on http://localhost:${port}`)
-  Bun.serve({
-    fetch: app.fetch,
-    port,
-  })
+  console.log(`API preflight checks passed.`)
 }
