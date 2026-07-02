@@ -1,3 +1,15 @@
+# [1.15.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.14.0...v1.15.0) (2026-07-02)
+
+
+## Bug Fixes
+
+* resolve duplicate export and unused imports for CI ([f02c3cc](https://github.com/fderuiter/Hono-Kiln/commit/f02c3ccacdb15f9c71019aede38d045f7ba302e5))
+
+
+## Features
+
+* implement multi-tenancy foundation and scaffolding support ([7b3b6db](https://github.com/fderuiter/Hono-Kiln/commit/7b3b6db83db8610452b13e2874be126b954fc798))
+
 # [1.14.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.13.0...v1.14.0) (2026-07-02)
 
 
