@@ -6,6 +6,7 @@ import { authMiddleware } from './auth/middleware'
 import { globalGuard } from './auth/guard'
 import { initMiddleware } from './middleware/init'
 import { localeMiddleware } from './middleware/locale'
+import { corsMiddleware, rateLimitMiddleware, securityHeadersMiddleware } from './middleware/security'
 import { authRoutes } from './modules/auth/routes'
 import { healthRoutes } from './modules/health/routes'
 import { rootRoutes } from './modules/root/routes'
@@ -17,6 +18,8 @@ import { generateSwaggerUIHtml } from './utils/swagger-ui'
 const app = new OpenAPIHono<AppEnv>()
 
 app.use('*', localeMiddleware)
+app.use('*', securityHeadersMiddleware)
+app.use('*', corsMiddleware)
 
 const infraApp = new OpenAPIHono<AppEnv>()
 const coreApp = new OpenAPIHono<AppEnv>()
@@ -40,6 +43,7 @@ infraApp.get('/docs', async (c) => {
   return c.html(html)
 })
 
+coreApp.use('*', rateLimitMiddleware)
 coreApp.use('*', initMiddleware)
 coreApp.use('*', authMiddleware)
 coreApp.use('*', globalGuard)

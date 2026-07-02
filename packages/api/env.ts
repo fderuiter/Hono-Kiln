@@ -9,6 +9,9 @@ export type EnvBindings = {
   DATABASE_URL?: string
   DATABASE_AUTH_TOKEN?: string
   NODE_ENV?: string
+  CORS_ORIGIN?: string
+  RATE_LIMIT_MAX?: string
+  RATE_LIMIT_WINDOW_MS?: string
 }
 
 /**

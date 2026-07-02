@@ -202,18 +202,24 @@ function findHonoApp(repoRoot: string) {
       if (text === 'Hono' || text === 'OpenAPIHono') {
         const varDecl = newExpr.getFirstAncestorByKind(SyntaxKind.VariableDeclaration)
         if (varDecl) {
+          const varName = varDecl.getName()
           const stmt = varDecl.getFirstAncestorByKind(SyntaxKind.VariableStatement) || varDecl.getFirstAncestorByKind(SyntaxKind.ExpressionStatement)
-          mainApp = {
-            filePath: sourceFile.getFilePath(),
-            varName: varDecl.getName(),
-            sourceFile,
-            instanceEndLine: stmt ? stmt.getEndLineNumber() : varDecl.getEndLineNumber()
+          
+          if (!mainApp || varName === 'coreApp') {
+            mainApp = {
+              filePath: sourceFile.getFilePath(),
+              varName,
+              sourceFile,
+              instanceEndLine: stmt ? stmt.getEndLineNumber() : varDecl.getEndLineNumber()
+            }
           }
-          break
+          if (varName === 'coreApp') {
+            break
+          }
         }
       }
     }
-    if (mainApp) break
+    if (mainApp?.varName === 'coreApp') break
   }
 
   if (!mainApp) {
