@@ -1,4 +1,4 @@
-import { describe, expect, it, spyOn, beforeEach, afterEach, mock } from 'bun:test'
+import { describe, expect, it, spyOn, beforeEach, afterEach } from 'bun:test'
 import { runPreflightChecks } from './preflight'
 import * as dbCheck from './db/check'
 import * as cp from 'node:child_process'

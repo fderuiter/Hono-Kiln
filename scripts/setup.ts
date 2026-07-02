@@ -269,7 +269,7 @@ async function main() {
         execSync('git push -u origin main', { cwd: rootDir, stdio: 'ignore' });
       }
       s.stop('Pushed code to GitHub repository.');
-    } catch (e) {
+    } catch {
       s.stop('Skipped automatic GitHub push.');
       note('Ensure your repository is pushed to GitHub before secrets can be synced.', 'Notice');
     }
@@ -332,7 +332,7 @@ async function main() {
       try {
         execSync('gh workflow run deploy-production.yml --ref main', { stdio: 'ignore' });
         s.stop('Triggered production deployment workflow.');
-      } catch (e) {
+      } catch {
         s.stop('Failed to trigger deployment.');
         note('Workflow could not be triggered. Ensure deploy-production.yml exists on the remote main branch.', 'Warning');
       }

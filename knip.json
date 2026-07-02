@@ -1,5 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignoreBinaries": ["turso", "gh"],
   "workspaces": {
     ".": {
       "project": ["scripts/**/*.ts"],
