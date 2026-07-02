@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { text, confirm, intro, outro, isCancel, cancel, spinner, note } from '@clack/prompts';
+import { text, confirm, intro, outro, isCancel, cancel, spinner, note, select } from '@clack/prompts';
 
 async function fileExists(filePath: string) {
   try {
@@ -30,12 +30,31 @@ async function getFiles(dir: string, fileList: string[] = []) {
 async function main() {
   intro('🔥 Zero-Config Interactive Bootstrapper 🔥');
 
-  // Verify dependencies
-  try {
-    execSync('docker -v', { stdio: 'ignore' });
-  } catch {
-    cancel('Error: Docker is not installed or not in PATH.');
+  const envChoice = await select({
+    message: 'Choose Environment',
+    options: [
+      { value: 'lite', label: 'Lite (Local) - SQLite file, no Docker needed' },
+      { value: 'full', label: 'Full (Docker) - Production-parity environment' },
+    ],
+  });
+  if (isCancel(envChoice)) {
+    cancel('Operation cancelled');
     process.exit(1);
+  }
+  const isLite = envChoice === 'lite';
+
+  if (isLite) {
+    note('Warning: Certain features like external integrations may be limited in Lite mode.', 'Environment Notice');
+  }
+
+  // Verify dependencies
+  if (!isLite) {
+    try {
+      execSync('docker -v', { stdio: 'ignore' });
+    } catch {
+      cancel('Error: Docker is not installed or not in PATH.');
+      process.exit(1);
+    }
   }
   try {
     execSync('bun -v', { stdio: 'ignore' });
@@ -199,22 +218,42 @@ async function main() {
     s.stop('Purged git history.');
   }
 
+  // Write .env if necessary
+  const envPath = path.join(rootDir, 'packages/api/.env');
+  if (isLite) {
+    const envContent = `DATABASE_URL=file:local.db\nDATABASE_AUTH_TOKEN=\nNODE_ENV=development\n`;
+    await fs.writeFile(envPath, envContent, 'utf8');
+  }
+
   // Start DB and Migrations
   if (startServices) {
-    s.start('Starting Docker services and running migrations...');
-    try {
-      execSync('docker compose up -d', { cwd: rootDir, stdio: 'inherit' });
-      
-      // Wait a bit for db to be ready
-      execSync('sleep 2');
+    if (isLite) {
+      s.start('Running migrations for local SQLite...');
+      try {
+        execSync(`bun run --filter @${packageScope}/api db:squash`, { cwd: rootDir, stdio: 'inherit' });
+        execSync(`bun run --filter @${packageScope}/api db:push`, { cwd: rootDir, stdio: 'inherit' });
+        execSync(`bun run --filter @${packageScope}/api db:seed`, { cwd: rootDir, stdio: 'inherit' });
+        s.stop('Ran migrations successfully.');
+      } catch (e) {
+        s.stop('Failed to run migrations.');
+        cancel('Could not run DB migrations. This might be due to environment limitations.\n' + (e instanceof Error ? e.message : ''));
+      }
+    } else {
+      s.start('Starting Docker services and running migrations...');
+      try {
+        execSync('docker compose up -d', { cwd: rootDir, stdio: 'inherit' });
+        
+        // Wait a bit for db to be ready
+        execSync('sleep 2');
 
-      execSync(`bun run --filter @${packageScope}/api db:squash`, { cwd: rootDir, stdio: 'inherit' });
-      execSync(`bun run --filter @${packageScope}/api db:push`, { cwd: rootDir, stdio: 'inherit' });
-      execSync(`bun run --filter @${packageScope}/api db:seed`, { cwd: rootDir, stdio: 'inherit' });
-      s.stop('Started Docker services and ran migrations.');
-    } catch (e) {
-      s.stop('Failed to start Docker services or run migrations.');
-      cancel('Could not run DB migrations or start Docker services. This might be due to environment limitations.\n' + (e instanceof Error ? e.message : ''));
+        execSync(`bun run --filter @${packageScope}/api db:squash`, { cwd: rootDir, stdio: 'inherit' });
+        execSync(`bun run --filter @${packageScope}/api db:push`, { cwd: rootDir, stdio: 'inherit' });
+        execSync(`bun run --filter @${packageScope}/api db:seed`, { cwd: rootDir, stdio: 'inherit' });
+        s.stop('Started Docker services and ran migrations.');
+      } catch (e) {
+        s.stop('Failed to start Docker services or run migrations.');
+        cancel('Could not run DB migrations or start Docker services. This might be due to environment limitations.\n' + (e instanceof Error ? e.message : ''));
+      }
     }
   }
 
