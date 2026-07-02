@@ -1,6 +1,6 @@
 import { readdir, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { getTableName, is } from 'drizzle-orm'
+import { getTableName } from 'drizzle-orm'
 
 export async function syncSchema(apiDir: string) {
   const modulesDir = join(apiDir, 'modules')

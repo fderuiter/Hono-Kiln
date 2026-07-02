@@ -13,7 +13,7 @@ async function squash() {
   try {
     const raw = await fs.readFile(journalPath, 'utf-8');
     journal = JSON.parse(raw);
-  } catch (err) {
+  } catch {
     console.log('No journal found. Exiting.');
     return;
   }
@@ -35,7 +35,7 @@ async function squash() {
   try {
     const raw = await fs.readFile(lastSnapshotFile, 'utf-8');
     lastSnapshot = JSON.parse(raw);
-  } catch (err) {
+  } catch {
     console.error(`Failed to read last snapshot: ${lastSnapshotFile}`);
     process.exit(1);
   }
@@ -52,7 +52,7 @@ async function squash() {
       if (content.trim()) {
         sqlContents.push(content.trim());
       }
-    } catch (err) {
+    } catch {
       console.warn(`Missing SQL file: ${file}`);
     }
   }
