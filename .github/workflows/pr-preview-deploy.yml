@@ -143,16 +143,18 @@ jobs:
         run: |
           echo '{"defaults":{"standard":"WCAG2AA","runners":["axe","htmlcs"]}}' > .pa11yci
           
-          npx serve -p 8080 docs &
+          npx --yes serve -p 8080 docs &
           SERVE_PID=$!
-          sleep 3
+          
+          # Wait for the server to be ready
+          timeout 30 bash -c 'until curl -s http://localhost:8080 > /dev/null; do sleep 1; done'
           
           URLS="http://localhost:8080"
           if [ -n "${{ needs.deploy-preview.outputs.preview_url }}" ]; then
             URLS="$URLS ${{ needs.deploy-preview.outputs.preview_url }}/docs"
           fi
           
-          npx pa11y-ci $URLS > a11y-report.txt || echo "A11Y_FAILED=true" >> "$GITHUB_ENV"
+          npx --yes pa11y-ci $URLS > a11y-report.txt 2>&1 || echo "A11Y_FAILED=true" >> "$GITHUB_ENV"
           
           kill $SERVE_PID
           cat a11y-report.txt
