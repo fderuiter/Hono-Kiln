@@ -7,9 +7,6 @@
       "bun": {
         "entry": ["scripts/**/*.test.ts"]
       }
-    },
-    "packages/*": {
-      "project": ["**/*.ts"]
     }
   }
 }

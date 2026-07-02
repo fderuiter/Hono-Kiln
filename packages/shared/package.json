@@ -2,7 +2,9 @@
   "name": "@hono-kiln/shared",
   "private": true,
   "type": "module",
-  "main": "index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
   "dependencies": {
     "zod": "^4.4.3"
   },
