@@ -1,5 +1,4 @@
 import app from './app'
-import { runPreflightChecks } from './preflight'
 
 /**
  * The main application router exported for programmatic use or testing.
@@ -26,12 +25,14 @@ if (import.meta.main) {
     console.warn(`Warning: Missing required environment variables: ${missingVars.join(', ')}. Core features will fail.`)
   }
 
-  try {
-    await runPreflightChecks()
-  } catch (err) {
-    console.error('Preflight checks failed:', err)
-    process.exit(1)
+  if (Bun.env.NODE_ENV !== 'production') {
+    try {
+      const { runPreflightChecks } = await import('./preflight')
+      await runPreflightChecks()
+      console.log(`API preflight checks passed.`)
+    } catch (err) {
+      console.error('Preflight checks failed:', err)
+      process.exit(1)
+    }
   }
-
-  console.log(`API preflight checks passed.`)
 }
