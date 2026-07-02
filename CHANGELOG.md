@@ -1,3 +1,17 @@
+# [1.13.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.12.0...v1.13.0) (2026-07-02)
+
+
+## Bug Fixes
+
+* ci validations (knip ignored binaries and oxlint warnings) ([f6612ef](https://github.com/fderuiter/Hono-Kiln/commit/f6612efba839c235483667fd14328e428f97be1b))
+
+
+## Features
+
+* automated distributed infrastructure & observability ([b04a418](https://github.com/fderuiter/Hono-Kiln/commit/b04a4185b923a387e6019d976466a6b6b25cae08))
+* implement zero-touch cloud onboarding ([2eb91dd](https://github.com/fderuiter/Hono-Kiln/commit/2eb91ddad16034303786baf296f93637ba0357d5))
+* secure-by-default scaffolding ([7f21e43](https://github.com/fderuiter/Hono-Kiln/commit/7f21e4350cbeda7b3b56a9857291fffba058df9e))
+
 # [1.12.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.11.0...v1.12.0) (2026-07-02)
 
 
