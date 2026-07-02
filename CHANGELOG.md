@@ -1,3 +1,16 @@
+# [1.17.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.16.0...v1.17.0) (2026-07-02)
+
+
+## Bug Fixes
+
+* **ci:** fix a11y scan server race condition and capture errors ([2127c8e](https://github.com/fderuiter/Hono-Kiln/commit/2127c8ec47e144c6d266ee9c7985974014526a09))
+* **ci:** sanitize dynamic paths in CLI output snapshots ([40b7210](https://github.com/fderuiter/Hono-Kiln/commit/40b7210c695f6d556fbc3232e6805df0e628dc5a))
+
+
+## Features
+
+* **api:** add validated repository factory ([cace74c](https://github.com/fderuiter/Hono-Kiln/commit/cace74cde047f5815ba42d1154fb2872fc6ef641))
+
 # [1.16.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.15.0...v1.16.0) (2026-07-02)
 
 
