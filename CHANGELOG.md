@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.13.0...v1.14.0) (2026-07-02)
+
+
+## Features
+
+* implement robust sequential setup with active health polling ([54aebcd](https://github.com/fderuiter/Hono-Kiln/commit/54aebcdfa976a4c327ac0dc8b9d1331f03242cb9))
+
 # [1.13.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.12.0...v1.13.0) (2026-07-02)
 
 
