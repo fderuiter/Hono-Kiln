@@ -5,6 +5,11 @@ export function publicAccess<T>(handler: T): T {
   return handler
 }
 
+/**
+ * Decorator to require a specific permission for a route handler.
+ * @param permission - The required permission string.
+ * @returns A higher-order function that wraps the route handler.
+ */
 export function requirePermission<T>(permission: string): (handler: T) => T {
   return (handler: T) => {
     (handler as any).requiredPermission = permission
