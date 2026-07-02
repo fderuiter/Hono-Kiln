@@ -22,6 +22,20 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Validate Cloudflare Secrets
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CF_API_TOKEN" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN is missing. Please run \`bun run scripts/setup.ts\` locally and choose the 'cloud' environment to sync your credentials, or add it manually to GitHub Secrets."
+            exit 1
+          fi
+          if [ -z "$CF_ACCOUNT_ID" ]; then
+            echo "::error::CLOUDFLARE_ACCOUNT_ID is missing. Please run \`bun run scripts/setup.ts\` locally and choose the 'cloud' environment to sync your credentials, or add it manually to GitHub Secrets."
+            exit 1
+          fi
+
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@v3
         with:

@@ -46,6 +46,9 @@ async function main() {
   const isLite = envChoice === 'lite';
   const isCloud = envChoice === 'cloud';
 
+  let cloudflareAccountId = '';
+  let cloudflareApiToken = '';
+
   if (isLite) {
     note('Warning: Certain features like external integrations may be limited in Lite mode.', 'Environment Notice');
   }
@@ -79,6 +82,12 @@ async function main() {
       cancel('Error: GitHub CLI (gh) is not installed. Please install it.');
       process.exit(1);
     }
+    try {
+      execSync('bun x wrangler --version', { stdio: 'ignore' });
+    } catch {
+      cancel('Error: Cloudflare Wrangler CLI is not available. Please ensure bun is properly installed.');
+      process.exit(1);
+    }
     
     const sAuth = spinner();
     sAuth.start('Checking Turso authorization...');
@@ -103,6 +112,50 @@ async function main() {
       note('You will be prompted to log in to GitHub.', 'Authorization');
       execSync('gh auth login -p https -w', { stdio: 'inherit' });
     }
+
+    sAuth.start('Checking Cloudflare authorization...');
+    let whoamiOutput = '';
+    try {
+      whoamiOutput = execSync('bun x wrangler whoami', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
+    } catch (e) {
+      // ignore
+    }
+    
+    if (whoamiOutput.includes('You are not authenticated') || whoamiOutput.includes('Please run `wrangler login`') || !whoamiOutput.trim()) {
+      sAuth.stop('Cloudflare authorization required.');
+      note('You will be redirected to your browser to log in to Cloudflare.', 'Authorization');
+      execSync('bun x wrangler login', { stdio: 'inherit' });
+      try {
+        whoamiOutput = execSync('bun x wrangler whoami', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
+      } catch (e) {
+        // ignore
+      }
+    } else {
+      sAuth.stop('Cloudflare is authorized.');
+    }
+
+    const accountMatches = [...whoamiOutput.matchAll(/[a-fA-F0-9]{32}/g)].map(m => m[0]);
+    if (accountMatches.length > 0) {
+      cloudflareAccountId = accountMatches[0];
+    } else {
+      const pId = await text({
+        message: 'Could not automatically determine Cloudflare Account ID. Please enter it manually:',
+      });
+      if (isCancel(pId)) {
+        cancel('Operation cancelled');
+        process.exit(1);
+      }
+      cloudflareAccountId = (pId as string).trim();
+    }
+
+    const pToken = await text({
+      message: 'Enter your Cloudflare API Token for CI/CD deployments (requires Edit Workers permissions):',
+    });
+    if (isCancel(pToken)) {
+      cancel('Operation cancelled');
+      process.exit(1);
+    }
+    cloudflareApiToken = (pToken as string).trim();
   }
 
   let hasGit = true;
@@ -336,6 +389,12 @@ async function main() {
     try {
       execSync(`gh secret set DATABASE_URL --body "${dbUrlOutput}"`, { stdio: 'ignore' });
       execSync(`gh secret set DATABASE_AUTH_TOKEN --body "${dbTokenOutput}"`, { stdio: 'ignore' });
+      if (cloudflareAccountId) {
+        execSync(`gh secret set CLOUDFLARE_ACCOUNT_ID --body "${cloudflareAccountId}"`, { stdio: 'ignore' });
+      }
+      if (cloudflareApiToken) {
+        execSync(`gh secret set CLOUDFLARE_API_TOKEN --body "${cloudflareApiToken}"`, { stdio: 'ignore' });
+      }
       s.stop('Synced secrets to GitHub Repository Secrets.');
     } catch (e) {
       s.stop('Failed to sync GitHub secrets.');
