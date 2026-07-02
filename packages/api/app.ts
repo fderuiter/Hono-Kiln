@@ -52,23 +52,6 @@ const coreApp = new OpenAPIHono<AppEnv>()
 infraApp.route('/health', healthRoutes)
 infraApp.all('/api/inngest', serve({ client: inngest, functions }))
 
-infraApp.doc('/openapi.json', {
-  openapi: '3.0.0',
-  info: {
-    title: 'Hono Kiln API',
-    version: '1.0.0',
-    description: 'Auto-generated OpenAPI specification for the Hono Kiln API.',
-  },
-})
-
-infraApp.get('/docs', async (c) => {
-  const html = SwaggerUI({
-    url: '/openapi.json',
-    manuallySwaggerUIHtml: (asset) => generateSwaggerUIHtml(asset, c.var.locale)
-  })
-  return c.html(html)
-})
-
 coreApp.use('*', rateLimitMiddleware)
 coreApp.use('*', initMiddleware)
 coreApp.use('*', authMiddleware)
@@ -79,6 +62,24 @@ coreApp.route('/organizations', organizationsRoutes)
 coreApp.route('/documents', documentsRoutes)
 
 app.route('/', infraApp)
+
+app.doc('/openapi.json', {
+  openapi: '3.0.0',
+  info: {
+    title: 'Hono Kiln API',
+    version: '1.0.0',
+    description: 'Auto-generated OpenAPI specification for the Hono Kiln API.',
+  },
+})
+
+app.get('/docs', async (c) => {
+  const html = SwaggerUI({
+    url: '/openapi.json',
+    manuallySwaggerUIHtml: (asset) => generateSwaggerUIHtml(asset, c.var.locale)
+  })
+  return c.html(html)
+})
+
 app.route('/', coreApp)
 
 export default app
