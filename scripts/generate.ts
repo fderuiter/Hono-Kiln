@@ -51,7 +51,7 @@ type ModuleMetadata = {
   mainSchemaDescription: string
 }
 
-function getTemplateFiles(moduleName: string, meta: ModuleMetadata) {
+function getTemplateFiles(moduleName: string, meta: ModuleMetadata, isWorker: boolean = false) {
   const camelName = toCamelCase(moduleName)
   const pascalName = toPascalCase(moduleName)
   const routeName = `${camelName}Routes`
@@ -59,10 +59,8 @@ function getTemplateFiles(moduleName: string, meta: ModuleMetadata) {
   const repositoryFnName = `create${pascalName}Repository`
   const serviceFnName = `create${pascalName}Service`
 
-  return {
-    routeName,
-    files: {
-      'schema.ts': `import { z } from '@hono/zod-openapi'
+  const files: Record<string, string> = {
+    'schema.ts': `import { z } from '@hono/zod-openapi'
 
 export const entityName = '${moduleName}' as const
 
@@ -72,7 +70,7 @@ export const ${schemaName} = z.object({
 
 export type ${pascalName} = z.infer<typeof ${schemaName}>
 `,
-      'repository.ts': `import type { Database } from '../../db'
+    'repository.ts': `import type { Database } from '../../db'
 import { ${schemaName}, type ${pascalName} } from './schema'
 import { entityName } from './schema'
 
@@ -85,7 +83,7 @@ export function ${repositoryFnName}(_db: Database) {
   }
 }
 `,
-      'service.ts': `import type { Database } from '../../db'
+    'service.ts': `import type { Database } from '../../db'
 import { ${repositoryFnName} } from './repository'
 import type { ${pascalName} } from './schema'
 
@@ -99,12 +97,12 @@ export function ${serviceFnName}(db: Database) {
   }
 }
 `,
-      'routes.ts': `import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
+    'routes.ts': `import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { HttpStatusCodes, InternalServerErrorSchema, UnauthorizedSchema, UnprocessableEntitySchema } from '@hono-kiln/shared'
 
 import { ${serviceFnName} } from './service'
 import { ${schemaName} } from './schema'
-
+${isWorker ? "import { inngest } from '../../inngest/client'\n" : ""}
 export const ${routeName} = new OpenAPIHono()
 
 const listRoute = createRoute({
@@ -162,8 +160,28 @@ ${routeName}.openapi(listRoute, (c) => {
     HttpStatusCodes.OK,
   )
 })
-`,
-      'routes.test.ts': `import { describe, expect, it } from 'bun:test'
+${isWorker ? `
+const triggerRoute = createRoute({
+  method: 'post',
+  path: '/trigger',
+  tags: ['${pascalName}'],
+  summary: 'Trigger background worker',
+  responses: {
+    [HttpStatusCodes.OK]: {
+      description: 'Worker triggered',
+      content: {
+        'application/json': { schema: z.object({ message: z.string() }) },
+      },
+    },
+  }
+})
+
+${routeName}.openapi(triggerRoute, async (c) => {
+  await inngest.send({ name: '${moduleName}/process', data: {} })
+  return c.json({ message: 'Worker triggered successfully' }, HttpStatusCodes.OK)
+})
+` : ''}`,
+    'routes.test.ts': `import { describe, expect, it } from 'bun:test'
 import { HttpStatusCodes } from '@hono-kiln/shared'
 import { createTestApp } from '@hono-kiln/testing'
 
@@ -179,8 +197,25 @@ describe('${moduleName} routes', () => {
     })
   })
 })
-`,
-    },
+`
+  }
+
+  if (isWorker) {
+    files['worker.ts'] = `import { inngest } from '../../inngest/client'
+
+export const ${camelName}Worker = inngest.createFunction(
+  { id: '${moduleName}-worker', event: '${moduleName}/process' },
+  async ({ event, step }) => {
+    await step.sleep('wait-a-moment', '1s')
+    return { event, body: 'Task completed' }
+  }
+)
+`
+  }
+
+  return {
+    routeName,
+    files
   }
 }
 
@@ -229,7 +264,7 @@ function findHonoApp(repoRoot: string) {
   return mainApp
 }
 
-export async function mountModule(moduleName: string, routeName: string, repoRoot: string) {
+export async function mountModule(moduleName: string, routeName: string, repoRoot: string, isWorker: boolean = false) {
   const { filePath: mountPath, varName, sourceFile } = findHonoApp(repoRoot)
 
   const targetRoutesDir = path.join(repoRoot, 'packages', 'api', 'modules', moduleName)
@@ -301,7 +336,32 @@ export async function mountModule(moduleName: string, routeName: string, repoRoo
   }
 
   if (updatedContent !== appContent) {
-    await writeFile(mountPath, updatedContent)
+    if (isWorker) {
+    const functionsPath = path.join(repoRoot, 'packages', 'api', 'inngest', 'functions.ts')
+    let functionsContent = await readFile(functionsPath, 'utf8')
+    const workerExportName = `${toCamelCase(moduleName)}Worker`
+    const workerImportPath = `../modules/${moduleName}/worker`
+    
+    // Add import if not exists
+    if (!functionsContent.includes(workerImportPath)) {
+      functionsContent = `import { ${workerExportName} } from '${workerImportPath}'\n` + functionsContent
+    }
+    
+    // Add to functions array
+    functionsContent = functionsContent.replace(
+      /export const functions:\s*any\[\]\s*=\s*\[(.*?)\]/s,
+      (match, p1) => {
+        const funcs = p1.split(',').map(f => f.trim()).filter(Boolean)
+        if (!funcs.includes(workerExportName)) {
+          funcs.push(workerExportName)
+        }
+        return `export const functions: any[] = [${funcs.join(', ')}]`
+      }
+    )
+    
+    await writeFile(functionsPath, functionsContent)
+  }
+  await writeFile(mountPath, updatedContent)
   }
 }
 
@@ -336,7 +396,7 @@ export async function promptWithValidation(
   return (answer as string).trim() || smartDefault;
 }
 
-export async function generateModule(moduleInputName: string, repoRoot = process.cwd()): Promise<GenerateModuleResult> {
+export async function generateModule(moduleInputName: string, repoRoot = process.cwd(), isWorker: boolean = false): Promise<GenerateModuleResult> {
   const moduleName = normalizeModuleName(moduleInputName)
 
   if (!moduleName || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(moduleName)) {
@@ -388,7 +448,7 @@ export async function generateModule(moduleInputName: string, repoRoot = process
     outro('Metadata gathered.');
   }
 
-  const { files, routeName } = getTemplateFiles(moduleName, meta)
+  const { files, routeName } = getTemplateFiles(moduleName, meta, isWorker)
   await mkdir(modulePath, { recursive: true })
 
   await Promise.all(
@@ -397,7 +457,7 @@ export async function generateModule(moduleInputName: string, repoRoot = process
     ),
   )
 
-  await mountModule(moduleName, routeName, repoRoot)
+  await mountModule(moduleName, routeName, repoRoot, isWorker)
 
   const { spawnSync } = await import('node:child_process')
   const syncScript = path.resolve(import.meta.dirname, '../packages/api/scripts/sync-schema.ts')
@@ -553,6 +613,8 @@ export async function checkDocumentation(repoRoot: string): Promise<boolean> {
 }
 
 export async function run(argv: string[], repoRoot = process.cwd()) {
+  const isWorker = argv.includes('--worker')
+  argv = argv.filter(a => a !== '--worker')
   const [action, type, name] = argv
 
   if (action === 'audit') {
@@ -604,7 +666,7 @@ export async function run(argv: string[], repoRoot = process.cwd()) {
   }
 
   try {
-    const { modulePath } = await generateModule(name, repoRoot)
+    const { modulePath } = await generateModule(name, repoRoot, isWorker)
     outro(`Generated module at ${modulePath}`)
     return 0
   } catch (error) {
