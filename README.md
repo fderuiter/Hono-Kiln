@@ -170,6 +170,10 @@ Scaffold a complete new module in one command:
 bun kiln generate module <name>
 ```
 
+### Configuration
+
+- `AUDIBLE_BELL`: Set to `'false'` to silence the auditory alert (ASCII bell character) triggered when input matches generic placeholders during interactive module generation. Defaults to enabled.
+
 This creates `packages/api/modules/<name>/` with four files:
 
 | File | Purpose |
