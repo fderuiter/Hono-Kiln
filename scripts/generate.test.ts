@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it, spyOn } from 'bun:test'
 import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
@@ -26,6 +26,11 @@ app.route('/health', healthRoutes)
 
 export default app
 `,
+  )
+
+  await writeFile(
+    path.join(repoRoot, 'tsconfig.typedoc.json'),
+    `{ "compilerOptions": { "strict": true } }`
   )
 
   return repoRoot
@@ -241,3 +246,149 @@ describe('Prompt Validation', () => {
   })
 })
 
+
+import * as prompts from '@clack/prompts'
+import * as childProcess from 'node:child_process'
+
+describe('CLI Output Snapshots', () => {
+  function cleanAnsi(str: string) {
+    return str.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '')
+  }
+
+  async function captureCliOutput(args: string[], cwd: string, mockedInputs: Record<string, string> = {}) {
+    let output = ''
+    const origWrite = process.stdout.write
+    const origLog = console.log
+    const origError = console.error
+
+    const capture = (chunk: string | Uint8Array) => {
+      output += chunk.toString()
+      return true
+    }
+    process.stdout.write = capture as any
+    console.log = (...a) => { output += a.join(' ') + '\n' }
+    console.error = (...a) => { output += a.join(' ') + '\n' }
+
+    const origIsTTY = process.stdout.isTTY
+    const origStdinIsTTY = process.stdin.isTTY
+    const origCI = process.env.CI
+    const origEnvBell = process.env.AUDIBLE_BELL
+
+    // Default to simulating an interactive terminal
+    if (mockedInputs.CI === 'true') {
+      process.stdout.isTTY = false
+      process.stdin.isTTY = false
+      process.env.CI = 'true'
+    } else {
+      process.stdout.isTTY = true
+      process.stdin.isTTY = true
+      process.env.CI = 'false'
+    }
+    
+    process.env.AUDIBLE_BELL = 'true'
+
+    const introSpy = spyOn(prompts, 'intro').mockImplementation((msg) => {
+      process.stdout.write(`[intro] ${msg}\n`)
+    })
+    const outroSpy = spyOn(prompts, 'outro').mockImplementation((msg) => {
+      process.stdout.write(`[outro] ${msg}\n`)
+    })
+    const textSpy = spyOn(prompts, 'text').mockImplementation(async (opts: any) => {
+      process.stdout.write(`[text] ${opts.message}\n`)
+      
+      const key = Object.keys(mockedInputs).find(k => opts.message.includes(k))
+      let input = key ? mockedInputs[key] : (opts.defaultValue ?? '')
+      
+      if (opts.validate) {
+        const err = opts.validate(input)
+        if (err) {
+          process.stdout.write(`[error] ${err}\n`)
+          input = opts.defaultValue ?? ''
+        }
+      }
+      return input
+    })
+    const confirmSpy = spyOn(prompts, 'confirm').mockImplementation(async (opts: any) => {
+      process.stdout.write(`[confirm] ${opts.message}\n`)
+      const key = Object.keys(mockedInputs).find(k => opts.message.includes(k))
+      return key ? (mockedInputs[key] === 'true') : (opts.initialValue ?? true)
+    })
+    const cancelSpy = spyOn(prompts, 'cancel').mockImplementation((msg) => {
+      process.stdout.write(`[cancel] ${msg}\n`)
+    })
+    const isCancelSpy = spyOn(prompts, 'isCancel').mockImplementation(() => false)
+
+    const spawnSyncSpy = spyOn(childProcess, 'spawnSync').mockImplementation((cmd, args) => {
+      const normalizedArgs = (args as string[]).map(a => a.replace(cwd, '<REPO_ROOT>').replace(process.cwd(), '<APP_ROOT>'))
+      console.log(`[spawn] ${cmd} ${normalizedArgs.join(' ')}`)
+      return { status: 0 } as any
+    })
+
+    try {
+      await run(args, cwd)
+    } catch (err: any) {
+      output += `\n[exception] ${err.message}\n`
+    } finally {
+      process.stdout.write = origWrite
+      console.log = origLog
+      console.error = origError
+      process.stdout.isTTY = origIsTTY
+      process.stdin.isTTY = origStdinIsTTY
+      if (origCI === undefined) delete process.env.CI; else process.env.CI = origCI;
+      if (origEnvBell === undefined) delete process.env.AUDIBLE_BELL; else process.env.AUDIBLE_BELL = origEnvBell;
+      
+      introSpy.mockRestore()
+      outroSpy.mockRestore()
+      textSpy.mockRestore()
+      confirmSpy.mockRestore()
+      cancelSpy.mockRestore()
+      isCancelSpy.mockRestore()
+      spawnSyncSpy.mockRestore()
+    }
+
+    return cleanAnsi(output)
+  }
+
+  it('snapshots output for generate command with interactive prompts', async () => {
+    const repoRoot = await createRepoFixture()
+    const output = await captureCliOutput(['generate', 'module', 'posts'], repoRoot)
+    expect(output).toMatchSnapshot()
+    expect(output).toContain('[text] Module Description')
+    expect(output).toContain('[text] Primary Route Summary')
+    expect(output).toContain('[text] Main Schema Description')
+  })
+
+  it('snapshots output for remove command', async () => {
+    const repoRoot = await createRepoFixture()
+    await run(['generate', 'module', 'posts'], repoRoot)
+    const output = await captureCliOutput(['remove', 'module', 'posts'], repoRoot)
+    expect(output).toMatchSnapshot()
+    expect(output).toContain('[outro] Removed module posts')
+  })
+
+  it('snapshots output for audit command', async () => {
+    const repoRoot = await createRepoFixture()
+    const output = await captureCliOutput(['audit'], repoRoot)
+    expect(output).toMatchSnapshot()
+    expect(output).toContain('[spawn] bun run <APP_ROOT>/packages/api/scripts/sync-schema.ts <REPO_ROOT>/packages/api')
+  })
+
+  it('fails validation when input matches generic placeholder and produces auditory bell', async () => {
+    const repoRoot = await createRepoFixture()
+    // Providing 'The posts module' which matches the generic placeholder exactly
+    const output = await captureCliOutput(['generate', 'module', 'posts'], repoRoot, {
+      'Module Description': 'The posts module'
+    })
+    expect(output).toContain('\x07')
+    expect(output).toContain('[error]')
+    expect(output).toMatchSnapshot()
+  })
+
+  it('bypasses interactive prompts in CI environment', async () => {
+    const repoRoot = await createRepoFixture()
+    const output = await captureCliOutput(['generate', 'module', 'posts'], repoRoot, { CI: 'true' })
+    expect(output).not.toContain('[text]')
+    expect(output).not.toContain('[intro]')
+    expect(output).toMatchSnapshot()
+  })
+})

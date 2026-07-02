@@ -1,0 +1,42 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CLI Output Snapshots snapshots output for generate command with interactive prompts 1`] = `
+"[intro] Gathering metadata for the new "posts" module...
+[text] Module Description [API endpoints for managing postss.]
+[text] Primary Route Summary [Retrieve a list of postss.]
+[text] Main Schema Description [Represents a single posts record.]
+[confirm] Should this module be multi-tenant (scoped to organizations)?
+[outro] Metadata gathered.
+[outro] Generated module at /tmp/kiln-generate-WtXwrk/packages/api/modules/posts
+"
+`;
+
+exports[`CLI Output Snapshots snapshots output for remove command 1`] = `
+"[outro] Removed module posts
+"
+`;
+
+exports[`CLI Output Snapshots snapshots output for audit command 1`] = `
+"[spawn] bun run <APP_ROOT>/packages/api/scripts/sync-schema.ts <REPO_ROOT>/packages/api
+[spawn] bun run knip
+Missing JSDoc documentation for export 'default' in packages/api/app.ts
+Audit failed: Missing documentation.
+"
+`;
+
+exports[`CLI Output Snapshots fails validation when input matches generic placeholder and produces auditory bell 1`] = `
+"[intro] Gathering metadata for the new "posts" module...
+[text] Module Description [API endpoints for managing postss.]
+[error] \x07Input cannot be identical to the generic placeholder ("The posts module"). Please provide a meaningful description.
+[text] Primary Route Summary [Retrieve a list of postss.]
+[text] Main Schema Description [Represents a single posts record.]
+[confirm] Should this module be multi-tenant (scoped to organizations)?
+[outro] Metadata gathered.
+[outro] Generated module at /tmp/kiln-generate-5WBMaP/packages/api/modules/posts
+"
+`;
+
+exports[`CLI Output Snapshots bypasses interactive prompts in CI environment 1`] = `
+"[outro] Generated module at /tmp/kiln-generate-ZVYzhL/packages/api/modules/posts
+"
+`;
