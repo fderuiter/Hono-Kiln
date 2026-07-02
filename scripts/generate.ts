@@ -12,6 +12,9 @@ const usage = `Usage:
   bun kiln generate module <name> [--worker] [--tenant]
   bun kiln remove module <name>
   bun kiln audit
+
+Environment Variables:
+  AUDIBLE_BELL   Set to 'false' to silence the auditory alert when matching generic placeholders during generation.
 `
 
 function toIdentifierSegment(input: string) {
