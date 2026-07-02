@@ -4,14 +4,24 @@ import { Lucia, TimeSpan } from 'lucia'
 import type { Database } from '../db'
 import { sessions, users } from '../db/schema'
 
+/**
+ * Represents an authentication provider in the system.
+ */
 export type AuthProvider = {
   id: string
   name: string
   handleCallback?: (request: Request) => Promise<any>
 }
 
+/**
+ * A registry of all registered authentication providers.
+ */
 export const authProviders = new Map<string, AuthProvider>()
 
+/**
+ * Registers a new authentication provider.
+ * @param provider - The authentication provider to register.
+ */
 export function registerAuthProvider(provider: AuthProvider) {
   authProviders.set(provider.id, provider)
 }

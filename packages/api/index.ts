@@ -7,6 +7,9 @@ import { runPreflightChecks } from './preflight'
 const exportedApp = app
 
 export type { AppEnv, EnvBindings } from './env'
+export { requirePermission } from './auth/guard'
+export { registerAuthProvider, authProviders, type AuthProvider } from './auth/index'
+
 export default exportedApp
 
 if (import.meta.main) {
