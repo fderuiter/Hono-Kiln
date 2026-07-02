@@ -112,6 +112,32 @@ async function main() {
     note('Git is not installed or not in PATH. Git operations will be skipped.', 'Warning');
   }
 
+  const rootDir = process.cwd();
+
+  const startServices = await confirm({
+    message: 'Start database and run migrations?',
+    initialValue: true,
+  });
+  if (isCancel(startServices)) {
+    cancel('Operation cancelled');
+    process.exit(1);
+  }
+
+  if (startServices && !isLite && !isCloud) {
+    const sDocker = spinner();
+    sDocker.start('Starting Docker services...');
+    try {
+      execSync('docker compose up -d', { cwd: rootDir, stdio: 'inherit' });
+      // Wait a bit for db to be ready
+      execSync('sleep 2');
+      sDocker.stop('Started Docker services.');
+    } catch (e) {
+      sDocker.stop('Failed to start Docker services.');
+      cancel('Could not start Docker services. This might be due to environment limitations.\n' + (e instanceof Error ? e.message : ''));
+      process.exit(1);
+    }
+  }
+
   // Interactive Prompts
   const pName = await text({
     message: 'Project Name',
@@ -161,17 +187,6 @@ async function main() {
     }
     purgeGit = pg as boolean;
   }
-
-  const startServices = await confirm({
-    message: 'Start database and run migrations?',
-    initialValue: true,
-  });
-  if (isCancel(startServices)) {
-    cancel('Operation cancelled');
-    process.exit(1);
-  }
-  
-  const rootDir = process.cwd();
 
   // Replace Project Name and Scope
   const s = spinner();
@@ -349,20 +364,15 @@ async function main() {
         cancel('Could not run DB migrations. This might be due to environment limitations.\n' + (e instanceof Error ? e.message : ''));
       }
     } else {
-      s.start('Starting Docker services and running migrations...');
+      s.start('Running migrations...');
       try {
-        execSync('docker compose up -d', { cwd: rootDir, stdio: 'inherit' });
-        
-        // Wait a bit for db to be ready
-        execSync('sleep 2');
-
         execSync(`bun run --filter @${packageScope}/api db:squash`, { cwd: rootDir, stdio: 'inherit' });
         execSync(`bun run --filter @${packageScope}/api db:push`, { cwd: rootDir, stdio: 'inherit' });
         execSync(`bun run --filter @${packageScope}/api db:seed`, { cwd: rootDir, stdio: 'inherit' });
-        s.stop('Started Docker services and ran migrations.');
+        s.stop('Ran migrations.');
       } catch (e) {
-        s.stop('Failed to start Docker services or run migrations.');
-        cancel('Could not run DB migrations or start Docker services. This might be due to environment limitations.\n' + (e instanceof Error ? e.message : ''));
+        s.stop('Failed to run migrations.');
+        cancel('Could not run DB migrations. This might be due to environment limitations.\n' + (e instanceof Error ? e.message : ''));
       }
     }
   }
