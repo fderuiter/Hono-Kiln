@@ -484,7 +484,7 @@ export async function promptWithValidation(
   smartDefault: string
 ): Promise<string> {
   const answer = await text({
-    message: `${questionText} [${smartDefault}]`,
+    message: questionText,
     defaultValue: smartDefault,
     placeholder: smartDefault,
     validate(value) {
@@ -553,7 +553,8 @@ export async function generateModule(moduleInputName: string, repoRoot = process
 
     if (!isTenant) {
       const tenantAnswer = await confirm({
-        message: 'Should this module be multi-tenant (scoped to organizations)?',
+        message: 'Should this module be multi-tenant?',
+        hint: 'scoped to organizations',
         initialValue: true
       });
       if (isCancel(tenantAnswer)) {
