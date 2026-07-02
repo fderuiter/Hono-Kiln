@@ -31,9 +31,6 @@ export const swaggerA11yStyles = `
     z-index: 10000;
     text-decoration: none;
   }
-  #swagger-ui[tabindex="-1"]:focus {
-    outline: none;
-  }
 `;
 
 /**
