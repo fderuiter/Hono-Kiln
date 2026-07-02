@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.11.0...v1.12.0) (2026-07-02)
+
+
+## Features
+
+* Add Interactive Onboarding Choice for Lite and Full environments ([86e5546](https://github.com/fderuiter/Hono-Kiln/commit/86e554621f819bae22b8d675dd7d8cc92c225dd0))
+
 # [1.11.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.10.0...v1.11.0) (2026-07-01)
 
 
