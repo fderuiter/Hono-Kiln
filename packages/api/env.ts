@@ -22,5 +22,7 @@ export interface AppEnv {
     auth: Auth
     user: User | null
     session: Session | null
+    requestId: string
+    logger: import('pino').Logger
   }
 }

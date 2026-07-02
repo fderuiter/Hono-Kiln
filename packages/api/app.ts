@@ -1,6 +1,11 @@
 import { SwaggerUI } from '@hono/swagger-ui'
 import { OpenAPIHono } from '@hono/zod-openapi'
+import { requestId } from 'hono/request-id'
+import { pino } from 'pino'
 import type { AppEnv } from './env'
+import { serve } from 'inngest/hono'
+import { inngest } from './inngest/client'
+import { functions } from './inngest/functions'
 
 import { authMiddleware } from './auth/middleware'
 import { globalGuard } from './auth/guard'
@@ -11,10 +16,28 @@ import { healthRoutes } from './modules/health/routes'
 import { rootRoutes } from './modules/root/routes'
 import { generateSwaggerUIHtml } from './utils/swagger-ui'
 
+const pinoLogger = pino()
+
 /**
  * The initialized Hono application containing all mounted API routes.
  */
 const app = new OpenAPIHono<AppEnv>()
+
+app.use('*', requestId())
+app.use('*', async (c, next) => {
+  const reqId = c.get('requestId')
+  const reqLogger = pinoLogger.child({ correlation_id: reqId })
+  c.set('logger', reqLogger)
+  reqLogger.info({ method: c.req.method, url: c.req.url }, 'Request started')
+  await next()
+  reqLogger.info({ status: c.res.status }, 'Request completed')
+})
+
+app.onError((err, c) => {
+  const reqLogger = c.get('logger') || pinoLogger
+  reqLogger.error({ err: err.message, stack: err.stack }, 'An unhandled error occurred')
+  return c.json({ error: 'Internal Server Error', message: err.message }, 500)
+})
 
 app.use('*', localeMiddleware)
 
@@ -22,6 +45,7 @@ const infraApp = new OpenAPIHono<AppEnv>()
 const coreApp = new OpenAPIHono<AppEnv>()
 
 infraApp.route('/health', healthRoutes)
+infraApp.all('/api/inngest', serve({ client: inngest, functions }))
 
 infraApp.doc('/openapi.json', {
   openapi: '3.0.0',
