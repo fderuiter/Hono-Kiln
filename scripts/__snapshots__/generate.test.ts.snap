@@ -2,12 +2,12 @@
 
 exports[`CLI Output Snapshots snapshots output for generate command with interactive prompts 1`] = `
 "[intro] Gathering metadata for the new "posts" module...
-[text] Module Description [API endpoints for managing postss.]
-[text] Primary Route Summary [Retrieve a list of postss.]
-[text] Main Schema Description [Represents a single posts record.]
-[confirm] Should this module be multi-tenant (scoped to organizations)?
+[text] Module Description
+[text] Primary Route Summary
+[text] Main Schema Description
+[confirm] Should this module be multi-tenant?
 [outro] Metadata gathered.
-[outro] Generated module at /tmp/kiln-generate-WtXwrk/packages/api/modules/posts
+[outro] Generated module at /tmp/kiln-generate-<ID>/packages/api/modules/posts
 "
 `;
 
@@ -26,17 +26,17 @@ Audit failed: Missing documentation.
 
 exports[`CLI Output Snapshots fails validation when input matches generic placeholder and produces auditory bell 1`] = `
 "[intro] Gathering metadata for the new "posts" module...
-[text] Module Description [API endpoints for managing postss.]
+[text] Module Description
 [error] \x07Input cannot be identical to the generic placeholder ("The posts module"). Please provide a meaningful description.
-[text] Primary Route Summary [Retrieve a list of postss.]
-[text] Main Schema Description [Represents a single posts record.]
-[confirm] Should this module be multi-tenant (scoped to organizations)?
+[text] Primary Route Summary
+[text] Main Schema Description
+[confirm] Should this module be multi-tenant?
 [outro] Metadata gathered.
-[outro] Generated module at /tmp/kiln-generate-5WBMaP/packages/api/modules/posts
+[outro] Generated module at /tmp/kiln-generate-<ID>/packages/api/modules/posts
 "
 `;
 
 exports[`CLI Output Snapshots bypasses interactive prompts in CI environment 1`] = `
-"[outro] Generated module at /tmp/kiln-generate-ZVYzhL/packages/api/modules/posts
+"[outro] Generated module at /tmp/kiln-generate-<ID>/packages/api/modules/posts
 "
 `;
