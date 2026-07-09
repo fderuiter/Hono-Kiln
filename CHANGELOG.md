@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.19.0...v1.20.0) (2026-07-09)
+
+
+## Features
+
+* Decouple route registry and introduce typed SDK package ([085acc1](https://github.com/fderuiter/Hono-Kiln/commit/085acc126804747b03a640385865f75e97c03738))
+
 # [1.19.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.18.0...v1.19.0) (2026-07-02)
 
 
