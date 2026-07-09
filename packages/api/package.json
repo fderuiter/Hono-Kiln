@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./index.ts"
+    ".": "./index.ts",
+    "./registry": "./registry.ts"
   },
   "scripts": {
     "sync-schema": "bun run scripts/sync-schema.ts",

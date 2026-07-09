@@ -19,8 +19,8 @@ exports[`CLI Output Snapshots snapshots output for remove command 1`] = `
 exports[`CLI Output Snapshots snapshots output for audit command 1`] = `
 "[spawn] bun run <APP_ROOT>/packages/api/scripts/sync-schema.ts <REPO_ROOT>/packages/api
 [spawn] bun run knip
-Missing JSDoc documentation for export 'default' in packages/api/app.ts
-Audit failed: Missing documentation.
+[spawn] bun run docs
+[outro] Audit passed successfully.
 "
 `;
 

@@ -35,6 +35,16 @@
         "drizzle-kit": "0.31.10",
       },
     },
+    "packages/sdk": {
+      "name": "@hono-kiln/sdk",
+      "version": "1.0.0",
+      "dependencies": {
+        "hono": "^4.10.1",
+      },
+      "devDependencies": {
+        "@hono-kiln/api": "workspace:*",
+      },
+    },
     "packages/shared": {
       "name": "@hono-kiln/shared",
       "dependencies": {
@@ -137,6 +147,8 @@
     "@grpc/proto-loader": ["@grpc/proto-loader@0.8.1", "", { "dependencies": { "lodash.camelcase": "^4.3.0", "long": "^5.0.0", "protobufjs": "^7.5.5", "yargs": "^17.7.2" }, "bin": { "proto-loader-gen-types": "build/bin/proto-loader-gen-types.js" } }, "sha512-wtF6h+DY6M3YaDBPAmvuuA6jV8Sif9MjtOI5euKFWRgCDl5PeDpPsHR9u2l6St5ceY8AZgoNDww5+HvEsXFsGg=="],
 
     "@hono-kiln/api": ["@hono-kiln/api@workspace:packages/api"],
+
+    "@hono-kiln/sdk": ["@hono-kiln/sdk@workspace:packages/sdk"],
 
     "@hono-kiln/shared": ["@hono-kiln/shared@workspace:packages/shared"],
 

@@ -347,53 +347,21 @@ export const ${camelName}Worker = inngest.createFunction(
   }
 }
 
-function findHonoApp(repoRoot: string) {
+function findRegistry(repoRoot: string) {
   const project = new Project()
-  project.addSourceFilesAtPaths(path.join(repoRoot, 'packages/api/**/*.ts'))
+  const filePath = path.join(repoRoot, 'packages/api/registry.ts')
+  project.addSourceFileAtPath(filePath)
+  const sourceFile = project.getSourceFile(filePath)
 
-  let mainApp: { filePath: string; varName: string; sourceFile: import('ts-morph').SourceFile; instanceEndLine: number } | null = null
-
-  for (const sourceFile of project.getSourceFiles()) {
-    const posixPath = sourceFile.getFilePath().replace(/\\/g, '/')
-    if (posixPath.includes('/packages/api/modules/')) {
-      continue
-    }
-
-    const newExprs = sourceFile.getDescendantsOfKind(SyntaxKind.NewExpression)
-    for (const newExpr of newExprs) {
-      const text = newExpr.getExpression().getText()
-      if (text === 'Hono' || text === 'OpenAPIHono') {
-        const varDecl = newExpr.getFirstAncestorByKind(SyntaxKind.VariableDeclaration)
-        if (varDecl) {
-          const varName = varDecl.getName()
-          const stmt = varDecl.getFirstAncestorByKind(SyntaxKind.VariableStatement) || varDecl.getFirstAncestorByKind(SyntaxKind.ExpressionStatement)
-          
-          if (!mainApp || varName === 'coreApp') {
-            mainApp = {
-              filePath: sourceFile.getFilePath(),
-              varName,
-              sourceFile,
-              instanceEndLine: stmt ? stmt.getEndLineNumber() : varDecl.getEndLineNumber()
-            }
-          }
-          if (varName === 'coreApp') {
-            break
-          }
-        }
-      }
-    }
-    if (mainApp?.varName === 'coreApp') break
+  if (!sourceFile) {
+    throw new Error("Could not find registry.ts")
   }
 
-  if (!mainApp) {
-    throw new Error("Could not find a valid application instance to register the module against.")
-  }
-
-  return mainApp
+  return { filePath, sourceFile }
 }
 
 export async function mountModule(moduleName: string, routeName: string, repoRoot: string, isWorker: boolean = false) {
-  const { filePath: mountPath, varName, sourceFile } = findHonoApp(repoRoot)
+  const { filePath: mountPath, sourceFile } = findRegistry(repoRoot)
 
   const targetRoutesDir = path.join(repoRoot, 'packages', 'api', 'modules', moduleName)
   const mountDir = path.dirname(mountPath)
@@ -404,7 +372,7 @@ export async function mountModule(moduleName: string, routeName: string, repoRoo
   }
 
   const importLine = `import { ${routeName} } from '${relPath}'`
-  const routeLine = `${varName}.route('/${moduleName}', ${routeName})`
+  const routeLine = `.route('/${moduleName}', ${routeName})`
 
   const appContent = await readFile(mountPath, 'utf8')
   let updatedContent = appContent
@@ -422,42 +390,14 @@ export async function mountModule(moduleName: string, routeName: string, repoRoo
 
   if (!updatedContent.includes(routeLine)) {
     lines = updatedContent.split('\n')
-    
     sourceFile.replaceWithText(updatedContent)
-
-    let lastRouteCallEndLine = -1
-    const callExprs = sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression)
-    for (const callExpr of callExprs) {
-      const propAccess = callExpr.getExpressionIfKind(SyntaxKind.PropertyAccessExpression)
-      if (propAccess && propAccess.getName() === 'route' && propAccess.getExpression().getText() === varName) {
-        const stmt = callExpr.getFirstAncestorByKind(SyntaxKind.ExpressionStatement)
-        if (stmt) {
-          lastRouteCallEndLine = Math.max(lastRouteCallEndLine, stmt.getEndLineNumber())
-        }
-      }
-    }
-
-    if (lastRouteCallEndLine !== -1) {
-      lines.splice(lastRouteCallEndLine, 0, routeLine)
-    } else {
-      let newInstanceEndLine = -1
-      const newNewExprs = sourceFile.getDescendantsOfKind(SyntaxKind.NewExpression)
-      for (const newExpr of newNewExprs) {
-        const text = newExpr.getExpression().getText()
-        if (text === 'Hono' || text === 'OpenAPIHono') {
-          const varDecl = newExpr.getFirstAncestorByKind(SyntaxKind.VariableDeclaration)
-          if (varDecl && varDecl.getName() === varName) {
-             const stmt = varDecl.getFirstAncestorByKind(SyntaxKind.VariableStatement) || varDecl.getFirstAncestorByKind(SyntaxKind.ExpressionStatement)
-             newInstanceEndLine = stmt ? stmt.getEndLineNumber() : varDecl.getEndLineNumber()
-          }
-        }
-      }
-
-      if (newInstanceEndLine !== -1) {
-        lines.splice(newInstanceEndLine, 0, routeLine)
-      } else {
-        const exportIndex = lines.findIndex((line) => line.trim().startsWith('export default '))
-        lines.splice(exportIndex >= 0 ? exportIndex : lines.length, 0, routeLine)
+    
+    const varDecl = sourceFile.getVariableDeclaration('registry')
+    if (varDecl) {
+      const init = varDecl.getInitializer()
+      if (init) {
+        const endLine = init.getEndLineNumber()
+        lines.splice(endLine, 0, `  ${routeLine}`)
       }
     }
     updatedContent = lines.join('\n')
@@ -619,54 +559,18 @@ export async function generateModule(moduleInputName: string, repoRoot = process
 }
 
 export async function unmountModule(moduleName: string, repoRoot: string) {
-  const { filePath: mountPath, sourceFile, varName } = findHonoApp(repoRoot)
-
-  const importDecls = sourceFile.getImportDeclarations().filter(decl => {
-    const val = decl.getModuleSpecifierValue()
-    return val.endsWith(`modules/${moduleName}/routes`) || val.endsWith(`modules/${moduleName}/routes.ts`)
-  })
-
-  if (importDecls.length !== 1) {
-    throw new Error(`Could not uniquely identify import statement for module "${moduleName}".`)
-  }
-
-  const callExprs = sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression)
-  const toRemove: any[] = []
-  for (const callExpr of callExprs) {
-    const propAccess = callExpr.getExpressionIfKind(SyntaxKind.PropertyAccessExpression)
-    if (propAccess && propAccess.getName() === 'route' && propAccess.getExpression().getText() === varName) {
-      const args = callExpr.getArguments()
-      if (args.length >= 2 && args[0].getKind() === SyntaxKind.StringLiteral) {
-        if (args[0].getText() === `'/${moduleName}'` || args[0].getText() === `"/${moduleName}"`) {
-          const stmt = callExpr.getFirstAncestorByKind(SyntaxKind.ExpressionStatement)
-          if (stmt) {
-            toRemove.push(stmt)
-          }
-        }
-      }
-    }
-  }
-
-  if (toRemove.length !== 1) {
-    throw new Error(`Could not uniquely identify route registration for module "${moduleName}".`)
-  }
-
-  const importStart = importDecls[0].getStartLineNumber()
-  const importEnd = importDecls[0].getEndLineNumber()
-  
-  const routeStart = toRemove[0].getStartLineNumber()
-  const routeEnd = toRemove[0].getEndLineNumber()
-
+  const mountPath = path.join(repoRoot, 'packages/api/registry.ts')
   const rawContent = await readFile(mountPath, 'utf8')
   const lines = rawContent.split('\n')
 
-  const ranges = [
-    { start: importStart - 1, end: importEnd - 1 },
-    { start: routeStart - 1, end: routeEnd - 1 }
-  ].sort((a, b) => b.start - a.start)
+  const importIdx = lines.findIndex(l => l.includes(`modules/${moduleName}/routes`))
+  if (importIdx !== -1) {
+    lines.splice(importIdx, 1)
+  }
 
-  for (const range of ranges) {
-    lines.splice(range.start, range.end - range.start + 1)
+  const routeIdx = lines.findIndex(l => l.includes(`.route('/${moduleName}'`))
+  if (routeIdx !== -1) {
+    lines.splice(routeIdx, 1)
   }
 
   await writeFile(mountPath, lines.join('\n'))
