@@ -12,12 +12,9 @@ import { globalGuard } from './auth/guard'
 import { initMiddleware } from './middleware/init'
 import { localeMiddleware } from './middleware/locale'
 import { corsMiddleware, rateLimitMiddleware, securityHeadersMiddleware } from './middleware/security'
-import { authRoutes } from './modules/auth/routes'
 import { healthRoutes } from './modules/health/routes'
-import { rootRoutes } from './modules/root/routes'
 import { generateSwaggerUIHtml } from './utils/swagger-ui'
-import { organizationsRoutes } from './modules/organizations/routes'
-import { documentsRoutes } from './modules/documents/routes'
+import { registry } from './registry'
 
 const pinoLogger = pino()
 
@@ -56,10 +53,7 @@ coreApp.use('*', rateLimitMiddleware)
 coreApp.use('*', initMiddleware)
 coreApp.use('*', authMiddleware)
 coreApp.use('*', globalGuard)
-coreApp.route('/', rootRoutes)
-coreApp.route('/auth', authRoutes)
-coreApp.route('/organizations', organizationsRoutes)
-coreApp.route('/documents', documentsRoutes)
+coreApp.route('/', registry)
 
 app.route('/', infraApp)
 
