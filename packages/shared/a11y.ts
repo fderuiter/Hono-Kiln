@@ -6,6 +6,35 @@
  * CSS styles for the swagger-ui skip link to ensure accessibility.
  */
 export const swaggerA11yStyles = `
+  :root {
+    --a11y-focus-color: #005fcc;
+    --a11y-focus-width: 4px;
+    --a11y-focus-offset: 2px;
+    --a11y-focus-radius: 4px;
+    --a11y-focus-animation-timing: 1s;
+    --a11y-focus-animation-easing: ease-out;
+    --a11y-pulse-color-start: rgba(0, 95, 204, 0.15);
+    
+    --a11y-skip-bg: #000;
+    --a11y-skip-text: #fff;
+    
+    --a11y-btn-focus-success: #004d00;
+    --a11y-btn-focus-primary: #003399;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --a11y-focus-color: #66b2ff;
+      --a11y-pulse-color-start: rgba(102, 178, 255, 0.2);
+      
+      --a11y-skip-bg: #fff;
+      --a11y-skip-text: #000;
+      
+      --a11y-btn-focus-success: #80ff80;
+      --a11y-btn-focus-primary: #99ccff;
+    }
+  }
+
   .skip-link {
     position: absolute;
     width: 1px;
@@ -26,36 +55,37 @@ export const swaggerA11yStyles = `
     overflow: visible;
     clip: auto;
     white-space: normal;
-    background-color: #000;
-    color: #fff;
+    background-color: var(--a11y-skip-bg);
+    color: var(--a11y-skip-text);
     z-index: 10000;
     text-decoration: none;
   }
 
-  #swagger-ui:focus-visible {
-    outline: 4px solid #005fcc;
-    outline-offset: 2px;
-    border-radius: 4px;
-    animation: focus-pulse 1s ease-out;
+  #swagger-ui:focus-visible,
+  #swagger-ui .btn:focus-visible {
+    outline: var(--a11y-focus-width) solid var(--a11y-focus-color);
+    outline-offset: var(--a11y-focus-offset);
+    border-radius: var(--a11y-focus-radius);
+    animation: focus-pulse var(--a11y-focus-animation-timing) var(--a11y-focus-animation-easing);
+  }
+
+  #swagger-ui .btn.authorize:focus-visible {
+    outline-color: var(--a11y-btn-focus-success);
+  }
+
+  #swagger-ui .btn.execute:focus-visible,
+  #swagger-ui .btn.try-out__btn:focus-visible {
+    outline-color: var(--a11y-btn-focus-primary);
   }
 
   @keyframes focus-pulse {
-    0% { background-color: rgba(0, 95, 204, 0.15); }
+    0% { background-color: var(--a11y-pulse-color-start); }
     100% { background-color: transparent; }
   }
 
-  @media (prefers-color-scheme: dark) {
-    #swagger-ui:focus-visible {
-      outline-color: #66b2ff;
-    }
-    @keyframes focus-pulse {
-      0% { background-color: rgba(102, 178, 255, 0.2); }
-      100% { background-color: transparent; }
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    #swagger-ui:focus-visible {
+    #swagger-ui:focus-visible,
+    #swagger-ui .btn:focus-visible {
       animation: none !important;
     }
   }
