@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test'
-import { integer, text } from 'drizzle-orm/sqlite-core'
+import { integer, text } from './db-types'
 import { createEntity } from './factory'
 import { z } from '@hono/zod-openapi'
 import { getOpenApiMetadata } from '@asteasolutions/zod-to-openapi'

@@ -1,5 +1,5 @@
 import { z } from '@hono/zod-openapi'
-import { integer, text } from 'drizzle-orm/sqlite-core'
+import { integer, text } from '../../utils/db-types'
 import { createEntity } from '../../utils/factory'
 
 const userEntity = createEntity('users', {
@@ -21,7 +21,7 @@ const userEntity = createEntity('users', {
     db: text('password_hash').notNull()
   },
   permissions: {
-    db: text('permissions', { mode: 'json' }).$type<string[]>().notNull().default([]),
+    db: text('permissions', { mode: 'json' }).notNull().default([]),
     validation: z.array(z.string()).default([]),
     openapi: { description: 'User permissions', example: ['documents:read'] }
   }

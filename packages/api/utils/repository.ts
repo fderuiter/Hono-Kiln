@@ -1,11 +1,11 @@
 import type { z } from 'zod';
 import { eq, and, type SQL, getTableColumns } from 'drizzle-orm';
-import type { SQLiteTable } from 'drizzle-orm/sqlite-core';
+
 import type { Database } from '../db';
 
 export interface RepositoryConfig<
   TQueryKey extends keyof Database['query'],
-  TTable extends SQLiteTable,
+  TTable extends import('drizzle-orm').Table,
   TSchema extends z.ZodTypeAny
 > {
   db: Database;
@@ -20,7 +20,7 @@ export interface RepositoryConfig<
 
 export function createValidatedRepository<
   TQueryKey extends keyof Database['query'],
-  TTable extends SQLiteTable,
+  TTable extends import('drizzle-orm').Table,
   TSchema extends z.ZodTypeAny
 >(config: RepositoryConfig<TQueryKey, TTable, TSchema>) {
   const { db, queryKey, table, schema, tenant } = config;

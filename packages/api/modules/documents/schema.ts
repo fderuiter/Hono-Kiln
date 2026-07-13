@@ -1,5 +1,5 @@
 import { z } from '@hono/zod-openapi'
-import { integer, text } from 'drizzle-orm/sqlite-core'
+import { integer, text } from '../../utils/db-types'
 import { createEntity } from '../../utils/factory'
 import { organizations } from '../organizations/schema'
 
