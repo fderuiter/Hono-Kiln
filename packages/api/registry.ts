@@ -5,10 +5,10 @@ import { documentsRoutes } from './modules/documents/routes'
 import { organizationsRoutes } from './modules/organizations/routes'
 import { rootRoutes } from './modules/root/routes'
 
-export const registry = new OpenAPIHono<AppEnv>()
+export const v1App = new OpenAPIHono<AppEnv>()
   .route('/', rootRoutes)
   .route('/auth', authRoutes)
   .route('/organizations', organizationsRoutes)
   .route('/documents', documentsRoutes)
 
-export type AppType = typeof registry
+export type AppType = typeof v1App

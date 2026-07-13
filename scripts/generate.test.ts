@@ -19,11 +19,11 @@ async function createRepoFixture() {
 import { healthRoutes } from './modules/health/routes'
 import { rootRoutes } from './modules/root/routes'
 
-export const registry = new OpenAPIHono()
+export const v1App = new OpenAPIHono()
   .route('/', rootRoutes)
   .route('/health', healthRoutes)
 
-export type AppType = typeof registry
+export type AppType = typeof v1App
 `,
   )
 
@@ -46,10 +46,10 @@ async function createMultilineImportFixture() {
   OpenAPIHono,
 } from '@hono/zod-openapi'
 
-export const registry = new OpenAPIHono()
+export const v1App = new OpenAPIHono()
   .route('/health', healthRoutes)
 
-export type AppType = typeof registry
+export type AppType = typeof v1App
 `,
   )
 

@@ -395,7 +395,7 @@ export async function mountModule(moduleName: string, routeName: string, repoRoo
     lines = updatedContent.split('\n')
     sourceFile.replaceWithText(updatedContent)
     
-    const varDecl = sourceFile.getVariableDeclaration('registry')
+    const varDecl = sourceFile.getVariableDeclaration('v1App')
     if (varDecl) {
       const init = varDecl.getInitializer()
       if (init) {

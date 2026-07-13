@@ -14,7 +14,7 @@ import { localeMiddleware } from './middleware/locale'
 import { corsMiddleware, rateLimitMiddleware, securityHeadersMiddleware } from './middleware/security'
 import { healthRoutes } from './modules/health/routes'
 import { generateSwaggerUIHtml } from './utils/swagger-ui'
-import { registry } from './registry'
+import { v1App } from './registry'
 
 const pinoLogger = pino()
 
@@ -53,7 +53,7 @@ coreApp.use('*', rateLimitMiddleware)
 coreApp.use('*', initMiddleware)
 coreApp.use('*', authMiddleware)
 coreApp.use('*', globalGuard)
-coreApp.route('/', registry)
+coreApp.route('/v1', v1App)
 
 app.route('/', infraApp)
 
