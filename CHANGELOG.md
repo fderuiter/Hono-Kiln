@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.21.0...v1.22.0) (2026-07-13)
+
+
+## Features
+
+* migrate a11y styles to variable-driven system ([85f3186](https://github.com/fderuiter/Hono-Kiln/commit/85f3186cda2b6c13084872c32c9c39aa1402fbf7))
+
 # [1.21.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.20.0...v1.21.0) (2026-07-13)
 
 
