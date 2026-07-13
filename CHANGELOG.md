@@ -1,3 +1,15 @@
+# [1.24.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.23.0...v1.24.0) (2026-07-13)
+
+
+## Bug Fixes
+
+* **api:** add missing database drivers to dependencies ([f303205](https://github.com/fderuiter/Hono-Kiln/commit/f303205ae7009935760cfc768818e01f374d58ff))
+
+
+## Features
+
+* Abstract database driver behind provider factory ([a1a16a2](https://github.com/fderuiter/Hono-Kiln/commit/a1a16a2a46de9b2eb352f3fe3472d54644829900))
+
 # [1.23.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.22.0...v1.23.0) (2026-07-13)
 
 
