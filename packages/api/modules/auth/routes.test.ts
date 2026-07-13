@@ -45,7 +45,7 @@ describe('auth routes', () => {
         name: 'Test',
         permissions: [],
       }
-    } as any)
+    })
     expect(data?.user).not.toHaveProperty('passwordHash')
     expect(data?.user).not.toHaveProperty('internalAuditFlag')
   })

@@ -289,31 +289,34 @@ ${routeName}.openapi(triggerRoute, requirePermission('${moduleName}:write')(asyn
 
   const testContent = isTenant
     ? `import { describe, expect, it } from 'bun:test'
-import { HttpStatusCodes } from '@hono-kiln/shared'
-import { createTestApp } from '@hono-kiln/testing'
+import { createTestApp, createTestClient } from '@hono-kiln/testing'
 
 import { ${routeName} } from './routes'
 
 describe('${moduleName} routes', () => {
   it('returns unauthorized when no organization context', async () => {
     const app = createTestApp(${routeName})
-    const response = await app.request('/')
-    expect(response.status).toBe(HttpStatusCodes.UNAUTHORIZED)
+    const client = createTestClient<typeof ${routeName}>(app)
+    const [data, error] = await client.index.$get()
+    
+    expect(data).toBeNull()
+    expect(error).toEqual({ error: 'Unauthorized' })
   })
 })
 `
     : `import { describe, expect, it } from 'bun:test'
-import { HttpStatusCodes } from '@hono-kiln/shared'
-import { createTestApp } from '@hono-kiln/testing'
+import { createTestApp, createTestClient } from '@hono-kiln/testing'
 
 import { ${routeName} } from './routes'
 
 describe('${moduleName} routes', () => {
   it('returns scaffolded payload', async () => {
     const app = createTestApp(${routeName})
-    const response = await app.request('/')
-    expect(response.status).toBe(HttpStatusCodes.OK)
-    expect(await response.json()).toEqual({
+    const client = createTestClient<typeof ${routeName}>(app)
+    const [data, error] = await client.index.$get()
+    
+    expect(error).toBeNull()
+    expect(data).toEqual({
       data: [{ entity: '${moduleName}' }],
     })
   })

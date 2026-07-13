@@ -14,6 +14,6 @@ describe('organizations routes', () => {
     
     const [data, error] = await client.organizations.$get()
     expect(error).toBeNull()
-    expect(data).toEqual({ data: [] } as any)
+    expect(data).toEqual({ data: [] })
   })
 })
