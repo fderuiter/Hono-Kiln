@@ -3,6 +3,7 @@ import { mock } from 'bun:test'
 import type { Hono } from 'hono'
 import { Cookie, type Session, type User } from 'lucia'
 import type { AppEnv } from '@hono-kiln/api'
+import { createSafeClient, injectHeader, type RequestInterceptor } from '@hono-kiln/sdk'
 
 /**
  * Options for creating a mock authentication environment.
@@ -129,5 +130,37 @@ export function createTestApp<T extends Hono<any, any, any>>(
 
   app.route('/', router)
 
+  ;(app as any).__testOptions = options
+
   return app
 }
+
+export type TestClientOptions = {
+  organizationId?: string
+  interceptors?: import('@hono-kiln/sdk').RequestInterceptor[]
+}
+
+export function createTestClient<T extends Record<string, any>>(
+  app: Hono<any, any, any>,
+  options: TestClientOptions = {}
+) {
+  const testOptions: TestAppOptions = (app as any).__testOptions || {}
+
+  const interceptors: RequestInterceptor[] = [...(options.interceptors || [])]
+
+  if (testOptions.authenticated || testOptions.session) {
+    const sessionId = testOptions.session?.id || 'mock-session-id'
+    interceptors.push((init) => injectHeader(init, 'Cookie', `auth_session=${sessionId}`))
+  }
+
+  const orgId = options.organizationId || (testOptions as any).organizationId
+  if (orgId) {
+    interceptors.push((init) => injectHeader(init, 'x-organization-id', orgId))
+  }
+
+  return createSafeClient<T>('http://localhost', {
+    fetch: app.request.bind(app) as any,
+    interceptors,
+  })
+}
+
