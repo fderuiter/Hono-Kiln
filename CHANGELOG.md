@@ -1,3 +1,15 @@
+# [1.21.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.20.0...v1.21.0) (2026-07-13)
+
+
+## Bug Fixes
+
+* **ci:** fix knip unused files and typedoc audit errors ([acf05d1](https://github.com/fderuiter/Hono-Kiln/commit/acf05d1a1f121c80a1586a49e60ff542726d12d0))
+
+
+## Features
+
+* implement safe result SDK client with functional interceptors and test helpers ([8c4ab6d](https://github.com/fderuiter/Hono-Kiln/commit/8c4ab6da4aaf5297684b34de19b9a6e2393c381a))
+
 # [1.20.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.19.0...v1.20.0) (2026-07-09)
 
 
