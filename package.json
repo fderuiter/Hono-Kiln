@@ -4,7 +4,7 @@
   "scripts": {
     "kiln": "bun ./scripts/generate.ts",
     "setup": "bun ./scripts/setup.ts",
-    "docs": "typedoc"
+    "docs": "typedoc && node ./scripts/fix-a11y.js"
   },
   "workspaces": [
     "packages/*"
