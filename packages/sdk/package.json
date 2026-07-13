@@ -13,5 +13,8 @@
   },
   "devDependencies": {
     "@hono-kiln/api": "workspace:*"
+  },
+  "scripts": {
+    "test": "bun test"
   }
 }
