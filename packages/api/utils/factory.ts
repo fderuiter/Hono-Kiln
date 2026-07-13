@@ -1,6 +1,13 @@
 import { sqliteTable } from 'drizzle-orm/sqlite-core';
+import { pgTable } from 'drizzle-orm/pg-core';
+import { mysqlTable } from 'drizzle-orm/mysql-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from '@hono/zod-openapi';
+
+import * as config from '../../../kiln.json';
+
+const provider = config.provider || 'libsql';
+const createTableFn: any = provider === 'postgresql' ? pgTable : provider === 'mysql' ? mysqlTable : sqliteTable;
 
 type FieldDefinition<TBuilder = any> = {
   db: TBuilder;
@@ -22,14 +29,13 @@ export function createEntity<T extends string, C extends EntityConfig>(
     Object.entries(config).map(([key, value]) => [key, value.db])
   ) as any;
 
-  const table = sqliteTable(tableName, columns);
+  const table = createTableFn(tableName, columns);
 
   const selectRefinements: Record<string, any> = {};
   const insertRefinements: Record<string, any> = {};
 
   for (const [key, value] of Object.entries(config)) {
     if (value.validation || value.openapi) {
-      // We'll construct a generic refinement function
       const refine = (schemaBase: z.ZodTypeAny) => {
         let finalSchema = value.validation ?? schemaBase;
         if (value.openapi) {
@@ -43,8 +49,8 @@ export function createEntity<T extends string, C extends EntityConfig>(
     }
   }
 
-  const selectSchema = createSelectSchema(table, selectRefinements as any);
-  const insertSchema = createInsertSchema(table, insertRefinements as any);
+  const selectSchema = createSelectSchema(table as any, selectRefinements as any);
+  const insertSchema = createInsertSchema(table as any, insertRefinements as any);
 
   return {
     table,

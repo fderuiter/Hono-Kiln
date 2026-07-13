@@ -1,5 +1,5 @@
 import { z } from '@hono/zod-openapi'
-import { integer, text, sqliteTable, primaryKey } from 'drizzle-orm/sqlite-core'
+import { integer, text, createTable, primaryKey } from '../../utils/db-types'
 import { createEntity } from '../../utils/factory'
 import { users } from '../auth/schema'
 
@@ -17,7 +17,7 @@ export const organizationEntity = createEntity('organizations', {
 
 export const organizations = organizationEntity.table
 
-export const organizationMembers = sqliteTable('organization_members', {
+export const organizationMembers = createTable('organization_members', {
   organizationId: integer('organization_id')
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),

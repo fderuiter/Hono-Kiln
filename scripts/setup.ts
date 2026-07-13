@@ -31,20 +31,68 @@ async function getFiles(dir: string, fileList: string[] = []) {
 async function main() {
   intro('🔥 Zero-Config Interactive Bootstrapper 🔥');
 
-  const envChoice = await select({
-    message: 'Choose Environment',
+
+  const provider = await select({
+    message: 'Choose Database Provider',
     options: [
-      { value: 'lite', label: 'Lite (Local)', hint: 'SQLite file, no Docker needed' },
-      { value: 'full', label: 'Full (Docker)', hint: 'Production-parity environment' },
-      { value: 'cloud', label: 'Cloud (Zero-Touch)', hint: 'Turso, Cloudflare, and GitHub Actions' },
+      { value: 'libsql', label: 'LibSQL (SQLite / Turso)' },
+      { value: 'postgresql', label: 'PostgreSQL' },
+      { value: 'mysql', label: 'MySQL' },
     ],
   });
-  if (isCancel(envChoice)) {
+  if (isCancel(provider)) {
     cancel('Operation cancelled');
     process.exit(1);
   }
+  
+  await fs.writeFile(path.join(process.cwd(), 'kiln.json'), JSON.stringify({ provider }, null, 2), 'utf8');
+
+
+  let envChoice = 'full';
+  let pgMysqlUrl = '';
+
+  if (provider === 'libsql') {
+    const envRes = await select({
+      message: 'Choose Environment',
+      options: [
+        { value: 'lite', label: 'Lite (Local)', hint: 'SQLite file, no Docker needed' },
+        { value: 'full', label: 'Full (Docker)', hint: 'Production-parity environment' },
+        { value: 'cloud', label: 'Cloud (Zero-Touch)', hint: 'Turso, Cloudflare, and GitHub Actions' },
+      ],
+    });
+    if (isCancel(envRes)) {
+      cancel('Operation cancelled');
+      process.exit(1);
+    }
+    envChoice = envRes;
+  } else {
+    const urlRes = await text({
+      message: `Enter your ${provider === 'postgresql' ? 'PostgreSQL' : 'MySQL'} connection string:`,
+      placeholder: provider === 'postgresql' ? 'postgresql://user:password@localhost:5432/db' : 'mysql://user:password@localhost:3306/db',
+    });
+    if (isCancel(urlRes)) {
+      cancel('Operation cancelled');
+      process.exit(1);
+    }
+    pgMysqlUrl = (urlRes as string).trim();
+    envChoice = 'full'; // use full flow but without docker if they have a remote string?
+    // Wait, let's just write this to .env temporarily so checkDatabaseConnectivity works!
+    await fs.writeFile(path.join(process.cwd(), 'packages/api/.env'), `DATABASE_URL=${pgMysqlUrl}\nNODE_ENV=development\n`, 'utf8');
+    
+    const s = spinner();
+    s.start('Validating connection string...');
+    const dbStatus = await checkDatabaseConnectivity();
+    if (!dbStatus.success) {
+      s.stop('Connection failed.');
+      cancel('Could not connect to the database: ' + dbStatus.error);
+      process.exit(1);
+    }
+    s.stop('Connection successful.');
+  }
+
   const isLite = envChoice === 'lite';
   const isCloud = envChoice === 'cloud';
+
 
   let cloudflareAccountId = '';
   let cloudflareApiToken = '';
@@ -181,7 +229,7 @@ async function main() {
     const sDocker = spinner();
     sDocker.start('Starting Docker services...');
     try {
-      execSync('docker compose up -d', { cwd: rootDir, stdio: 'inherit' });
+      if (provider === 'libsql') execSync('docker compose up -d', { cwd: rootDir, stdio: 'inherit' });
       sDocker.message('Waiting for service to become healthy...');
       let isReady = false;
       for (let i = 0; i < 30; i++) {
@@ -404,6 +452,10 @@ async function main() {
   }
 
   // Start DB and Migrations
+  if (provider !== 'libsql') {
+    await fs.rm(path.join(rootDir, 'packages/api/drizzle'), { recursive: true, force: true }).catch(() => {});
+    execSync('bun run --filter @' + packageScope + '/api db:migrate', { cwd: rootDir, stdio: 'ignore' });
+  }
   if (startServices) {
     if (isCloud) {
       s.start('Running migrations to remote database...');
