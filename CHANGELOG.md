@@ -1,3 +1,10 @@
+# [1.23.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.22.0...v1.23.0) (2026-07-13)
+
+
+## Features
+
+* standardise v1 sub-app architecture ([1a9d2de](https://github.com/fderuiter/Hono-Kiln/commit/1a9d2de156a86ba4db1d6c860a4249e653e66485))
+
 # [1.22.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.21.0...v1.22.0) (2026-07-13)
 
 
