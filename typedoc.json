@@ -3,7 +3,8 @@
     "packages/api/index.ts",
     "packages/api/app.ts",
     "packages/shared/index.ts",
-    "packages/testing/index.ts"
+    "packages/testing/index.ts",
+    "packages/sdk/src/index.ts"
   ],
   "out": "docs",
   "name": "Hono Kiln Architecture",
