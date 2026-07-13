@@ -135,11 +135,24 @@ export function createTestApp<T extends Hono<any, any, any>>(
   return app
 }
 
+/**
+ * Options for configuring the test client.
+ */
 export type TestClientOptions = {
+  /** Optional organization ID to inject via headers */
   organizationId?: string
+  /** Optional interceptors to apply to the client */
   interceptors?: import('@hono-kiln/sdk').RequestInterceptor[]
 }
 
+/**
+ * Creates a type-safe client configured for testing against a mocked application.
+ * Automatically injects session cookies and organization headers if specified in options.
+ *
+ * @param app - The test application instance.
+ * @param options - Configuration options for the test client.
+ * @returns A safe client instance for testing.
+ */
 export function createTestClient<T extends Record<string, any>>(
   app: Hono<any, any, any>,
   options: TestClientOptions = {}

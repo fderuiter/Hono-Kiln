@@ -16,5 +16,8 @@
   },
   "dependencies": {
     "@hono-kiln/sdk": "workspace:*"
+  },
+  "scripts": {
+    "test": "bun test"
   }
 }
