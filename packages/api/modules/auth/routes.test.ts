@@ -1,6 +1,5 @@
 import { describe, expect, it, mock } from 'bun:test'
-import { createTestApp } from '@hono-kiln/testing'
-import { hc } from 'hono/client'
+import { createTestApp, createTestClient } from '@hono-kiln/testing'
 import { registry } from '../../registry'
 
 describe('auth routes', () => {
@@ -27,11 +26,9 @@ describe('auth routes', () => {
     }
 
     const app = createTestApp(registry, { db: mockDb as any })
-    const client = hc<typeof registry>('http://localhost', {
-      fetch: app.request as any
-    })
+    const client = createTestClient<typeof registry>(app)
 
-    const response = await client.auth.register.$post({
+    const [data, error] = await client.auth.register.$post({
       json: {
         name: 'Test',
         email: 'test@example.com',
@@ -39,18 +36,17 @@ describe('auth routes', () => {
       }
     })
 
-    expect(response.status).toBe(201)
+    expect(error).toBeNull()
     
-    const body = await response.json()
-    expect(body).toEqual({
+    expect(data).toEqual({
       user: {
         id: 1,
         email: 'test@example.com',
         name: 'Test',
         permissions: [],
       }
-    })
-    expect(body.user).not.toHaveProperty('passwordHash')
-    expect(body.user).not.toHaveProperty('internalAuditFlag')
+    } as any)
+    expect(data?.user).not.toHaveProperty('passwordHash')
+    expect(data?.user).not.toHaveProperty('internalAuditFlag')
   })
 })

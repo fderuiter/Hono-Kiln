@@ -56,6 +56,9 @@
     },
     "packages/testing": {
       "name": "@hono-kiln/testing",
+      "dependencies": {
+        "@hono-kiln/sdk": "workspace:*",
+      },
       "devDependencies": {
         "@types/bun": "latest",
       },

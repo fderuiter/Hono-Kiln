@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { HttpStatusCodes } from '@hono-kiln/shared'
-import { createTestApp } from '@hono-kiln/testing'
-import { hc } from 'hono/client'
+import { createTestApp, createTestClient } from '@hono-kiln/testing'
 import { registry } from '../../registry'
 
 describe('organizations routes', () => {
@@ -12,10 +10,10 @@ describe('organizations routes', () => {
       })
     }
     const app = createTestApp(registry, { db: mockDb as any })
-    const client = hc<typeof registry>('http://localhost', {
-      fetch: app.request as any
-    })
-    const response = await client.organizations.$get()
-    expect(response.status).toBe(HttpStatusCodes.OK)
+    const client = createTestClient<typeof registry>(app)
+    
+    const [data, error] = await client.organizations.$get()
+    expect(error).toBeNull()
+    expect(data).toEqual({ data: [] } as any)
   })
 })
