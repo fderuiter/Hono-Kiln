@@ -6,8 +6,8 @@ process.env.DATABASE_AUTH_TOKEN = 'test-token'
 import app from './index'
 
 describe('health routes', () => {
-  it('returns welcome payload for /', async () => {
-    const response = await app.request('/')
+  it('returns welcome payload for /v1/', async () => {
+    const response = await app.request('/v1')
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual({ message: 'Hono Kiln API' })
   })

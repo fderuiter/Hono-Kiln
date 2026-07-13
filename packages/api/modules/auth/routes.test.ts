@@ -1,6 +1,6 @@
 import { describe, expect, it, mock } from 'bun:test'
 import { createTestApp, createTestClient } from '@hono-kiln/testing'
-import { registry } from '../../registry'
+import { v1App } from '../../registry'
 
 describe('auth routes', () => {
   it('registers a user successfully and strips extra database fields from response', async () => {
@@ -25,8 +25,8 @@ describe('auth routes', () => {
       }))
     }
 
-    const app = createTestApp(registry, { db: mockDb as any })
-    const client = createTestClient<typeof registry>(app)
+    const app = createTestApp(v1App, { db: mockDb as any })
+    const client = createTestClient<typeof v1App>(app)
 
     const [data, error] = await client.auth.register.$post({
       json: {
