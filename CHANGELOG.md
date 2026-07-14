@@ -1,3 +1,10 @@
+# [1.24.1](https://github.com/fderuiter/Hono-Kiln/compare/v1.24.0...v1.24.1) (2026-07-14)
+
+
+## Bug Fixes
+
+* **docker:** add missing sdk package to build context ([0236008](https://github.com/fderuiter/Hono-Kiln/commit/0236008e42e430002dd81449a62de7b3e205053c))
+
 # [1.24.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.23.0...v1.24.0) (2026-07-13)
 
 
