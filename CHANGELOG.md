@@ -1,3 +1,17 @@
+# [1.25.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.24.1...v1.25.0) (2026-07-14)
+
+
+## Bug Fixes
+
+* **a11y:** static patching of main.js to avoid flaky CI and ignore nested-interactive ([3644ab6](https://github.com/fderuiter/Hono-Kiln/commit/3644ab624275b3ee88c5280d44949320bd2519b6))
+* **docs:** apply accessibility enhancements to sidebar links ([1cb09f5](https://github.com/fderuiter/Hono-Kiln/commit/1cb09f5483b5a223b08ec5bbed3c468108776fa2))
+* **swagger-ui:** render custom a11y styles after external stylesheets ([34b5a8c](https://github.com/fderuiter/Hono-Kiln/commit/34b5a8c03a647985af6733827a1252b1936a65bf))
+
+
+## Features
+
+* add standalone Makefile target for inngest runner ([3f4052d](https://github.com/fderuiter/Hono-Kiln/commit/3f4052df5daabbe8836092fe694067dc42f730c2))
+
 # [1.24.1](https://github.com/fderuiter/Hono-Kiln/compare/v1.24.0...v1.24.1) (2026-07-14)
 
 
