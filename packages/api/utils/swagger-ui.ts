@@ -19,10 +19,10 @@ export function generateSwaggerUIHtml(asset: { css: string[]; js: string[] }, lo
     <head>
       <meta charset="utf-8" />
       <title>API Documentation</title>
+      ${asset.css.map((url) => `<link rel="stylesheet" href="${url}" />`).join('')}
       <style>
         ${swaggerA11yStyles}
       </style>
-      ${asset.css.map((url) => `<link rel="stylesheet" href="${url}" />`).join('')}
     </head>
     <body>
       ${swaggerA11ySkipLink}
