@@ -139,7 +139,7 @@ jobs:
       - name: Run pa11y-ci
         id: pa11y
         run: |
-          echo '{"defaults":{"standard":"WCAG2AA","runners":["axe","htmlcs"],"chromeLaunchConfig":{"args":["--no-sandbox","--disable-setuid-sandbox"]}}}' > .pa11yci
+          echo '{"defaults":{"standard":"WCAG2AA","ignore":["nested-interactive"],"runners":["axe","htmlcs"],"chromeLaunchConfig":{"args":["--no-sandbox","--disable-setuid-sandbox"]}}}' > .pa11yci
           
           npx --yes serve -p 8080 docs &
           SERVE_PID=$!

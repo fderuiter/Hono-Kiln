@@ -18,50 +18,25 @@ function walk(dir) {
 
 const htmlFiles = walk('./docs').filter(f => f.endsWith('.html'));
 
-const injectScript = `
-<script id="fix-a11y-script">
-  const fixA11y = () => {
-    document.querySelectorAll('summary a').forEach(a => {
-      const span = document.createElement('span');
-      span.innerHTML = a.innerHTML;
-      span.className = a.className;
-      span.style.cursor = 'pointer';
-      span.setAttribute('role', 'link');
-      span.setAttribute('tabindex', '0');
-      span.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        window.location.href = a.href;
-      };
-      span.onkeydown = (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          e.stopPropagation();
-          window.location.href = a.href;
-        }
-      };
-      a.replaceWith(span);
-    });
-  };
-  
-  fixA11y();
-  const observer = new MutationObserver((mutations) => {
-    fixA11y();
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-</script>
-</body>
-`;
-
 for (const file of htmlFiles) {
   let content = fs.readFileSync(file, 'utf8');
   content = content.replace(/id="tsd-search-input"/g, 'id="tsd-search-input" aria-label="Search"');
   // Remove ANY previously injected script from fixA11y
   content = content.replace(/<script>[^<]*fixA11y[\s\S]*?<\/body>/, '</body>');
   content = content.replace(/<script id="fix-a11y-script">[\s\S]*?<\/body>/, '</body>');
-  content = content.replace('</body>', injectScript);
   fs.writeFileSync(file, content, 'utf8');
 }
+
+const mainJsFile = './docs/assets/main.js';
+if (fs.existsSync(mainJsFile)) {
+  let mainJs = fs.readFileSync(mainJsFile, 'utf8');
+  mainJs = mainJs.replace(
+    'let r=e.appendChild(document.createElement("a"));',
+    'let r=e.appendChild(document.createElement(e.tagName==="SUMMARY"?"span":"a"));if(r.tagName==="SPAN"){r.style.cursor="pointer";r.setAttribute("role","link");r.setAttribute("tabindex","0");r.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();window.location.href=se+t.path;};r.onkeydown=(ev)=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();ev.stopPropagation();window.location.href=se+t.path;}};}if(r.href=se+t.path'
+  );
+  fs.writeFileSync(mainJsFile, mainJs, 'utf8');
+}
+
 
 const cssFile = './docs/assets/style.css';
 if (fs.existsSync(cssFile)) {
