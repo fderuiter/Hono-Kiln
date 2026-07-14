@@ -1,4 +1,4 @@
-.PHONY: install dev db-migrate db-push db-seed
+.PHONY: install dev db-migrate db-push db-seed inngest
 
 install:
 	bun install
@@ -14,3 +14,6 @@ db-push:
 
 db-seed:
 	cd packages/api && bun run db:seed
+
+inngest:
+	bunx inngest-cli dev -u http://localhost:3000/api/inngest
