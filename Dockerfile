@@ -8,6 +8,7 @@ RUN mkdir -p /temp/dev
 COPY package.json bun.lock /temp/dev/
 COPY packages/api/package.json /temp/dev/packages/api/
 COPY packages/shared/package.json /temp/dev/packages/shared/
+COPY packages/sdk/package.json /temp/dev/packages/sdk/
 # testing package might be needed by workspace during install if lockfile expects it
 COPY packages/testing/package.json /temp/dev/packages/testing/
 RUN cd /temp/dev && bun install --frozen-lockfile
@@ -17,6 +18,7 @@ RUN mkdir -p /temp/prod
 COPY package.json bun.lock /temp/prod/
 COPY packages/api/package.json /temp/prod/packages/api/
 COPY packages/shared/package.json /temp/prod/packages/shared/
+COPY packages/sdk/package.json /temp/prod/packages/sdk/
 COPY packages/testing/package.json /temp/prod/packages/testing/
 RUN cd /temp/prod && bun install --frozen-lockfile --production
 
