@@ -26,10 +26,19 @@ const injectScript = `
       span.innerHTML = a.innerHTML;
       span.className = a.className;
       span.style.cursor = 'pointer';
+      span.setAttribute('role', 'link');
+      span.setAttribute('tabindex', '0');
       span.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
         window.location.href = a.href;
+      };
+      span.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          e.stopPropagation();
+          window.location.href = a.href;
+        }
       };
       a.replaceWith(span);
     });

@@ -130,9 +130,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build architecture docs
-        run: |
-          bun run docs
-          node scripts/fix-a11y.js
+        run: bun run docs
 
       - name: Setup Node
         uses: actions/setup-node@v4
