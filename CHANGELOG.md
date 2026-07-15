@@ -1,3 +1,16 @@
+# [1.27.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.26.0...v1.27.0) (2026-07-15)
+
+
+## Bug Fixes
+
+* **a11y:** enhance swagger-ui accessibility ([467593f](https://github.com/fderuiter/Hono-Kiln/commit/467593f4efed280712c162001a07d7bdceae52af))
+* **schema:** synchronize migrations with schema ([0a2d10f](https://github.com/fderuiter/Hono-Kiln/commit/0a2d10f815c752a6218094250c9c460deb46c2b9))
+
+
+## Features
+
+* Add database schema verification to preflight check ([9e961a1](https://github.com/fderuiter/Hono-Kiln/commit/9e961a15a4f93e646a5f393c0b1f8da3514de6e5))
+
 # [1.26.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.25.0...v1.26.0) (2026-07-15)
 
 
