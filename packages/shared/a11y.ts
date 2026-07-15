@@ -116,14 +116,16 @@ export const SwaggerA11yPluginCode = `
         };
 
         let previousValidationErrors = 0;
+        let debounceTimer;
         system.getStore().subscribe(() => {
-          setTimeout(() => {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
             const errors = document.querySelectorAll('.errors-wrapper, .error, .invalid').length;
             if (errors > previousValidationErrors) {
-              announce('Validation failed. Required field missing.');
+              announce('Validation failed. ' + errors + ' visual error' + (errors === 1 ? '' : 's') + ' found.');
             }
             previousValidationErrors = errors;
-          }, 100);
+          }, 200);
         });
       },
       statePlugins: {
