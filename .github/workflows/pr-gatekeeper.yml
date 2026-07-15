@@ -36,6 +36,19 @@ jobs:
       - name: Audit codebase health
         run: bun kiln audit
 
+      - name: Verify migration metadata integrity
+        run: cd packages/api && bun x drizzle-kit check
+
+      - name: Verify schema drift
+        run: |
+          cd packages/api
+          bun db:migrate
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Error: Database schema drift detected. Please run 'drizzle-kit generate' and commit the resulting migration files."
+            git status --porcelain
+            exit 1
+          fi
+
   secret-scan:
     name: TruffleHog Secret Scan
     runs-on: ubuntu-latest
