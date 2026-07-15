@@ -1,3 +1,10 @@
+# [1.28.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.27.1...v1.28.0) (2026-07-15)
+
+
+## Features
+
+* **auth:** fallback to Bearer token authentication ([#101](https://github.com/fderuiter/Hono-Kiln/issues/101)) ([c575355](https://github.com/fderuiter/Hono-Kiln/commit/c575355876a4eeda8572644f79b6c8b7a8a46a9f))
+
 # [1.27.1](https://github.com/fderuiter/Hono-Kiln/compare/v1.27.0...v1.27.1) (2026-07-15)
 
 
