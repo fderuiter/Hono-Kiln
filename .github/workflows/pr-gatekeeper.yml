@@ -27,6 +27,9 @@ jobs:
       - name: Run tests
         run: bun test
 
+      - name: Detect duplicate code
+        run: bun x jscpd .
+
       - name: Lint
         run: bun x --bun oxlint .
 
