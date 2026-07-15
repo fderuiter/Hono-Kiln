@@ -335,14 +335,14 @@ async function main() {
       await fs.rm(rootModulePath, { recursive: true, force: true });
     }
 
-    const appTsPath = path.join(rootDir, 'packages/api/app.ts');
-    if (await fileExists(appTsPath)) {
-      const appTs = await fs.readFile(appTsPath, 'utf8');
-      let newAppTs = appTs
+    const registryTsPath = path.join(rootDir, 'packages/api/registry.ts');
+    if (await fileExists(registryTsPath)) {
+      const registryTs = await fs.readFile(registryTsPath, 'utf8');
+      let newRegistryTs = registryTs
         .split('\n')
         .filter(line => !line.includes('rootRoutes') && !line.includes('/modules/root/routes'))
         .join('\n');
-      await fs.writeFile(appTsPath, newAppTs, 'utf8');
+      await fs.writeFile(registryTsPath, newRegistryTs, 'utf8');
     }
 
     const indexTestTsPath = path.join(rootDir, 'packages/api/index.test.ts');
@@ -353,7 +353,7 @@ async function main() {
         const lines = indexTestTs.split('\n');
         let inBlock = false;
         const newLines = lines.filter(line => {
-          if (line.includes("it('returns welcome payload for /', async () => {")) {
+          if (line.includes("it('returns welcome payload for /v1/', async () => {")) {
             inBlock = true;
             return false;
           }
@@ -370,6 +370,17 @@ async function main() {
         let newContent = newLines.join('\n').replace(/\n{3,}/g, '\n\n');
         await fs.writeFile(indexTestTsPath, newContent, 'utf8');
     }
+
+    const schemaTsPath = path.join(rootDir, 'packages/api/db/schema.ts');
+    if (await fileExists(schemaTsPath)) {
+      const schemaTs = await fs.readFile(schemaTsPath, 'utf8');
+      let newSchemaTs = schemaTs
+        .split('\n')
+        .filter(line => !line.includes('/modules/root/schema'))
+        .join('\n');
+      await fs.writeFile(schemaTsPath, newSchemaTs, 'utf8');
+    }
+
     s.stop('Removed boilerplate modules.');
   }
 
