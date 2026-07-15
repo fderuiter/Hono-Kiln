@@ -74,6 +74,10 @@ export const swaggerA11yStyles = `
   }
 
   #swagger-ui:focus-visible,
+  #swagger-ui :focus-visible,
+  #swagger-ui input:focus-visible,
+  #swagger-ui textarea:focus-visible,
+  #swagger-ui select:focus-visible,
   #swagger-ui .btn:focus-visible {
     outline: var(--a11y-focus-width) solid var(--a11y-focus-color);
     outline-offset: var(--a11y-focus-offset);
@@ -97,6 +101,10 @@ export const swaggerA11yStyles = `
 
   @media (prefers-reduced-motion: reduce) {
     #swagger-ui:focus-visible,
+    #swagger-ui :focus-visible,
+    #swagger-ui input:focus-visible,
+    #swagger-ui textarea:focus-visible,
+    #swagger-ui select:focus-visible,
     #swagger-ui .btn:focus-visible {
       animation: none !important;
     }
