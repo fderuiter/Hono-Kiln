@@ -33,7 +33,7 @@ jobs:
         run: bun test
 
       - name: Lint
-        run: bun x --bun oxlint .
+        run: bun x oxlint .
 
       - name: Audit codebase health
         run: bun kiln audit
