@@ -63,7 +63,7 @@ jobs:
         if: steps.check.outputs.has-secrets == 'true'
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: "1.1.29"
 
       - name: Deploy with Wrangler
         if: steps.check.outputs.has-secrets == 'true'
@@ -124,7 +124,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: "1.1.29"
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
