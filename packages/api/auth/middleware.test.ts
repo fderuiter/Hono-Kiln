@@ -104,4 +104,61 @@ describe('auth middleware', () => {
     expect(response.headers.get('set-cookie')).toContain('auth_session=')
     expect(response.headers.get('set-cookie')).toContain('Max-Age=0')
   })
+
+  it('authenticates with a valid bearer token if cookie is missing, without setting cookies', async () => {
+    const app = createTestApp(async (sessionId) => ({
+      user: {
+        id: 2,
+        email: 'bob@example.com',
+        name: 'Bob',
+      },
+      session: {
+        id: sessionId,
+        userId: 2,
+        expiresAt: new Date('2030-01-01T00:00:00.000Z'),
+        fresh: true,
+      },
+    }))
+
+    const response = await app.request('/me', {
+      headers: {
+        Authorization: 'Bearer token-456',
+      },
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({
+      user: {
+        id: 2,
+        email: 'bob@example.com',
+        name: 'Bob',
+      },
+      session: {
+        id: 'token-456',
+        userId: 2,
+        fresh: true,
+      },
+    })
+    expect(response.headers.get('set-cookie')).toBeNull()
+  })
+
+  it('rejects invalid bearer token without clearing cookies', async () => {
+    const app = createTestApp(async () => ({
+      user: null,
+      session: null,
+    }))
+
+    const response = await app.request('/me', {
+      headers: {
+        Authorization: 'Bearer invalid-token',
+      },
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({
+      user: null,
+      session: null,
+    })
+    expect(response.headers.get('set-cookie')).toBeNull()
+  })
 })
