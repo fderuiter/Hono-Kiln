@@ -1,3 +1,16 @@
+# [1.26.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.25.0...v1.26.0) (2026-07-15)
+
+
+## Bug Fixes
+
+* **docs:** resolve syntax error in accessibility script ([75bb283](https://github.com/fderuiter/Hono-Kiln/commit/75bb2834c3682b0994caa21d5009839cf52f41d8))
+* **setup:** target module registry and schema for boilerplate cleanup ([ed82456](https://github.com/fderuiter/Hono-Kiln/commit/ed82456b2a45ac5b83de93258b9867c50d58be4a))
+
+
+## Features
+
+* **ci:** add jscpd duplicate code detection to PR validation ([6b90799](https://github.com/fderuiter/Hono-Kiln/commit/6b9079968620b40998844e87355d936befed0eb0))
+
 # [1.25.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.24.1...v1.25.0) (2026-07-14)
 
 
