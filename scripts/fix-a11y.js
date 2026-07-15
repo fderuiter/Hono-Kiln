@@ -32,7 +32,7 @@ if (fs.existsSync(mainJsFile)) {
   let mainJs = fs.readFileSync(mainJsFile, 'utf8');
   mainJs = mainJs.replace(
     'let r=e.appendChild(document.createElement("a"));',
-    'let r=e.appendChild(document.createElement(e.tagName==="SUMMARY"?"span":"a"));if(r.tagName==="SPAN"){r.style.cursor="pointer";r.setAttribute("role","link");r.setAttribute("tabindex","0");r.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();window.location.href=se+t.path;};r.onkeydown=(ev)=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();ev.stopPropagation();window.location.href=se+t.path;}};}if(r.href=se+t.path'
+    'let r=e.appendChild(document.createElement(e.tagName==="SUMMARY"?"span":"a"));if(r.tagName==="SPAN"){r.style.cursor="pointer";r.setAttribute("role","link");r.setAttribute("tabindex","0");r.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();window.location.href=se+t.path;};r.onkeydown=(ev)=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();ev.stopPropagation();window.location.href=se+t.path;}};} '
   );
   fs.writeFileSync(mainJsFile, mainJs, 'utf8');
 }
