@@ -30,11 +30,14 @@ describe('preflight checks', () => {
     process.stdout.isTTY = false
 
     const dbCheckSpy = spyOn(dbCheck, 'checkDatabaseConnectivity').mockResolvedValue({ success: true })
+    const dbSchemaSpy = spyOn(dbCheck, 'checkDatabaseSchema').mockResolvedValue({ provisioned: true })
     
     await runPreflightChecks()
 
     expect(dbCheckSpy).toHaveBeenCalled()
+    expect(dbSchemaSpy).toHaveBeenCalled()
     dbCheckSpy.mockRestore()
+    dbSchemaSpy.mockRestore()
   })
 
   it('exits with a non-zero code in non-TTY environments if database connection fails', async () => {
@@ -42,6 +45,7 @@ describe('preflight checks', () => {
     process.stdout.isTTY = false
 
     const dbCheckSpy = spyOn(dbCheck, 'checkDatabaseConnectivity').mockResolvedValue({ success: false, error: 'connection refused' })
+    const dbSchemaSpy = spyOn(dbCheck, 'checkDatabaseSchema').mockResolvedValue({ provisioned: true })
     const consoleSpy = spyOn(console, 'error').mockImplementation(() => {})
     const exitSpy = spyOn(process, 'exit').mockImplementation((code?: number | string | null | undefined): never => {
       throw new Error(`process.exit called with ${code}`)
@@ -57,6 +61,33 @@ describe('preflight checks', () => {
     expect(exitSpy).toHaveBeenCalledWith(1)
 
     dbCheckSpy.mockRestore()
+    dbSchemaSpy.mockRestore()
+    consoleSpy.mockRestore()
+    exitSpy.mockRestore()
+  })
+
+  it('exits with a non-zero code if database schema is missing', async () => {
+    process.stdin.isTTY = false
+    process.stdout.isTTY = false
+
+    const dbCheckSpy = spyOn(dbCheck, 'checkDatabaseConnectivity').mockResolvedValue({ success: true })
+    const dbSchemaSpy = spyOn(dbCheck, 'checkDatabaseSchema').mockResolvedValue({ provisioned: false, error: 'no such table' })
+    const consoleSpy = spyOn(console, 'error').mockImplementation(() => {})
+    const exitSpy = spyOn(process, 'exit').mockImplementation((code?: number | string | null | undefined): never => {
+      throw new Error(`process.exit called with ${code}`)
+    })
+
+    try {
+      await runPreflightChecks()
+    } catch (e: any) {
+      expect(e.message).toBe('process.exit called with 1')
+    }
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Database schema verification failed'))
+    expect(exitSpy).toHaveBeenCalledWith(1)
+
+    dbCheckSpy.mockRestore()
+    dbSchemaSpy.mockRestore()
     consoleSpy.mockRestore()
     exitSpy.mockRestore()
   })
