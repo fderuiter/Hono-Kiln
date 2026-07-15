@@ -90,9 +90,9 @@ authRoutes.openapi(registerRoute, publicAccess(async (c) => {
   const db = c.get('db')
   const auth = c.get('auth')
   const service = createAuthService(db, auth)
-  const { name, email, password } = c.req.valid('json')
+  const { name, email, password, workspaceName } = c.req.valid('json')
 
-  const result = await service.register(name, email, password)
+  const result = await service.register(name, email, password, workspaceName)
 
   if ('error' in result) {
     return c.json({ error: result.error }, 400 as const)

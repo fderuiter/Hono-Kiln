@@ -5,6 +5,7 @@ import { v1App } from '../../registry'
 describe('auth routes', () => {
   it('registers a user successfully and strips extra database fields from response', async () => {
     const mockDb = {
+      transaction: async (cb: any) => cb(mockDb),
       query: {
         users: {
           findFirst: mock(async () => undefined),

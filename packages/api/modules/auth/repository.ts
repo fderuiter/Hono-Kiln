@@ -28,9 +28,10 @@ export function createAuthRepository(db: Database) {
       return UserSchema.parse(user)
     },
 
-    async createUser(data: { name: string; email: string; password: string }): Promise<UserType> {
+    async createUser(data: { name: string; email: string; password: string }, tx?: any): Promise<UserType> {
       const passwordHash = await passwordHelpers.hash(data.password)
-      const [newUser] = await db
+      const client = tx || db;
+      const [newUser] = await client
         .insert(users)
         .values({
           name: data.name,
