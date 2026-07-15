@@ -1,3 +1,10 @@
+# [1.27.1](https://github.com/fderuiter/Hono-Kiln/compare/v1.27.0...v1.27.1) (2026-07-15)
+
+
+## Performance Improvements
+
+* **a11y:** optimize Swagger UI validation polling via debouncing ([#100](https://github.com/fderuiter/Hono-Kiln/issues/100)) ([03622be](https://github.com/fderuiter/Hono-Kiln/commit/03622bea7207ffa57e8916a00f32b5dcb3d3fd69))
+
 # [1.27.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.26.0...v1.27.0) (2026-07-15)
 
 
