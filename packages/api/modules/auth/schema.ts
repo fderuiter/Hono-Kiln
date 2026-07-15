@@ -55,7 +55,8 @@ export const UserSchema = userEntity.selectSchema.pick({
 export const RegisterRequestSchema = z.object({
   name: userEntity.insertSchema.shape.name,
   email: userEntity.insertSchema.shape.email,
-  password: z.string().min(8, 'Password must be at least 8 characters').openapi({ description: 'User password', example: 'password123' })
+  password: z.string().min(8, 'Password must be at least 8 characters').openapi({ description: 'User password', example: 'password123' }),
+  workspaceName: z.string().optional().openapi({ description: 'Workspace name', example: 'Acme Corp' })
 }).openapi('RegisterRequest');
 
 export const LoginRequestSchema = z.object({

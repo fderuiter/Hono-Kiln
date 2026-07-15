@@ -4,6 +4,7 @@ import { createAuthService } from './service'
 describe('auth service', () => {
   it('registers a user and returns a session successfully', async () => {
     const mockDb = {
+      transaction: async (cb: any) => cb(mockDb),
       query: {
         users: {
           findFirst: async () => null
