@@ -11,7 +11,14 @@ export const authMiddleware = createMiddleware<AppEnv>(async (c, next) => {
   c.set('organizationRole', null)
 
   const auth = c.get('auth')
-  const sessionId = auth.readSessionCookie(c.req.header('Cookie') ?? '')
+  const cookieHeader = c.req.header('Cookie') ?? ''
+  const sessionIdCookie = auth.readSessionCookie(cookieHeader)
+  
+  const authHeader = c.req.header('Authorization') ?? ''
+  const sessionIdBearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+
+  const sessionId = sessionIdCookie || sessionIdBearer
+  const isBearerAuth = !sessionIdCookie && !!sessionIdBearer
 
   if (!sessionId) {
     await next()
@@ -20,12 +27,14 @@ export const authMiddleware = createMiddleware<AppEnv>(async (c, next) => {
 
   const { session, user } = await auth.validateSession(sessionId)
 
-  if (session?.fresh) {
-    sessionHelpers.setSessionCookie(c, auth.createSessionCookie(session.id))
-  }
+  if (!isBearerAuth) {
+    if (session?.fresh) {
+      sessionHelpers.setSessionCookie(c, auth.createSessionCookie(session.id))
+    }
 
-  if (!session) {
-    sessionHelpers.setSessionCookie(c, auth.createBlankSessionCookie())
+    if (!session) {
+      sessionHelpers.setSessionCookie(c, auth.createBlankSessionCookie())
+    }
   }
 
   c.set('user', user)
