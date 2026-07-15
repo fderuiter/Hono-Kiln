@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process'
 import readline from 'node:readline/promises'
-import { checkDatabaseConnectivity } from './db/check'
+import { checkDatabaseConnectivity, checkDatabaseSchema } from './db/check'
 import { getDatabaseUrl } from './db/config'
 
 export async function runPreflightChecks(): Promise<void> {
@@ -106,6 +106,18 @@ export async function runPreflightChecks(): Promise<void> {
         process.exit(1)
       }
       dbStatus = await checkDatabaseConnectivity()
+    }
+
+    const schemaStatus = await checkDatabaseSchema()
+    if (!schemaStatus.provisioned) {
+      console.error('\n[Pre-flight] Database schema verification failed. Required core tables are missing.')
+      console.error(`Error details: ${schemaStatus.error}`)
+      console.error('\nPlease provision your database by running:')
+      console.error('  bun run setup')
+      console.error('Or manually apply migrations via:')
+      console.error('  bun run sync-schema && bun run db:push')
+      console.error('\nServer startup aborted.')
+      process.exit(1)
     }
   } finally {
     rl.close()
