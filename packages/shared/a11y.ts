@@ -35,6 +35,18 @@ export const swaggerA11yStyles = `
     }
   }
 
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
   .skip-link {
     position: absolute;
     width: 1px;
@@ -107,7 +119,7 @@ export const SwaggerA11yPluginCode = `
         liveRegion.id = 'a11y-status-message';
         liveRegion.setAttribute('aria-live', 'polite');
         liveRegion.setAttribute('aria-atomic', 'true');
-        liveRegion.className = 'skip-link';
+        liveRegion.className = 'sr-only';
         document.body.appendChild(liveRegion);
 
         const announce = (msg) => {
@@ -118,11 +130,20 @@ export const SwaggerA11yPluginCode = `
         let previousValidationErrors = 0;
         system.getStore().subscribe(() => {
           setTimeout(() => {
-            const errors = document.querySelectorAll('.errors-wrapper, .error, .invalid').length;
-            if (errors > previousValidationErrors) {
-              announce('Validation failed. Required field missing.');
+            const errorNodes = document.querySelectorAll('.errors-wrapper, .error, .invalid');
+            const errorsCount = errorNodes.length;
+            if (errorsCount > previousValidationErrors) {
+              let errorMsg = 'Validation failed. Required field missing.';
+              for (let i = 0; i < errorsCount; i++) {
+                const text = errorNodes[i].textContent.trim();
+                if (text) {
+                  errorMsg = text;
+                  break;
+                }
+              }
+              announce(errorMsg);
             }
-            previousValidationErrors = errors;
+            previousValidationErrors = errorsCount;
           }, 100);
         });
       },
