@@ -128,8 +128,10 @@ export const SwaggerA11yPluginCode = `
         };
 
         let previousValidationErrors = 0;
+        let debounceTimer;
         system.getStore().subscribe(() => {
-          setTimeout(() => {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
             const errorNodes = document.querySelectorAll('.errors-wrapper, .error, .invalid');
             const errorsCount = errorNodes.length;
             if (errorsCount > previousValidationErrors) {
@@ -144,7 +146,7 @@ export const SwaggerA11yPluginCode = `
               announce(errorMsg);
             }
             previousValidationErrors = errorsCount;
-          }, 100);
+          }, 200);
         });
       },
       statePlugins: {
