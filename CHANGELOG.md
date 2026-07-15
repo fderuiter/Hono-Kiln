@@ -1,3 +1,11 @@
+# [1.29.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.28.0...v1.29.0) (2026-07-15)
+
+
+## Features
+
+* Add Explicit Workspace Management API ([1ef4deb](https://github.com/fderuiter/Hono-Kiln/commit/1ef4deb24845f57a573af2402df42d0580b9693f))
+* Add high-contrast pulse-focus styling for all interactive elements in Swagger UI ([02f0796](https://github.com/fderuiter/Hono-Kiln/commit/02f0796986aae3946d788586f202a5edcd7de7fa)), closes [hi#contrast](https://github.com/hi/issues/contrast)
+
 # [1.28.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.27.1...v1.28.0) (2026-07-15)
 
 
