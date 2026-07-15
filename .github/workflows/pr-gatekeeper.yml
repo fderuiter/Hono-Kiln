@@ -31,7 +31,7 @@ jobs:
         run: bun x jscpd .
 
       - name: Lint
-        run: bun x --bun oxlint .
+        run: bun x oxlint .
 
       - name: Audit codebase health
         run: bun kiln audit
