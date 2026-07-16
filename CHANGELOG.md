@@ -1,3 +1,10 @@
+# [1.29.1](https://github.com/fderuiter/Hono-Kiln/compare/v1.29.0...v1.29.1) (2026-07-16)
+
+
+## Bug Fixes
+
+* **ci:** remove --bun flag from oxlint to prevent crash on bun 1.1.29 ([fa28a8b](https://github.com/fderuiter/Hono-Kiln/commit/fa28a8b1aa57303b954dd2417d9208ecd11df579))
+
 # [1.29.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.28.0...v1.29.0) (2026-07-15)
 
 
