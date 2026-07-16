@@ -1,3 +1,10 @@
+# [1.30.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.29.1...v1.30.0) (2026-07-16)
+
+
+## Features
+
+* **api:** make preflight checks database-aware ([6c7bd54](https://github.com/fderuiter/Hono-Kiln/commit/6c7bd549f4df80abf4fe4338f8f8d2e613c96823))
+
 # [1.29.1](https://github.com/fderuiter/Hono-Kiln/compare/v1.29.0...v1.29.1) (2026-07-16)
 
 
