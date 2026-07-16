@@ -1,7 +1,24 @@
 import { spawnSync } from 'node:child_process'
 import readline from 'node:readline/promises'
+import config from '../../kiln.json'
 import { checkDatabaseConnectivity, checkDatabaseSchema } from './db/check'
 import { getDatabaseUrl } from './db/config'
+
+function isRemoteService(url: string): boolean {
+  if (url.startsWith('file:') || url === ':memory:') {
+    return false
+  }
+  try {
+    const parsed = new URL(url)
+    const hostname = parsed.hostname
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0') {
+      return false
+    }
+    return true
+  } catch {
+    return false
+  }
+}
 
 export async function runPreflightChecks(): Promise<void> {
   if (Bun.env.NODE_ENV === 'production') {
@@ -9,7 +26,9 @@ export async function runPreflightChecks(): Promise<void> {
   }
 
   const isTTY = process.stdout.isTTY && process.stdin.isTTY
-  const isLite = getDatabaseUrl().startsWith('file:')
+  const dbUrl = getDatabaseUrl()
+  const provider = config.provider || 'libsql'
+  const shouldSkipDocker = provider !== 'libsql' || isRemoteService(dbUrl)
 
   const rl = readline.createInterface({
     input: process.stdin,
@@ -37,7 +56,7 @@ export async function runPreflightChecks(): Promise<void> {
   }
 
   try {
-    if (!isLite) {
+    if (!shouldSkipDocker) {
       let dockerInfo = spawnSync('docker', ['info'])
       while (dockerInfo.status !== 0) {
         console.error('\n[Pre-flight] Docker daemon is not running.')
