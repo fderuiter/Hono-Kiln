@@ -1,5 +1,6 @@
 import { setCookie } from 'hono/cookie'
 import type { Context } from 'hono'
+import type { CookieOptions } from 'hono/utils/cookie'
 
 /** Utilities for securely hashing and verifying passwords */
 export const passwordHelpers = {
@@ -9,7 +10,7 @@ export const passwordHelpers = {
 
 /** Utilities for managing session cookies in HTTP responses */
 export const sessionHelpers = {
-  setSessionCookie: (c: Context, sessionCookie: { name: string; value: string; attributes: any }) => {
+  setSessionCookie: (c: Context, sessionCookie: { name: string; value: string; attributes?: CookieOptions }) => {
     setCookie(c, sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
   }
 }
