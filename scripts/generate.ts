@@ -463,7 +463,15 @@ export async function run(argv: string[], repoRoot = process.cwd()) {
       return syncResult.status ?? 1
     }
 
-    const knipResult = spawnSync('bun', ['run', 'knip'], { stdio: 'inherit', cwd: repoRoot })
+    const knipBinPath = path.join(repoRoot, 'node_modules', '.bin', 'knip')
+    const knipExists = await exists(knipBinPath)
+    if (!knipExists) {
+      console.error('Error: Local knip binary not found.')
+      console.error('Please ensure dependencies are installed locally by running `bun install`.')
+      return 1
+    }
+
+    const knipResult = spawnSync('bun', [knipBinPath], { stdio: 'inherit', cwd: repoRoot })
     if (knipResult.status !== 0) {
       return knipResult.status ?? 1
     }

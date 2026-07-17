@@ -12,6 +12,8 @@ async function createRepoFixture() {
   tempDirs.push(repoRoot)
 
   await mkdir(path.join(repoRoot, 'packages', 'api', 'modules'), { recursive: true })
+  await mkdir(path.join(repoRoot, 'node_modules', '.bin'), { recursive: true })
+  await writeFile(path.join(repoRoot, 'node_modules', '.bin', 'knip'), '#!/usr/bin/env node\nconsole.log("mock");\n', { mode: 0o755 })
   await writeFile(
     path.join(repoRoot, 'packages', 'api', 'registry.ts'),
     `import { OpenAPIHono } from '@hono/zod-openapi'
