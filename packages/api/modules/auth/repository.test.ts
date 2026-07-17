@@ -4,6 +4,7 @@ import { createAuthRepository } from './repository'
 describe('auth repository', () => {
   it('strips internal fields like passwordHash from responses', async () => {
     const mockDb = {
+      query: { users: {} },
       insert: () => ({
         values: () => ({
           returning: async () => [{
