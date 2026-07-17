@@ -48,6 +48,18 @@ async function main() {
   await fs.writeFile(path.join(process.cwd(), 'kiln.json'), JSON.stringify({ provider }, null, 2), 'utf8');
 
 
+  const architecture = await select({
+    message: 'Choose Architecture',
+    options: [
+      { value: 'multi', label: 'Multi-Tenant (SaaS)', hint: 'Includes organizations and documents' },
+      { value: 'single', label: 'Single-Tenant', hint: 'Clean slate without multi-tenant boilerplate' },
+    ],
+  });
+  if (isCancel(architecture)) {
+    cancel('Operation cancelled');
+    process.exit(1);
+  }
+
   let envChoice = 'full';
   let pgMysqlUrl = '';
 
