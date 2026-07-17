@@ -1,3 +1,10 @@
+# [1.33.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.32.0...v1.33.0) (2026-07-17)
+
+
+## Features
+
+* **generator:** standardize external testing templates and worker registry ([85d1168](https://github.com/fderuiter/Hono-Kiln/commit/85d1168940a19c83a266261065a5075266b7b468))
+
 # [1.32.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.31.0...v1.32.0) (2026-07-17)
 
 
