@@ -107,18 +107,41 @@ import { eq, and } from 'drizzle-orm'
 import { ${camelName}s, ${schemaName}, type ${pascalName} } from './schema'
 import { entityName } from './schema'
 
+/**
+ * Creates a repository instance for the module.
+ * @param db The database connection instance.
+ * @returns An object containing repository database operations.
+ */
 export function ${repositoryFnName}(db: Database) {
   return {
+    /**
+     * Retrieves all records for a specific organization.
+     * @param organizationId The unique identifier of the organization.
+     * @returns A promise that resolves to an array of records.
+     */
     async list(organizationId: number): Promise<${pascalName}[]> {
       const results = await db.select().from(${camelName}s).where(eq(${camelName}s.organizationId, organizationId))
       return results as ${pascalName}[]
     },
+    /**
+     * Finds a specific record by ID and organization ID.
+     * @param id The unique identifier of the record.
+     * @param organizationId The unique identifier of the organization.
+     * @returns A promise that resolves to the record or undefined if not found.
+     */
     async find(id: number, organizationId: number): Promise<${pascalName} | undefined> {
       const results = await db.select().from(${camelName}s).where(
         and(eq(${camelName}s.id, id), eq(${camelName}s.organizationId, organizationId))
       ).limit(1)
       return results[0] as ${pascalName} | undefined
     },
+    /**
+     * Updates a specific record by ID and organization ID.
+     * @param id The unique identifier of the record.
+     * @param data The data update payload.
+     * @param organizationId The unique identifier of the organization.
+     * @returns A promise that resolves to the updated record.
+     */
     async update(id: number, data: any, organizationId: number) {
       const results = await db.update(${camelName}s).set(data).where(
         and(eq(${camelName}s.id, id), eq(${camelName}s.organizationId, organizationId))
@@ -132,12 +155,27 @@ export function ${repositoryFnName}(db: Database) {
 import { ${schemaName}, type ${pascalName} } from './schema'
 import { entityName } from './schema'
 
+/**
+ * Creates a repository instance for the module.
+ * @param _db The database connection instance.
+ * @returns An object containing repository database operations.
+ */
 export function ${repositoryFnName}(_db: Database) {
   return {
+    /**
+     * Retrieves all records.
+     * @returns An array of parsed records.
+     */
     list(): ${pascalName}[] {
       const rawData = [{ entity: entityName, internalField: 'hidden-value' }]
       return rawData.map(item => ${schemaName}.parse(item))
     },
+    /**
+     * Updates a specific record by ID.
+     * @param id The unique identifier of the record.
+     * @param data The data update payload.
+     * @returns An empty array stub.
+     */
     update(id: number, data: any) {
       return []
     }
@@ -150,10 +188,20 @@ export function ${repositoryFnName}(_db: Database) {
 import { ${repositoryFnName} } from './repository'
 import type { ${pascalName} } from './schema'
 
+/**
+ * Creates a service instance for the module.
+ * @param db The database connection instance.
+ * @returns An object containing service business logic operations.
+ */
 export function ${serviceFnName}(db: Database) {
   const repository = ${repositoryFnName}(db)
 
   return {
+    /**
+     * Retrieves all records for a specific organization from the repository.
+     * @param organizationId The unique identifier of the organization.
+     * @returns A promise that resolves to an array of records.
+     */
     async list(organizationId: number): Promise<${pascalName}[]> {
       return repository.list(organizationId)
     }
@@ -164,10 +212,19 @@ export function ${serviceFnName}(db: Database) {
 import { ${repositoryFnName} } from './repository'
 import type { ${pascalName} } from './schema'
 
+/**
+ * Creates a service instance for the module.
+ * @param db The database connection instance.
+ * @returns An object containing service business logic operations.
+ */
 export function ${serviceFnName}(db: Database) {
   const repository = ${repositoryFnName}(db)
 
   return {
+    /**
+     * Retrieves all records from the repository.
+     * @returns An array of parsed records.
+     */
     list(): ${pascalName}[] {
       return repository.list()
     }
