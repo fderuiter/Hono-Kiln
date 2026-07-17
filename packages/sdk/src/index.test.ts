@@ -1,6 +1,30 @@
 import { describe, it, expect, mock } from 'bun:test'
 import { Hono } from 'hono'
-import { createSafeClient, injectHeader } from './index'
+import { createClient, createSafeClient, injectHeader } from './index'
+
+describe('createClient (deprecated)', () => {
+  it('should successfully make an in-memory request', async () => {
+    const app = new Hono().get('/api/test', (c) => c.json({ message: 'standard success' }))
+    const client = createClient('http://localhost', {
+      fetch: app.request.bind(app),
+    })
+
+    const response = await client.api.test.$get()
+    const data = await response.json()
+    
+    expect(response.ok).toBe(true)
+    expect(data).toEqual({ message: 'standard success' })
+  })
+
+  it('should throw exceptions on failed API requests (network errors)', async () => {
+    const brokenFetch = () => Promise.reject(new Error('Hard network failure'))
+    const client = createClient('http://localhost', {
+      fetch: brokenFetch as any,
+    })
+
+    expect(client.api.broken.$get()).rejects.toThrow('Hard network failure')
+  })
+})
 
 describe('createSafeClient', () => {
   it('should transform successful JSON responses into [data, null]', async () => {
