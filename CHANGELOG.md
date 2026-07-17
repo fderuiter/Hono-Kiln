@@ -1,3 +1,10 @@
+# [1.32.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.31.0...v1.32.0) (2026-07-17)
+
+
+## Features
+
+* centralize primary key injection for schema entities ([f23abe8](https://github.com/fderuiter/Hono-Kiln/commit/f23abe89bd675a3fd0409a0b22ea4ce83b382feb))
+
 # [1.31.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.30.0...v1.31.0) (2026-07-17)
 
 
