@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Check for unused dependencies
+        run: bun x knip --dependencies --exclude unlisted,binaries,unresolved
+
       - name: Run tests
         run: bun test
 
