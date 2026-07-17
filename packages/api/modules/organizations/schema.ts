@@ -4,10 +4,6 @@ import { createEntity } from '../../utils/factory'
 import { users } from '../auth/schema'
 
 export const organizationEntity = createEntity('organizations', {
-  id: {
-    db: integer('id').primaryKey({ autoIncrement: true }),
-    openapi: { description: 'Organization ID', example: 1 }
-  },
   name: {
     db: text('name').notNull(),
     validation: z.string().min(1, 'Name is required'),
