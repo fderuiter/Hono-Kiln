@@ -7,6 +7,8 @@
     "./registry": "./registry.ts"
   },
   "scripts": {
+    "audit": "knip",
+    "typecheck": "tsc --noEmit",
     "sync-schema": "bun run scripts/sync-schema.ts",
     "dev": "bun --watch index.ts",
     "start": "bun index.ts",
@@ -36,6 +38,9 @@
   "devDependencies": {
     "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@hono-kiln/testing": "workspace:*",
-    "drizzle-kit": "0.31.10"
+    "@types/bun": "^1.3.14",
+    "drizzle-kit": "0.31.10",
+    "knip": "^6.27.0",
+    "typescript": "^7.0.2"
   }
 }

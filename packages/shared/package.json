@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "audit": "knip",
+    "typecheck": "tsc --noEmit",
     "test": "bun test"
   },
   "exports": {
@@ -13,5 +15,9 @@
   },
   "peerDependencies": {
     "@hono/zod-openapi": "^1.4.0"
+  },
+  "devDependencies": {
+    "knip": "^6.27.0",
+    "typescript": "^7.0.2"
   }
 }

@@ -18,7 +18,14 @@ exports[`CLI Output Snapshots snapshots output for remove command 1`] = `
 
 exports[`CLI Output Snapshots snapshots output for audit command 1`] = `
 "[spawn] bun run <APP_ROOT>/packages/api/scripts/sync-schema.ts <REPO_ROOT>/packages/api
-[spawn] bun run knip
+[spawn] bun run audit
+[spawn] bun run typecheck
+[spawn] bun run audit
+[spawn] bun run typecheck
+[spawn] bun run audit
+[spawn] bun run typecheck
+[spawn] bun run audit
+[spawn] bun run typecheck
 [spawn] bun run docs
 [outro] Audit passed successfully.
 "

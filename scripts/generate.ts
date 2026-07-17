@@ -463,9 +463,22 @@ export async function run(argv: string[], repoRoot = process.cwd()) {
       return syncResult.status ?? 1
     }
 
-    const knipResult = spawnSync('bun', ['run', 'knip'], { stdio: 'inherit', cwd: repoRoot })
-    if (knipResult.status !== 0) {
-      return knipResult.status ?? 1
+    const packages = ['api', 'sdk', 'shared', 'testing']
+    
+    for (const pkg of packages) {
+      const pkgPath = path.join(repoRoot, 'packages', pkg)
+      
+      const auditResult = spawnSync('bun', ['run', 'audit'], { stdio: 'inherit', cwd: pkgPath })
+      if (auditResult.status !== 0) {
+        console.error(`Audit failed: knip error in packages/${pkg}.`)
+        return auditResult.status ?? 1
+      }
+      
+      const tscResult = spawnSync('bun', ['run', 'typecheck'], { stdio: 'inherit', cwd: pkgPath })
+      if (tscResult.status !== 0) {
+        console.error(`Audit failed: type validation error in packages/${pkg}.`)
+        return tscResult.status ?? 1
+      }
     }
     
     const docsPassed = await checkDocumentation(repoRoot)
