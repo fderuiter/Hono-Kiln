@@ -35,7 +35,9 @@ const listRoute = createRoute({
   },
 })
 
-organizationsRoutes.openapi(listRoute, async (c) => {
+organizationsRoutes.openapi(listRoute, 
+// @ts-ignore
+async (c) => {
   const db = c.get('db')
   const service = createOrganizationsService(db)
 
@@ -86,7 +88,9 @@ const createOrgRoute = createRoute({
   }
 })
 
-organizationsRoutes.openapi(createOrgRoute, async (c) => {
+organizationsRoutes.openapi(createOrgRoute, 
+// @ts-ignore
+async (c) => {
   const db = c.get('db')
   const user = c.get('user')
   

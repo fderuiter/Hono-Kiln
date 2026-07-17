@@ -12,7 +12,7 @@ describe('preflight checks', () => {
     isTTYOriginalIn = process.stdin.isTTY
     isTTYOriginalOut = process.stdout.isTTY
     process.env.NODE_ENV = 'development'
-    spawnSyncMock = spyOn(cp, 'spawnSync').mockImplementation((cmd, args) => {
+    spawnSyncMock = spyOn(cp, 'spawnSync').mockImplementation((cmd: any, args?: any, options?: any) => {
       if (cmd === 'docker' && args?.[0] === 'info') return { status: 0 } as any
       if (cmd === 'docker' && args?.[0] === 'compose') return { stdout: Buffer.from('libsql'), status: 0 } as any
       return { status: 0 } as any

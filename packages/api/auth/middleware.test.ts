@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { Hono } from 'hono'
+import type { AppEnv } from '../env'
 import type { Session, User } from 'lucia'
 import { createMockAuth, createTestApp as createHarnessApp } from '@hono-kiln/testing'
 
@@ -11,7 +12,7 @@ function createTestApp(
     session: Session | null
   }>,
 ) {
-  const router = new Hono()
+  const router = new Hono<AppEnv>()
   router.use('*', authMiddleware)
   router.get('/me', (c) =>
     c.json({
@@ -52,6 +53,7 @@ describe('auth middleware', () => {
       user: {
         id: 1,
         email: 'ada@example.com',
+        permissions: [],
         name: 'Ada Lovelace',
       },
       session: {
@@ -73,6 +75,7 @@ describe('auth middleware', () => {
       user: {
         id: 1,
         email: 'ada@example.com',
+        permissions: [],
         name: 'Ada Lovelace',
       },
       session: {
@@ -111,6 +114,7 @@ describe('auth middleware', () => {
         id: 2,
         email: 'bob@example.com',
         name: 'Bob',
+        permissions: [],
       },
       session: {
         id: sessionId,
@@ -132,6 +136,7 @@ describe('auth middleware', () => {
         id: 2,
         email: 'bob@example.com',
         name: 'Bob',
+        permissions: [],
       },
       session: {
         id: 'token-456',

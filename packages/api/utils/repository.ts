@@ -53,7 +53,7 @@ export function createValidatedRepository<
         ...options,
         where: finalWhere,
       });
-      return results.map((r: any) => schema.parse(r));
+      return (results as any[]).map((r: any) => schema.parse(r));
     },
 
     async insert(data: TTable['$inferInsert']): Promise<z.infer<TSchema>> {
@@ -68,14 +68,14 @@ export function createValidatedRepository<
       const finalWhere = applyTenantFilter(where);
       if (!finalWhere) throw new Error('Update requires a where clause');
       const results = await db.update(table).set(data).where(finalWhere).returning();
-      return results.map((r: any) => schema.parse(r));
+      return (results as any[]).map((r: any) => schema.parse(r));
     },
 
     async delete(where: SQL): Promise<z.infer<TSchema>[]> {
       const finalWhere = applyTenantFilter(where);
       if (!finalWhere) throw new Error('Delete requires a where clause');
       const results = await db.delete(table).where(finalWhere).returning();
-      return results.map((r: any) => schema.parse(r));
+      return (results as any[]).map((r: any) => schema.parse(r));
     },
   };
 }

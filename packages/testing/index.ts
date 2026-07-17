@@ -153,7 +153,7 @@ export type TestClientOptions = {
  * @param options - Configuration options for the test client.
  * @returns A safe client instance for testing.
  */
-export function createTestClient<T extends Record<string, any>>(
+export function createTestClient<T extends Hono<any, any, any>>(
   app: Hono<any, any, any>,
   options: TestClientOptions = {}
 ) {

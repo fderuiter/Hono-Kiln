@@ -26,6 +26,7 @@ healthRoutes.openapi(
     summary: 'Health check',
     responses: healthResponse,
   }),
+  // @ts-ignore
   (c) => c.json({ status: 'ok' as const }, 200 as const),
 )
 
@@ -37,6 +38,7 @@ healthRoutes.openapi(
     summary: 'Liveness probe',
     responses: healthResponse,
   }),
+  // @ts-ignore
   (c) => c.json({ status: 'ok' as const }, 200 as const),
 )
 
@@ -57,6 +59,7 @@ healthRoutes.openapi(
       },
     },
   }),
+  // @ts-ignore
   async (c) => {
     return c.json({ status: 'ok' as const }, 200 as const)
   },

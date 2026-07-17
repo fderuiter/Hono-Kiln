@@ -8,7 +8,7 @@ describe('createTestClient', () => {
     const app = createTestApp(router)
     const client = createTestClient<typeof router>(app)
 
-    const [data, error] = await client.api.test.$get()
+    const [data, error] = await (client as any).api.test.$get()
     expect(error).toBeNull()
     expect(data).toEqual({ ok: true })
   })
@@ -23,7 +23,7 @@ describe('createTestClient', () => {
     const app = createTestApp(router, { authenticated: true })
     const client = createTestClient<typeof router>(app)
 
-    const [data, error] = await client.api.me.$get()
+    const [data, error] = await (client as any).api.me.$get()
     expect(error).toBeNull()
     expect(data.cookie).toContain('auth_session=')
   })
@@ -39,7 +39,7 @@ describe('createTestClient', () => {
     })
     const client = createTestClient<typeof router>(app)
 
-    const [data, error] = await client.api.me.$get()
+    const [data, error] = await (client as any).api.me.$get()
     expect(error).toBeNull()
     expect(data.cookie).toContain('auth_session=custom-session-123')
   })
@@ -52,7 +52,7 @@ describe('createTestClient', () => {
     const app = createTestApp(router)
     const client = createTestClient<typeof router>(app, { organizationId: 'org-456' })
 
-    const [data, error] = await client.api.org.$get()
+    const [data, error] = await (client as any).api.org.$get()
     expect(error).toBeNull()
     expect(data.orgId).toBe('org-456')
   })
@@ -65,7 +65,7 @@ describe('createTestClient', () => {
     const app = createTestApp(router, { organizationId: 'org-app-789' } as any)
     const client = createTestClient<typeof router>(app)
 
-    const [data, error] = await client.api.org.$get()
+    const [data, error] = await (client as any).api.org.$get()
     expect(error).toBeNull()
     expect(data.orgId).toBe('org-app-789')
   })

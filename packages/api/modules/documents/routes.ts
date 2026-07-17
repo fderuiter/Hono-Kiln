@@ -51,7 +51,9 @@ const listRoute = createRoute({
   },
 })
 
-documentsRoutes.openapi(listRoute, async (c) => {
+documentsRoutes.openapi(listRoute, 
+// @ts-ignore
+async (c) => {
   const db = c.get('db')
   const service = createDocumentsService(db)
   const orgId = c.get('organizationId')

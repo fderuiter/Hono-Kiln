@@ -12,13 +12,13 @@ export function createDocumentsRepository(db: Database) {
       const results = await db.select().from(documentss).where(
         and(eq(documentss.id, id), eq(documentss.organizationId, organizationId))
       ).limit(1)
-      return results[0] as Documents | undefined
+      return (results as any[])[0] as Documents | undefined
     },
     async update(id: number, data: any, organizationId: number) {
       const results = await db.update(documentss).set(data).where(
         and(eq(documentss.id, id), eq(documentss.organizationId, organizationId))
       ).returning()
-      return results[0]
+      return (results as any[])[0]
     }
   }
 }

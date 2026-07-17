@@ -21,11 +21,10 @@ export const organizationMembers = createTable('organization_members', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   role: text('role', { enum: ['admin', 'member'] }).notNull().default('member'),
-}, (table) => ({
+}, (table: any) => ({
   pk: primaryKey({ columns: [table.organizationId, table.userId] })
 }))
 
 export const OrganizationSchema = organizationEntity.selectSchema.openapi('Organization')
 
 export type Organization = z.infer<typeof OrganizationSchema>
-export const entityName = 'organizations' as const

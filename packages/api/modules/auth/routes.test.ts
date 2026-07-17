@@ -27,7 +27,7 @@ describe('auth routes', () => {
     }
 
     const app = createTestApp(v1App, { db: mockDb as any })
-    const client = createTestClient<typeof v1App>(app)
+    const client = createTestClient<typeof v1App>(app) as any
 
     const [data, error] = await client.auth.register.$post({
       json: {

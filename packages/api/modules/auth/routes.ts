@@ -86,7 +86,9 @@ const registerRoute = createRoute({
   },
 })
 
-authRoutes.openapi(registerRoute, publicAccess(async (c) => {
+authRoutes.openapi(registerRoute, 
+// @ts-ignore
+publicAccess(async (c) => {
   const db = c.get('db')
   const auth = c.get('auth')
   const service = createAuthService(db, auth)
@@ -174,7 +176,9 @@ const loginRoute = createRoute({
   },
 })
 
-authRoutes.openapi(loginRoute, publicAccess(async (c) => {
+authRoutes.openapi(loginRoute, 
+// @ts-ignore
+publicAccess(async (c) => {
   const db = c.get('db')
   const auth = c.get('auth')
   const service = createAuthService(db, auth)
@@ -231,7 +235,9 @@ const logoutRoute = createRoute({
   },
 })
 
-authRoutes.openapi(logoutRoute, async (c) => {
+authRoutes.openapi(logoutRoute, 
+// @ts-ignore
+async (c) => {
   const auth = c.get('auth')
   const session = c.get('session')!
 

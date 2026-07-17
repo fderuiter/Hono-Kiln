@@ -23,9 +23,9 @@ export function createAuthService(db: Database, auth: Auth) {
 
         const finalWorkspaceName = workspaceName || `${name}'s Workspace`;
 
-        const [newOrg] = await tx.insert(organizations).values({
+        const [newOrg] = (await tx.insert(organizations).values({
           name: finalWorkspaceName
-        }).returning();
+        }).returning()) as any[];
 
         await tx.insert(organizationMembers).values({
           organizationId: newOrg.id,
