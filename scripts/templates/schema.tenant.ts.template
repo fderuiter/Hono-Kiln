@@ -1,0 +1,26 @@
+import { z } from '@hono/zod-openapi'
+import { integer, text } from '../../utils/db-types'
+import { createEntity } from '../../utils/factory'
+import { organizations } from '../organizations/schema'
+
+export const entityName = '{{moduleName}}' as const
+
+export const {{camelName}}Entity = createEntity('{{moduleName}}s', {
+  id: {
+    db: integer('id').primaryKey({ autoIncrement: true }),
+    openapi: { description: '{{pascalName}} ID', example: 1 }
+  },
+  organizationId: {
+    db: integer('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    openapi: { description: 'Organization ID', example: 1 }
+  },
+  entity: {
+    db: text('entity').notNull(),
+    validation: z.string(),
+    openapi: { description: '{{mainSchemaDescription}}', example: '{{moduleName}}' }
+  }
+})
+
+export const {{camelName}}s = {{camelName}}Entity.table
+export const {{schemaName}} = {{camelName}}Entity.selectSchema.openapi('{{pascalName}}')
+export type {{pascalName}} = z.infer<typeof {{schemaName}}>

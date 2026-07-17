@@ -54,7 +54,22 @@ type ModuleMetadata = {
   mainSchemaDescription: string
 }
 
-function getTemplateFiles(moduleName: string, meta: ModuleMetadata, isWorker: boolean = false, isTenant: boolean = false) {
+async function processTemplate(templateName: string, data: Record<string, any>): Promise<string> {
+  const templatePath = path.join(import.meta.dirname, 'templates', templateName);
+  let content = await readFile(templatePath, 'utf8');
+  
+  content = content.replace(/\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/endif\}\}/g, (match, condition, block) => {
+    return data[condition] ? block : '';
+  });
+  
+  content = content.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+    return key in data ? data[key] : match;
+  });
+  
+  return content;
+}
+
+async function getTemplateFiles(moduleName: string, meta: ModuleMetadata, isWorker: boolean = false, isTenant: boolean = false) {
   const camelName = toCamelCase(moduleName)
   const pascalName = toPascalCase(moduleName)
   const routeName = `${camelName}Routes`
@@ -62,323 +77,25 @@ function getTemplateFiles(moduleName: string, meta: ModuleMetadata, isWorker: bo
   const repositoryFnName = `create${pascalName}Repository`
   const serviceFnName = `create${pascalName}Service`
 
-  const schemaContent = isTenant 
-    ? `import { z } from '@hono/zod-openapi'
-import { integer, text } from '../../utils/db-types'
-import { createEntity } from '../../utils/factory'
-import { organizations } from '../organizations/schema'
+  const templateData = {
+    moduleName,
+    camelName,
+    pascalName,
+    routeName,
+    schemaName,
+    repositoryFnName,
+    serviceFnName,
+    isWorker,
+    isTenant,
+    notTenant: !isTenant,
+    ...meta
+  };
 
-export const entityName = '${moduleName}' as const
-
-export const ${camelName}Entity = createEntity('${moduleName}s', {
-  id: {
-    db: integer('id').primaryKey({ autoIncrement: true }),
-    openapi: { description: '${pascalName} ID', example: 1 }
-  },
-  organizationId: {
-    db: integer('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-    openapi: { description: 'Organization ID', example: 1 }
-  },
-  entity: {
-    db: text('entity').notNull(),
-    validation: z.string(),
-    openapi: { description: '${meta.mainSchemaDescription}', example: '${moduleName}' }
-  }
-})
-
-export const ${camelName}s = ${camelName}Entity.table
-export const ${schemaName} = ${camelName}Entity.selectSchema.openapi('${pascalName}')
-export type ${pascalName} = z.infer<typeof ${schemaName}>
-`
-    : `import { z } from '@hono/zod-openapi'
-
-export const entityName = '${moduleName}' as const
-
-export const ${schemaName} = z.object({
-  entity: z.string().openapi({ description: '${meta.mainSchemaDescription}', example: '${moduleName}' }),
-}).openapi('${pascalName}')
-
-export type ${pascalName} = z.infer<typeof ${schemaName}>
-`
-
-  const repoContent = isTenant
-    ? `import type { Database } from '../../db'
-import { eq, and } from 'drizzle-orm'
-import { ${camelName}s, ${schemaName}, type ${pascalName} } from './schema'
-import { entityName } from './schema'
-
-/**
- * Creates a repository instance for the module.
- * @param db The database connection instance.
- * @returns An object containing repository database operations.
- */
-export function ${repositoryFnName}(db: Database) {
-  return {
-    /**
-     * Retrieves all records for a specific organization.
-     * @param organizationId The unique identifier of the organization.
-     * @returns A promise that resolves to an array of records.
-     */
-    async list(organizationId: number): Promise<${pascalName}[]> {
-      const results = await db.select().from(${camelName}s).where(eq(${camelName}s.organizationId, organizationId))
-      return results as ${pascalName}[]
-    },
-    /**
-     * Finds a specific record by ID and organization ID.
-     * @param id The unique identifier of the record.
-     * @param organizationId The unique identifier of the organization.
-     * @returns A promise that resolves to the record or undefined if not found.
-     */
-    async find(id: number, organizationId: number): Promise<${pascalName} | undefined> {
-      const results = await db.select().from(${camelName}s).where(
-        and(eq(${camelName}s.id, id), eq(${camelName}s.organizationId, organizationId))
-      ).limit(1)
-      return results[0] as ${pascalName} | undefined
-    },
-    /**
-     * Updates a specific record by ID and organization ID.
-     * @param id The unique identifier of the record.
-     * @param data The data update payload.
-     * @param organizationId The unique identifier of the organization.
-     * @returns A promise that resolves to the updated record.
-     */
-    async update(id: number, data: any, organizationId: number) {
-      const results = await db.update(${camelName}s).set(data).where(
-        and(eq(${camelName}s.id, id), eq(${camelName}s.organizationId, organizationId))
-      ).returning()
-      return results[0]
-    }
-  }
-}
-`
-    : `import type { Database } from '../../db'
-import { ${schemaName}, type ${pascalName} } from './schema'
-import { entityName } from './schema'
-
-/**
- * Creates a repository instance for the module.
- * @param _db The database connection instance.
- * @returns An object containing repository database operations.
- */
-export function ${repositoryFnName}(_db: Database) {
-  return {
-    /**
-     * Retrieves all records.
-     * @returns An array of parsed records.
-     */
-    list(): ${pascalName}[] {
-      const rawData = [{ entity: entityName, internalField: 'hidden-value' }]
-      return rawData.map(item => ${schemaName}.parse(item))
-    },
-    /**
-     * Updates a specific record by ID.
-     * @param id The unique identifier of the record.
-     * @param data The data update payload.
-     * @returns An empty array stub.
-     */
-    update(id: number, data: any) {
-      return []
-    }
-  }
-}
-`
-
-  const serviceContent = isTenant
-    ? `import type { Database } from '../../db'
-import { ${repositoryFnName} } from './repository'
-import type { ${pascalName} } from './schema'
-
-/**
- * Creates a service instance for the module.
- * @param db The database connection instance.
- * @returns An object containing service business logic operations.
- */
-export function ${serviceFnName}(db: Database) {
-  const repository = ${repositoryFnName}(db)
-
-  return {
-    /**
-     * Retrieves all records for a specific organization from the repository.
-     * @param organizationId The unique identifier of the organization.
-     * @returns A promise that resolves to an array of records.
-     */
-    async list(organizationId: number): Promise<${pascalName}[]> {
-      return repository.list(organizationId)
-    }
-  }
-}
-`
-    : `import type { Database } from '../../db'
-import { ${repositoryFnName} } from './repository'
-import type { ${pascalName} } from './schema'
-
-/**
- * Creates a service instance for the module.
- * @param db The database connection instance.
- * @returns An object containing service business logic operations.
- */
-export function ${serviceFnName}(db: Database) {
-  const repository = ${repositoryFnName}(db)
-
-  return {
-    /**
-     * Retrieves all records from the repository.
-     * @returns An array of parsed records.
-     */
-    list(): ${pascalName}[] {
-      return repository.list()
-    }
-  }
-}
-`
-
-  const routesContent = `import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
-import { HttpStatusCodes, InternalServerErrorSchema, UnauthorizedSchema, UnprocessableEntitySchema, ForbiddenSchema } from '@hono-kiln/shared'
-
-import { ${serviceFnName} } from './service'
-import { ${schemaName} } from './schema'
-import type { AppEnv } from '../../env'
-import { requirePermission } from '../../auth/guard'
-${isWorker ? "import { inngest } from '../../inngest/client'\n" : ""}
-export const ${routeName} = new OpenAPIHono<AppEnv>()
-
-const listRoute = createRoute({
-  method: 'get',
-  path: '/',
-  tags: ['${pascalName}'],
-  summary: '${meta.primaryRouteSummary}',
-  description: '${meta.moduleDescription}',
-  responses: {
-    [HttpStatusCodes.OK]: {
-      description: 'Successful response',
-      content: {
-        'application/json': {
-          schema: z.object({
-            data: z.array(${schemaName}).openapi({ description: 'List of ${pascalName} objects' }),
-          }).openapi('${pascalName}ListResponse'),
-        },
-      },
-    },
-    [HttpStatusCodes.UNAUTHORIZED]: {
-      description: 'Unauthorized',
-      content: {
-        'application/json': {
-          schema: UnauthorizedSchema,
-        },
-      },
-    },
-    [HttpStatusCodes.FORBIDDEN]: {
-      description: 'Forbidden',
-      content: {
-        'application/json': {
-          schema: ForbiddenSchema,
-        },
-      },
-    },
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: {
-      description: 'Validation Error',
-      content: {
-        'application/json': {
-          schema: UnprocessableEntitySchema,
-        },
-      },
-    },
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: {
-      description: 'Internal Server Error',
-      content: {
-        'application/json': {
-          schema: InternalServerErrorSchema,
-        },
-      },
-    },
-  },
-})
-
-${routeName}.openapi(listRoute, requirePermission('${moduleName}:read')(async (c) => {
-  const db = c.get('db')
-  const service = ${serviceFnName}(db)
-${isTenant ? `  const orgId = c.get('organizationId')
-  if (!orgId) {
-    return c.json({ error: 'Unauthorized' }, HttpStatusCodes.UNAUTHORIZED as any)
-  }
-  return c.json({ data: await service.list(orgId) }, HttpStatusCodes.OK as any)
-` : `
-  return c.json(
-    {
-      data: service.list(),
-    },
-    HttpStatusCodes.OK as any,
-  )
-`}}))
-${isWorker ? `
-const triggerRoute = createRoute({
-  method: 'post',
-  path: '/trigger',
-  tags: ['${pascalName}'],
-  summary: 'Trigger background worker',
-  responses: {
-    [HttpStatusCodes.OK]: {
-      description: 'Worker triggered',
-      content: {
-        'application/json': { schema: z.object({ message: z.string() }) },
-      },
-    },
-    [HttpStatusCodes.UNAUTHORIZED]: {
-      description: 'Unauthorized',
-      content: {
-        'application/json': { schema: UnauthorizedSchema },
-      },
-    },
-    [HttpStatusCodes.FORBIDDEN]: {
-      description: 'Forbidden',
-      content: {
-        'application/json': { schema: ForbiddenSchema },
-      },
-    },
-  }
-})
-
-${routeName}.openapi(triggerRoute, requirePermission('${moduleName}:write')(async (c) => {
-  await inngest.send({ name: '${moduleName}/process', data: {} })
-  return c.json({ message: 'Worker triggered successfully' }, HttpStatusCodes.OK as any)
-}))
-` : ''}`
-
-  const testContent = isTenant
-    ? `import { describe, expect, it } from 'bun:test'
-import { createTestApp, createTestClient } from '@hono-kiln/testing'
-
-import { ${routeName} } from './routes'
-
-describe('${moduleName} routes', () => {
-  it('returns unauthorized when no organization context', async () => {
-    const app = createTestApp(${routeName})
-    const client = createTestClient<typeof ${routeName}>(app)
-    const [data, error] = await client.index.$get()
-    
-    expect(data).toBeNull()
-    expect(error).toEqual({ error: 'Unauthorized' })
-  })
-})
-`
-    : `import { describe, expect, it } from 'bun:test'
-import { createTestApp, createTestClient } from '@hono-kiln/testing'
-
-import { ${routeName} } from './routes'
-
-describe('${moduleName} routes', () => {
-  it('returns scaffolded payload', async () => {
-    const app = createTestApp(${routeName})
-    const client = createTestClient<typeof ${routeName}>(app)
-    const [data, error] = await client.index.$get()
-    
-    expect(error).toBeNull()
-    expect(data).toEqual({
-      data: [{ entity: '${moduleName}' }],
-    })
-  })
-})
-`
+  const schemaContent = await processTemplate(isTenant ? 'schema.tenant.ts.template' : 'schema.ts.template', templateData);
+  const repoContent = await processTemplate(isTenant ? 'repository.tenant.ts.template' : 'repository.ts.template', templateData);
+  const serviceContent = await processTemplate(isTenant ? 'service.tenant.ts.template' : 'service.ts.template', templateData);
+  const routesContent = await processTemplate('routes.ts.template', templateData);
+  const testContent = await processTemplate('routes.test.ts.template', templateData);
 
   const files: Record<string, string> = {
     'schema.ts': schemaContent,
@@ -389,16 +106,7 @@ describe('${moduleName} routes', () => {
   }
 
   if (isWorker) {
-    files['worker.ts'] = `import { inngest } from '../../inngest/client'
-
-export const ${camelName}Worker = inngest.createFunction(
-  { id: '${moduleName}-worker', event: '${moduleName}/process' },
-  async ({ event, step }) => {
-    await step.sleep('wait-a-moment', '1s')
-    return { event, body: 'Task completed' }
-  }
-)
-`
+    files['worker.ts'] = await processTemplate('worker.ts.template', templateData);
   }
 
   return {
@@ -464,7 +172,10 @@ export async function mountModule(moduleName: string, routeName: string, repoRoo
   }
 
   if (updatedContent !== appContent) {
-    if (isWorker) {
+    await writeFile(mountPath, updatedContent)
+  }
+
+  if (isWorker) {
     const functionsPath = path.join(repoRoot, 'packages', 'api', 'inngest', 'functions.ts')
     let functionsContent = await readFile(functionsPath, 'utf8')
     const workerExportName = `${toCamelCase(moduleName)}Worker`
@@ -488,8 +199,6 @@ export async function mountModule(moduleName: string, routeName: string, repoRoo
     )
     
     await writeFile(functionsPath, functionsContent)
-  }
-  await writeFile(mountPath, updatedContent)
   }
 }
 
@@ -591,7 +300,7 @@ export async function generateModule(moduleInputName: string, repoRoot = process
     outro('Metadata gathered.');
   }
 
-  const { files, routeName } = getTemplateFiles(moduleName, meta, isWorker, promptedIsTenant)
+  const { files, routeName } = await getTemplateFiles(moduleName, meta, isWorker, promptedIsTenant)
   await mkdir(modulePath, { recursive: true })
 
   await Promise.all(
@@ -634,6 +343,25 @@ export async function unmountModule(moduleName: string, repoRoot: string) {
   }
 
   await writeFile(mountPath, lines.join('\n'))
+
+  const functionsPath = path.join(repoRoot, 'packages/api/inngest/functions.ts')
+  if (await exists(functionsPath)) {
+    let functionsContent = await readFile(functionsPath, 'utf8')
+    const workerExportName = `${toCamelCase(moduleName)}Worker`
+    const workerImportPath = `../modules/${moduleName}/worker`
+
+    const importRegex = new RegExp(`import\\s+\\{\\s*${workerExportName}\\s*\\}\\s+from\\s+'${workerImportPath}'\\n?`, 'g')
+    functionsContent = functionsContent.replace(importRegex, '')
+
+    functionsContent = functionsContent.replace(
+      /export const functions:\s*any\[\]\s*=\s*\[(.*?)\]/s,
+      (match, p1) => {
+        const funcs = p1.split(',').map(f => f.trim()).filter(f => Boolean(f) && f !== workerExportName)
+        return `export const functions: any[] = [${funcs.join(', ')}]`
+      }
+    )
+    await writeFile(functionsPath, functionsContent)
+  }
 }
 
 export async function removeModule(moduleInputName: string, repoRoot = process.cwd()) {
