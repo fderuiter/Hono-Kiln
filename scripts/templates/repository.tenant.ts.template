@@ -1,0 +1,48 @@
+import type { Database } from '../../db'
+import { eq, and } from 'drizzle-orm'
+import { {{camelName}}s, {{schemaName}}, type {{pascalName}} } from './schema'
+import { entityName } from './schema'
+
+/**
+ * Creates a repository instance for the module.
+ * @param db The database connection instance.
+ * @returns An object containing repository database operations.
+ */
+export function {{repositoryFnName}}(db: Database) {
+  return {
+    /**
+     * Retrieves all records for a specific organization.
+     * @param organizationId The unique identifier of the organization.
+     * @returns A promise that resolves to an array of records.
+     */
+    async list(organizationId: number): Promise<{{pascalName}}[]> {
+      const results = await db.select().from({{camelName}}s).where(eq({{camelName}}s.organizationId, organizationId))
+      return results as {{pascalName}}[]
+    },
+    /**
+     * Finds a specific record by ID and organization ID.
+     * @param id The unique identifier of the record.
+     * @param organizationId The unique identifier of the organization.
+     * @returns A promise that resolves to the record or undefined if not found.
+     */
+    async find(id: number, organizationId: number): Promise<{{pascalName}} | undefined> {
+      const results = await db.select().from({{camelName}}s).where(
+        and(eq({{camelName}}s.id, id), eq({{camelName}}s.organizationId, organizationId))
+      ).limit(1)
+      return results[0] as {{pascalName}} | undefined
+    },
+    /**
+     * Updates a specific record by ID and organization ID.
+     * @param id The unique identifier of the record.
+     * @param data The data update payload.
+     * @param organizationId The unique identifier of the organization.
+     * @returns A promise that resolves to the updated record.
+     */
+    async update(id: number, data: any, organizationId: number) {
+      const results = await db.update({{camelName}}s).set(data).where(
+        and(eq({{camelName}}s.id, id), eq({{camelName}}s.organizationId, organizationId))
+      ).returning()
+      return results[0]
+    }
+  }
+}

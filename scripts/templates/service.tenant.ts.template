@@ -1,0 +1,23 @@
+import type { Database } from '../../db'
+import { {{repositoryFnName}} } from './repository'
+import type { {{pascalName}} } from './schema'
+
+/**
+ * Creates a service instance for the module.
+ * @param db The database connection instance.
+ * @returns An object containing service business logic operations.
+ */
+export function {{serviceFnName}}(db: Database) {
+  const repository = {{repositoryFnName}}(db)
+
+  return {
+    /**
+     * Retrieves all records for a specific organization from the repository.
+     * @param organizationId The unique identifier of the organization.
+     * @returns A promise that resolves to an array of records.
+     */
+    async list(organizationId: number): Promise<{{pascalName}}[]> {
+      return repository.list(organizationId)
+    }
+  }
+}

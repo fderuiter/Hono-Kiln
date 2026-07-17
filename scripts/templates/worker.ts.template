@@ -1,0 +1,9 @@
+import { inngest } from '../../inngest/client'
+
+export const {{camelName}}Worker = inngest.createFunction(
+  { id: '{{moduleName}}-worker', event: '{{moduleName}/process' },
+  async ({ event, step }) => {
+    await step.sleep('wait-a-moment', '1s')
+    return { event, body: 'Task completed' }
+  }
+)

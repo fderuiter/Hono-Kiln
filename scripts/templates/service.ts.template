@@ -1,0 +1,22 @@
+import type { Database } from '../../db'
+import { {{repositoryFnName}} } from './repository'
+import type { {{pascalName}} } from './schema'
+
+/**
+ * Creates a service instance for the module.
+ * @param db The database connection instance.
+ * @returns An object containing service business logic operations.
+ */
+export function {{serviceFnName}}(db: Database) {
+  const repository = {{repositoryFnName}}(db)
+
+  return {
+    /**
+     * Retrieves all records from the repository.
+     * @returns An array of parsed records.
+     */
+    list(): {{pascalName}}[] {
+      return repository.list()
+    }
+  }
+}

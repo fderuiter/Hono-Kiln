@@ -1,0 +1,9 @@
+import { z } from '@hono/zod-openapi'
+
+export const entityName = '{{moduleName}}' as const
+
+export const {{schemaName}} = z.object({
+  entity: z.string().openapi({ description: '{{mainSchemaDescription}}', example: '{{moduleName}}' }),
+}).openapi('{{pascalName}}')
+
+export type {{pascalName}} = z.infer<typeof {{schemaName}}>
