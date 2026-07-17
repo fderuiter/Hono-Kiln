@@ -1,5 +1,5 @@
 import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
-import { Project, SyntaxKind } from 'ts-morph'
+import { Project } from 'ts-morph'
 import path from 'node:path'
 import { text, confirm, intro, outro, isCancel, cancel } from '@clack/prompts'
 

@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import { eq, and, type SQL, getTableColumns } from 'drizzle-orm';
+import { eq, and, type SQL } from 'drizzle-orm';
 
 import type { Database } from '../db';
 

@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach } from 'bun:test';
 import { createDatabase } from '../db';
 import { documentss, documentsSchema } from '../modules/documents/schema';
 import { createValidatedRepository } from './repository';
-import { eq } from 'drizzle-orm';
 
 describe('Validated Repository Factory', () => {
   let db: ReturnType<typeof createDatabase>;

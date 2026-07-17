@@ -1,4 +1,4 @@
-import { describe, it, expect, mock } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { Hono } from 'hono'
 import { createSafeClient, injectHeader } from './index'
 
@@ -26,7 +26,7 @@ describe('createSafeClient', () => {
   })
 
   it('should handle 204 No Content gracefully', async () => {
-    const app = new Hono().get('/api/empty', (c) => new Response(null, { status: 204 }))
+    const app = new Hono().get('/api/empty', () => new Response(null, { status: 204 }))
     const client = createSafeClient<any>('http://localhost', {
       fetch: app.request.bind(app),
     })
