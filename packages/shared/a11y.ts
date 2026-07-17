@@ -35,18 +35,7 @@ export const swaggerA11yStyles = `
     }
   }
 
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
-  }
-
+  .sr-only,
   .skip-link {
     position: absolute;
     width: 1px;
@@ -59,7 +48,7 @@ export const swaggerA11yStyles = `
     border-width: 0;
   }
   .skip-link:focus {
-    position: static;
+    position: absolute;
     width: auto;
     height: auto;
     padding: 10px;
@@ -170,10 +159,11 @@ export const SwaggerA11yPluginCode = `
             },
             setResponse: (oriAction, system) => (path, method, res) => {
               const el = document.getElementById('a11y-status-message');
-              if (el && res && res.status) {
+              if (el && res && typeof res.status !== 'undefined') {
                 let statusText = res.statusText || '';
                 if (!statusText) {
                     const codes = {
+                      0: 'Connection Failed',
                       200: 'OK', 201: 'Created', 202: 'Accepted', 204: 'No Content',
                       400: 'Bad Request', 401: 'Unauthorized', 403: 'Forbidden', 404: 'Not Found',
                       405: 'Method Not Allowed', 409: 'Conflict', 500: 'Internal Server Error'
@@ -182,7 +172,7 @@ export const SwaggerA11yPluginCode = `
                 }
                 const msg = res.status >= 200 && res.status < 300 
                   ? \`Success: \${res.status} \${statusText}\` 
-                  : \`Error: \${res.status} \${statusText}\`;
+                  : \`Error: \${res.status === 0 ? statusText : res.status + ' ' + statusText}\`;
                 el.textContent = '';
                 setTimeout(() => { el.textContent = msg; }, 50);
               }
