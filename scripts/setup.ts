@@ -3,6 +3,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { text, confirm, intro, outro, isCancel, cancel, spinner, note, select } from '@clack/prompts';
 import { checkDatabaseConnectivity } from '../packages/api/db/check';
+import { pruneDatabaseDependencies } from './prune';
 
 async function fileExists(filePath: string) {
   try {
@@ -47,6 +48,18 @@ async function main() {
   
   await fs.writeFile(path.join(process.cwd(), 'kiln.json'), JSON.stringify({ provider }, null, 2), 'utf8');
 
+
+  const architecture = await select({
+    message: 'Choose Architecture',
+    options: [
+      { value: 'multi', label: 'Multi-Tenant (SaaS)', hint: 'Includes organizations and documents' },
+      { value: 'single', label: 'Single-Tenant', hint: 'Clean slate without multi-tenant boilerplate' },
+    ],
+  });
+  if (isCancel(architecture)) {
+    cancel('Operation cancelled');
+    process.exit(1);
+  }
 
   let envChoice = 'full';
   let pgMysqlUrl = '';
@@ -321,6 +334,17 @@ async function main() {
     }
   }
   s.stop('Updated project name and package scope.');
+
+  // Prune unused database dependencies and configurations
+  s.start('Pruning unused database dependencies and configurations...');
+  try {
+    await pruneDatabaseDependencies(provider as string, path.join(rootDir, 'packages/api'));
+    s.stop('Pruned unused database dependencies and configurations.');
+  } catch (error) {
+    s.stop('Failed to prune database dependencies.');
+    cancel('Could not prune database dependencies: ' + (error instanceof Error ? error.message : String(error)));
+    process.exit(1);
+  }
 
   // Run bun install to update workspace symlinks
   s.start('Running bun install to update workspace symlinks...');

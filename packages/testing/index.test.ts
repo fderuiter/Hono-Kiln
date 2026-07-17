@@ -28,7 +28,7 @@ describe('createTestClient', () => {
     expect(data.cookie).toContain('auth_session=')
   })
 
-  it('should inject custom session cookie if session provided in TestAppOptions', async () => {
+  it('should inject custom session cookie if session provided in options', async () => {
     const router = new Hono().get('/api/me', (c) => {
       const cookie = c.req.header('cookie') || ''
       return c.json({ cookie })

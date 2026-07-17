@@ -6,6 +6,8 @@ import type { Hono } from 'hono'
 /**
  * Creates a standard Hono RPC client.
  *
+ * @deprecated Use `createSafeClient` instead. This standard client is deprecated and will be removed in a future release.
+ *
  * @param baseUrl - The base URL of the target API service.
  * @param options - Optional client configurations (from standard Hono client option parameters).
  * @returns A standard Hono RPC client instance bound to `AppType`.
@@ -222,5 +224,7 @@ export const createSafeClient = <T extends Hono<any, any, any>>(
 /**
  * Schema-level Hono API routing registry used for client typing.
  * This type ensures that SDK requests conform to the API's actual routes and parameter expectations.
+ *
+ * @deprecated Use of the raw AppType is deprecated.
  */
 export type { AppType }

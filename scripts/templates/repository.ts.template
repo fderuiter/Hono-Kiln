@@ -1,30 +1,38 @@
 import type { Database } from '../../db'
-import { {{schemaName}}, type {{pascalName}} } from './schema'
-import { entityName } from './schema'
+import { {{camelName}}s, {{schemaName}}, type {{pascalName}} } from './schema'
+import { createValidatedRepository } from '../../utils/repository'
 
 /**
  * Creates a repository instance for the module.
- * @param _db The database connection instance.
+ * @param db The database connection instance.
  * @returns An object containing repository database operations.
  */
-export function {{repositoryFnName}}(_db: Database) {
+export function {{repositoryFnName}}(db: Database) {
+  const repo = createValidatedRepository({
+    db,
+    queryKey: '{{camelName}}s',
+    table: {{camelName}}s,
+    schema: {{schemaName}}
+  })
+
   return {
     /**
      * Retrieves all records.
      * @returns An array of parsed records.
      */
-    list(): {{pascalName}}[] {
-      const rawData = [{ entity: entityName, internalField: 'hidden-value' }]
-      return rawData.map(item => {{schemaName}}.parse(item))
+    async list(): Promise<{{pascalName}}[]> {
+      return repo.findMany()
     },
     /**
      * Updates a specific record by ID.
      * @param id The unique identifier of the record.
      * @param data The data update payload.
-     * @returns An empty array stub.
+     * @returns The updated record or undefined.
      */
-    update(id: number, data: any) {
-      return []
+    async update(id: number, data: any) {
+      const { eq } = await import('drizzle-orm')
+      const results = await repo.update(eq({{camelName}}s.id, id), data)
+      return results[0]
     }
   }
 }

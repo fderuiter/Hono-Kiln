@@ -41,6 +41,8 @@ const sessionEntity = createEntity('sessions', {
 export const users = userEntity.table;
 export const sessions = sessionEntity.table;
 
+export const UserInternalSchema = userEntity.selectSchema;
+
 export const UserSchema = userEntity.selectSchema.pick({
   id: true,
   email: true,

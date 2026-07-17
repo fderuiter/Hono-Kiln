@@ -6,16 +6,6 @@ import type { AppEnv } from '@hono-kiln/api'
 import { createSafeClient, injectHeader, type RequestInterceptor } from '@hono-kiln/sdk'
 
 /**
- * Options for creating a mock authentication environment.
- */
-export type MockAuthOptions = {
-  /**
-   * Override the default session validation behavior.
-   */
-  validateSession?: (sessionId: string) => Promise<{ user: User | null; session: Session | null }>
-}
-
-/**
  * Creates a mocked authentication utility for testing purposes.
  * 
  * @example
@@ -28,7 +18,14 @@ export type MockAuthOptions = {
  * @param options - Configuration options for the mock auth instance.
  * @returns An object containing mocked auth methods matching the expected auth interface.
  */
-export function createMockAuth(options: MockAuthOptions = {}): AppEnv['Variables']['auth'] {
+export function createMockAuth(
+  options: {
+    /**
+     * Override the default session validation behavior.
+     */
+    validateSession?: (sessionId: string) => Promise<{ user: User | null; session: Session | null }>
+  } = {}
+): AppEnv['Variables']['auth'] {
   const validateSession =
     options.validateSession ??
     mock(async () => ({ user: null, session: null }))
@@ -69,22 +66,6 @@ export function createMockAuth(options: MockAuthOptions = {}): AppEnv['Variables
 }
 
 /**
- * Options for configuring the test application wrapper.
- */
-export type TestAppOptions = {
-  /** Mocked database instance */
-  db?: AppEnv['Variables']['db']
-  /** Mocked authentication instance */
-  auth?: AppEnv['Variables']['auth']
-  /** Optional user to inject into the test context */
-  user?: User | null
-  /** Optional session to inject into the test context */
-  session?: Session | null
-  /** Whether the mock app should simulate an authenticated state by default */
-  authenticated?: boolean
-}
-
-/**
  * Wraps a router with a test application context, injecting mock dependencies.
  * 
  * @param router - The Hono router to mount.
@@ -93,7 +74,18 @@ export type TestAppOptions = {
  */
 export function createTestApp<T extends Hono<any, any, any>>(
   router: T,
-  options: TestAppOptions = {},
+  options: {
+    /** Mocked database instance */
+    db?: AppEnv['Variables']['db']
+    /** Mocked authentication instance */
+    auth?: AppEnv['Variables']['auth']
+    /** Optional user to inject into the test context */
+    user?: User | null
+    /** Optional session to inject into the test context */
+    session?: Session | null
+    /** Whether the mock app should simulate an authenticated state by default */
+    authenticated?: boolean
+  } = {},
 ) {
   const app = new OpenAPIHono<AppEnv>()
 
@@ -136,16 +128,6 @@ export function createTestApp<T extends Hono<any, any, any>>(
 }
 
 /**
- * Options for configuring the test client.
- */
-export type TestClientOptions = {
-  /** Optional organization ID to inject via headers */
-  organizationId?: string
-  /** Optional interceptors to apply to the client */
-  interceptors?: import('@hono-kiln/sdk').RequestInterceptor[]
-}
-
-/**
  * Creates a type-safe client configured for testing against a mocked application.
  * Automatically injects session cookies and organization headers if specified in options.
  *
@@ -155,9 +137,20 @@ export type TestClientOptions = {
  */
 export function createTestClient<T extends Hono<any, any, any>>(
   app: Hono<any, any, any>,
-  options: TestClientOptions = {}
+  options: {
+    /** Optional organization ID to inject via headers */
+    organizationId?: string
+    /** Optional interceptors to apply to the client */
+    interceptors?: import('@hono-kiln/sdk').RequestInterceptor[]
+  } = {}
 ) {
-  const testOptions: TestAppOptions = (app as any).__testOptions || {}
+  const testOptions: {
+    db?: AppEnv['Variables']['db']
+    auth?: AppEnv['Variables']['auth']
+    user?: User | null
+    session?: Session | null
+    authenticated?: boolean
+  } = (app as any).__testOptions || {}
 
   const interceptors: RequestInterceptor[] = [...(options.interceptors || [])]
 
