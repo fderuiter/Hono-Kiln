@@ -1,8 +1,16 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
 import { createDatabase } from '../db';
-import { documentss, documentsSchema } from '../modules/documents/schema';
 import { createValidatedRepository } from './repository';
 import { eq } from 'drizzle-orm';
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+
+const mockTable = sqliteTable('mock_table', {
+  id: integer('id').primaryKey(),
+  tenantId: integer('tenant_id').notNull(),
+  name: text('name').notNull(),
+});
+const mockSchema = createSelectSchema(mockTable);
 
 describe('Validated Repository Factory', () => {
   let db: ReturnType<typeof createDatabase>;
@@ -14,9 +22,9 @@ describe('Validated Repository Factory', () => {
   it('should initialize successfully', () => {
     const repo = createValidatedRepository({
       db,
-      queryKey: 'documentss',
-      table: documentss,
-      schema: documentsSchema,
+      queryKey: 'mockTable' as any,
+      table: mockTable,
+      schema: mockSchema,
     });
     expect(repo).toBeDefined();
     expect(typeof repo.findFirst).toBe('function');
@@ -24,20 +32,17 @@ describe('Validated Repository Factory', () => {
   });
 
   it('should construct query options with tenant filter', async () => {
-    // We cannot fully execute the queries against the unmigrated in-memory DB,
-    // but we can ensure the factory returns the correctly typed functions.
     const repo = createValidatedRepository({
       db,
-      queryKey: 'documentss',
-      table: documentss,
-      schema: documentsSchema,
+      queryKey: 'mockTable' as any,
+      table: mockTable,
+      schema: mockSchema,
       tenant: {
-        column: documentss.organizationId,
+        column: mockTable.tenantId,
         id: 123,
       }
     });
 
-    // Validates that it doesn't throw on initialization
     expect(repo).toBeDefined();
   });
 });
