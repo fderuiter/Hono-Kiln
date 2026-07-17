@@ -136,24 +136,37 @@ export const SwaggerA11yPluginCode = `
         };
 
         let previousValidationErrors = 0;
+        let previousErrorMsg = '';
         let debounceTimer;
         system.getStore().subscribe(() => {
           clearTimeout(debounceTimer);
           debounceTimer = setTimeout(() => {
             const errorNodes = document.querySelectorAll('.errors-wrapper, .error, .invalid');
             const errorsCount = errorNodes.length;
-            if (errorsCount > previousValidationErrors) {
-              let errorMsg = 'Validation failed. Required field missing.';
+            
+            let currentErrorMsg = 'Validation failed. Required field missing.';
+            if (errorsCount > 0) {
               for (let i = 0; i < errorsCount; i++) {
                 const text = errorNodes[i].textContent.trim();
                 if (text) {
-                  errorMsg = text;
+                  currentErrorMsg = text;
                   break;
                 }
               }
-              announce(errorMsg);
+            } else {
+              currentErrorMsg = '';
             }
+
+            if (errorsCount === 0 && previousValidationErrors > 0) {
+              announce('All errors resolved.');
+            } else if (errorsCount > 0) {
+              if (errorsCount !== previousValidationErrors || currentErrorMsg !== previousErrorMsg) {
+                announce(currentErrorMsg);
+              }
+            }
+            
             previousValidationErrors = errorsCount;
+            previousErrorMsg = currentErrorMsg;
           }, 200);
         });
       },
