@@ -1,3 +1,17 @@
+# [1.34.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.33.0...v1.34.0) (2026-07-17)
+
+
+## Bug Fixes
+
+* **audit:** execute physical binary path for knip analyzer ([57213b5](https://github.com/fderuiter/Hono-Kiln/commit/57213b5f0b9b42fc72a7f65790b3d03a0ab80e69))
+
+
+## Features
+
+* automate codebase pruning for selected database driver during setup ([ad12bc5](https://github.com/fderuiter/Hono-Kiln/commit/ad12bc505a2c9b8174174adf43a4ce5f0dc8def9))
+* implement single-tenant clean slate conversion ([0d7b471](https://github.com/fderuiter/Hono-Kiln/commit/0d7b471853c52863a41fc97cb4bbdf8d474187fe))
+* standardize data-access layer adoption ([5f76b82](https://github.com/fderuiter/Hono-Kiln/commit/5f76b82f252702b326775713ff048d1ad535b499))
+
 # [1.33.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.32.0...v1.33.0) (2026-07-17)
 
 
