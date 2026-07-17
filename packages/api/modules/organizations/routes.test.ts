@@ -5,6 +5,7 @@ import { v1App } from '../../registry'
 describe('organizations routes', () => {
   it('returns successful response', async () => {
     const mockDb = {
+      query: { organizations: { findMany: async () => [] } },
       select: () => ({
         from: () => Promise.resolve([])
       })

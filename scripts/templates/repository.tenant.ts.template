@@ -1,7 +1,7 @@
 import type { Database } from '../../db'
-import { eq, and } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { {{camelName}}s, {{schemaName}}, type {{pascalName}} } from './schema'
-import { entityName } from './schema'
+import { createValidatedRepository } from '../../utils/repository'
 
 /**
  * Creates a repository instance for the module.
@@ -9,6 +9,17 @@ import { entityName } from './schema'
  * @returns An object containing repository database operations.
  */
 export function {{repositoryFnName}}(db: Database) {
+  const getRepo = (organizationId: number) => createValidatedRepository({
+    db,
+    queryKey: '{{camelName}}s',
+    table: {{camelName}}s,
+    schema: {{schemaName}},
+    tenant: {
+      column: {{camelName}}s.organizationId,
+      id: organizationId
+    }
+  })
+
   return {
     /**
      * Retrieves all records for a specific organization.
@@ -16,8 +27,8 @@ export function {{repositoryFnName}}(db: Database) {
      * @returns A promise that resolves to an array of records.
      */
     async list(organizationId: number): Promise<{{pascalName}}[]> {
-      const results = await db.select().from({{camelName}}s).where(eq({{camelName}}s.organizationId, organizationId))
-      return results as {{pascalName}}[]
+      const repo = getRepo(organizationId)
+      return repo.findMany()
     },
     /**
      * Finds a specific record by ID and organization ID.
@@ -26,10 +37,8 @@ export function {{repositoryFnName}}(db: Database) {
      * @returns A promise that resolves to the record or undefined if not found.
      */
     async find(id: number, organizationId: number): Promise<{{pascalName}} | undefined> {
-      const results = await db.select().from({{camelName}}s).where(
-        and(eq({{camelName}}s.id, id), eq({{camelName}}s.organizationId, organizationId))
-      ).limit(1)
-      return results[0] as {{pascalName}} | undefined
+      const repo = getRepo(organizationId)
+      return repo.findFirst({ where: eq({{camelName}}s.id, id) })
     },
     /**
      * Updates a specific record by ID and organization ID.
@@ -39,9 +48,8 @@ export function {{repositoryFnName}}(db: Database) {
      * @returns A promise that resolves to the updated record.
      */
     async update(id: number, data: any, organizationId: number) {
-      const results = await db.update({{camelName}}s).set(data).where(
-        and(eq({{camelName}}s.id, id), eq({{camelName}}s.organizationId, organizationId))
-      ).returning()
+      const repo = getRepo(organizationId)
+      const results = await repo.update(eq({{camelName}}s.id, id), data)
       return results[0]
     }
   }

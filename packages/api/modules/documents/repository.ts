@@ -1,23 +1,32 @@
 import type { Database } from '../../db'
-import { eq, and } from 'drizzle-orm'
-import { documentss, type Documents } from './schema'
+import { eq } from 'drizzle-orm'
+import { documentss, documentsSchema, type Documents } from './schema'
+import { createValidatedRepository } from '../../utils/repository'
 
 export function createDocumentsRepository(db: Database) {
+  const getRepo = (organizationId: number) => createValidatedRepository({
+    db,
+    queryKey: 'documentss',
+    table: documentss,
+    schema: documentsSchema,
+    tenant: {
+      column: documentss.organizationId,
+      id: organizationId
+    }
+  })
+
   return {
     async list(organizationId: number): Promise<Documents[]> {
-      const results = await db.select().from(documentss).where(eq(documentss.organizationId, organizationId))
-      return results as Documents[]
+      const repo = getRepo(organizationId)
+      return repo.findMany()
     },
     async find(id: number, organizationId: number): Promise<Documents | undefined> {
-      const results = await db.select().from(documentss).where(
-        and(eq(documentss.id, id), eq(documentss.organizationId, organizationId))
-      ).limit(1)
-      return results[0] as Documents | undefined
+      const repo = getRepo(organizationId)
+      return repo.findFirst({ where: eq(documentss.id, id) })
     },
     async update(id: number, data: any, organizationId: number) {
-      const results = await db.update(documentss).set(data).where(
-        and(eq(documentss.id, id), eq(documentss.organizationId, organizationId))
-      ).returning()
+      const repo = getRepo(organizationId)
+      const results = await repo.update(eq(documentss.id, id), data)
       return results[0]
     }
   }
