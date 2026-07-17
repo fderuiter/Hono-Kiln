@@ -1,3 +1,16 @@
+# [1.31.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.30.0...v1.31.0) (2026-07-17)
+
+
+## Bug Fixes
+
+* **shared:** improve a11y skip link, network status 0 handling, and auth typing ([b5a45d0](https://github.com/fderuiter/Hono-Kiln/commit/b5a45d04aac6e6575def633141b97505c178bb8e))
+
+
+## Features
+
+* **a11y:** announce swagger UI validation error updates and resolution ([4e3e2c8](https://github.com/fderuiter/Hono-Kiln/commit/4e3e2c803abf1c30101ba07396ea7c7c606826a8))
+* **scaffold:** add static JSDoc blocks to generated repository and service templates ([17ae1b1](https://github.com/fderuiter/Hono-Kiln/commit/17ae1b186af2090dab9dbc591553284fbac515aa))
+
 # [1.30.0](https://github.com/fderuiter/Hono-Kiln/compare/v1.29.1...v1.30.0) (2026-07-16)
 
 
