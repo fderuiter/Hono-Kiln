@@ -3,10 +3,6 @@ import { integer, text } from '../../utils/db-types'
 import { createEntity } from '../../utils/factory'
 
 const userEntity = createEntity('users', {
-  id: {
-    db: integer('id').primaryKey({ autoIncrement: true }),
-    openapi: { description: 'User ID', example: 1 }
-  },
   email: {
     db: text('email').notNull().unique(),
     validation: z.string().email('Invalid email address'),

@@ -5,7 +5,7 @@ CREATE TABLE "sessions" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"id" integer PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"email" text NOT NULL,
 	"name" text NOT NULL,
 	"password_hash" text NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE "users" (
 );
 --> statement-breakpoint
 CREATE TABLE "documentss" (
-	"id" integer PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"organization_id" integer NOT NULL,
 	"entity" text NOT NULL
 );
@@ -27,7 +27,7 @@ CREATE TABLE "organization_members" (
 );
 --> statement-breakpoint
 CREATE TABLE "organizations" (
-	"id" integer PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"name" text NOT NULL
 );
 --> statement-breakpoint

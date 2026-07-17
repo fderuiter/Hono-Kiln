@@ -1,6 +1,6 @@
-import { sqliteTable } from 'drizzle-orm/sqlite-core';
-import { pgTable } from 'drizzle-orm/pg-core';
-import { mysqlTable } from 'drizzle-orm/mysql-core';
+import { sqliteTable, integer as sqliteInt } from 'drizzle-orm/sqlite-core';
+import { pgTable, serial as pgSerial } from 'drizzle-orm/pg-core';
+import { mysqlTable, serial as mysqlSerial } from 'drizzle-orm/mysql-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from '@hono/zod-openapi';
 
@@ -25,9 +25,28 @@ export function createEntity<T extends string, C extends EntityConfig>(
   tableName: T,
   config: C
 ) {
-  const columns = Object.fromEntries(
-    Object.entries(config).map(([key, value]) => [key, value.db])
-  ) as any;
+  let hasPrimaryKey = false;
+  for (const field of Object.values(config)) {
+    if (field.db?.config?.primaryKey) {
+      hasPrimaryKey = true;
+      break;
+    }
+  }
+
+  let injectedIdColumn;
+  if (!hasPrimaryKey) {
+    if (provider === 'postgresql') {
+      injectedIdColumn = pgSerial('id').primaryKey();
+    } else if (provider === 'mysql') {
+      injectedIdColumn = mysqlSerial('id').primaryKey();
+    } else {
+      injectedIdColumn = sqliteInt('id').primaryKey({ autoIncrement: true });
+    }
+  }
+
+  const columns = injectedIdColumn 
+    ? { id: injectedIdColumn, ...Object.fromEntries(Object.entries(config).map(([key, value]) => [key, value.db])) }
+    : Object.fromEntries(Object.entries(config).map(([key, value]) => [key, value.db])) as any;
 
   const table = createTableFn(tableName, columns);
 
