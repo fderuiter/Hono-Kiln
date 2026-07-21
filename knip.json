@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignoreBinaries": ["turso", "gh"],
+  "ignoreBinaries": ["turso", "gh", "knip", "tsc"],
   "workspaces": {
     ".": {
       "project": ["scripts/**/*.ts"],
@@ -8,6 +8,21 @@
         "entry": ["scripts/**/*.test.ts"]
       }
     },
-    "packages/*": {}
+    "packages/api": {
+      "entry": ["index.ts", "registry.ts"],
+      "project": ["**/*.ts"]
+    },
+    "packages/sdk": {
+      "entry": ["src/index.ts"],
+      "project": ["**/*.ts"]
+    },
+    "packages/shared": {
+      "entry": ["index.ts"],
+      "project": ["**/*.ts"]
+    },
+    "packages/testing": {
+      "entry": ["index.ts"],
+      "project": ["**/*.ts"]
+    }
   }
 }

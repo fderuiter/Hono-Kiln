@@ -1,4 +1,4 @@
-import { describe, it, expect, mock } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { Hono } from 'hono'
 import { createClient, createSafeClient, injectHeader } from './index'
 
@@ -9,7 +9,7 @@ describe('createClient (deprecated)', () => {
       fetch: app.request.bind(app),
     })
 
-    const response = await client.api.test.$get()
+    const response = await (client as any).api.test.$get()
     const data = await response.json()
     
     expect(response.ok).toBe(true)
@@ -22,7 +22,7 @@ describe('createClient (deprecated)', () => {
       fetch: brokenFetch as any,
     })
 
-    expect(client.api.broken.$get()).rejects.toThrow('Hard network failure')
+    expect((client as any).api.broken.$get()).rejects.toThrow('Hard network failure')
   })
 })
 
@@ -33,7 +33,7 @@ describe('createSafeClient', () => {
       fetch: app.request.bind(app),
     })
 
-    const [data, error] = await client.api.test.$get()
+    const [data, error] = await (client as any).api.test.$get()
     expect(error).toBeNull()
     expect(data).toEqual({ message: 'success' })
   })
@@ -44,18 +44,18 @@ describe('createSafeClient', () => {
       fetch: app.request.bind(app),
     })
 
-    const [data, error] = await client.api.test.$get()
+    const [data, error] = await (client as any).api.test.$get()
     expect(error).toBeNull()
     expect(data).toBe('hello world')
   })
 
   it('should handle 204 No Content gracefully', async () => {
-    const app = new Hono().get('/api/empty', (c) => new Response(null, { status: 204 }))
+    const app = new Hono().get('/api/empty', () => new Response(null, { status: 204 }))
     const client = createSafeClient<any>('http://localhost', {
       fetch: app.request.bind(app),
     })
 
-    const [data, error] = await client.api.empty.$get()
+    const [data, error] = await (client as any).api.empty.$get()
     expect(error).toBeNull()
     expect(data).toBeNull()
   })
@@ -66,7 +66,7 @@ describe('createSafeClient', () => {
       fetch: app.request.bind(app),
     })
 
-    const [data, error] = await client.api.error.$get()
+    const [data, error] = await (client as any).api.error.$get()
     expect(data).toBeNull()
     expect(error).toEqual({ error: 'bad request' })
   })
@@ -77,7 +77,7 @@ describe('createSafeClient', () => {
       fetch: app.request.bind(app),
     })
 
-    const [data, error] = await client.api.error.$get()
+    const [data, error] = await (client as any).api.error.$get()
     expect(data).toBeNull()
     expect(error).toEqual({ error: 'internal error' })
   })
@@ -88,7 +88,7 @@ describe('createSafeClient', () => {
       fetch: brokenFetch as any,
     })
 
-    const [data, error] = await client.api.broken.$get()
+    const [data, error] = await (client as any).api.broken.$get()
     expect(data).toBeNull()
     expect(error).toEqual({ error: 'Network failure' })
   })
@@ -109,7 +109,7 @@ describe('createSafeClient', () => {
       interceptors: [interceptor1, interceptor2]
     })
 
-    const [data, error] = await client.api.headers.$get()
+    const [data, error] = await (client as any).api.headers.$get()
     expect(error).toBeNull()
     expect(data).toEqual({ foo: '123', bar: '456' })
   })

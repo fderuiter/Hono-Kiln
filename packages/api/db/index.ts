@@ -1,6 +1,6 @@
 import { createClient } from '@libsql/client'
 import { drizzle as drizzleLibsql, type LibSQLDatabase } from 'drizzle-orm/libsql'
-import { drizzle as drizzlePg, type PgDatabase } from 'drizzle-orm/postgres-js'
+import { drizzle as drizzlePg, type PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { drizzle as drizzleMysql, type MySql2Database } from 'drizzle-orm/mysql2'
 import postgres from 'postgres'
 import mysql from 'mysql2/promise'
@@ -34,7 +34,7 @@ export function createDatabase(url: string, authToken?: string): Database {
 }
 
 export type Database = typeof config.provider extends 'postgresql'
-  ? PgDatabase<any, typeof schema, any>
+  ? PostgresJsDatabase<typeof schema>
   : typeof config.provider extends 'mysql'
-  ? MySql2Database<any, any, typeof schema, any>
+  ? MySql2Database<typeof schema>
   : LibSQLDatabase<typeof schema>

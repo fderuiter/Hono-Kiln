@@ -11,7 +11,7 @@ export function createOrganizationsService(db: Database) {
     },
     async create(name: string, userId: number): Promise<Organization> {
       return await db.transaction(async (tx) => {
-        const [newOrg] = await tx.insert(organizations).values({ name }).returning();
+        const [newOrg] = (await tx.insert(organizations).values({ name }).returning()) as any[];
         await tx.insert(organizationMembers).values({
           organizationId: newOrg.id,
           userId,

@@ -6,18 +6,21 @@
     ".": "./index.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "knip": "^6.27.0"
   },
   "peerDependencies": {
     "hono": "^4.10.1",
     "lucia": "3.2.2",
     "@hono/zod-openapi": "^1.4.0",
-    "typescript": "^5"
+    "typescript": "^7.0.2"
   },
   "dependencies": {
     "@hono-kiln/sdk": "workspace:*"
   },
   "scripts": {
+    "audit": "knip",
+    "typecheck": "tsc --noEmit",
     "test": "bun test"
   }
 }

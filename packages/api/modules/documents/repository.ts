@@ -27,7 +27,7 @@ export function createDocumentsRepository(db: Database) {
     async update(id: number, data: any, organizationId: number) {
       const repo = getRepo(organizationId)
       const results = await repo.update(eq(documentss.id, id), data)
-      return results[0]
+      return (results as any[])[0]
     }
   }
 }

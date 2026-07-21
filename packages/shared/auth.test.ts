@@ -20,7 +20,7 @@ describe("auth utilities", () => {
   test("sessionHelpers.setSessionCookie has correct strong typing", () => {
     // We mock the context since we only want to ensure no crashes and strong typing is accepted
     const mockContext = {
-      header: (name: string, value: string, options?: any) => {}
+      header: (_name: string, _value: string, _options?: any) => {}
     } as unknown as Context;
     
     // As long as this compiles, strong typing is satisfied.

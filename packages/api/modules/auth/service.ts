@@ -14,32 +14,27 @@ export function createAuthService(db: Database, auth: Auth) {
         return { error: 'User already exists' }
       }
 
-      let newUser;
-      try {
-        newUser = await db.transaction(async (tx) => {
-          const user = await repository.createUser({
-            name,
-            email,
-            password,
-          }, tx)
+      const newUser = await db.transaction(async (tx) => {
+        const user = await repository.createUser({
+          name,
+          email,
+          password,
+        }, tx)
 
-          const finalWorkspaceName = workspaceName || `${name}'s Workspace`;
+        const finalWorkspaceName = workspaceName || `${name}'s Workspace`;
 
-          const [newOrg] = await tx.insert(organizations).values({
-            name: finalWorkspaceName
-          }).returning();
+        const [newOrg] = (await tx.insert(organizations).values({
+          name: finalWorkspaceName
+        }).returning()) as any[];
 
-          await tx.insert(organizationMembers).values({
-            organizationId: newOrg.id,
-            userId: user.id,
-            role: 'admin'
-          });
-
-          return user;
+        await tx.insert(organizationMembers).values({
+          organizationId: newOrg.id,
+          userId: user.id,
+          role: 'admin'
         });
-      } catch (error) {
-        throw error;
-      }
+
+        return user;
+      });
 
       const session = await auth.createSession(newUser.id, {})
 

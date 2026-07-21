@@ -1,9 +1,8 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
 import { createDatabase } from '../db';
 import { createValidatedRepository } from './repository';
-import { eq } from 'drizzle-orm';
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { createSelectSchema } from 'drizzle-zod';
 
 const mockTable = sqliteTable('mock_table', {
   id: integer('id').primaryKey(),

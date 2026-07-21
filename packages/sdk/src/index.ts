@@ -185,7 +185,7 @@ export const createSafeClient = <T extends Hono<any, any, any>>(
                     if (contentType && contentType.includes('application/json')) {
                       try {
                         errorPayload = await res.json()
-                      } catch (e) {
+                      } catch {
                         errorPayload = { error: await res.text() }
                       }
                     } else {

@@ -12,9 +12,13 @@
     "hono": "^4.10.1"
   },
   "devDependencies": {
-    "@hono-kiln/api": "workspace:*"
+    "@hono-kiln/api": "workspace:*",
+    "knip": "^6.27.0",
+    "typescript": "^7.0.2"
   },
   "scripts": {
+    "audit": "knip",
+    "typecheck": "tsc --noEmit",
     "test": "bun test"
   }
 }

@@ -20,5 +20,6 @@ rootRoutes.openapi(
       },
     },
   }),
+  // @ts-ignore
   publicAccess((c) => c.json({ message: 'Hono Kiln API' as const }, 200 as const)),
 )

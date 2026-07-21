@@ -3,7 +3,6 @@ import { integer, text } from '../../utils/db-types'
 import { createEntity } from '../../utils/factory'
 import { organizations } from '../organizations/schema'
 
-export const entityName = 'documents' as const
 
 export const documentsEntity = createEntity('documentss', {
   organizationId: {

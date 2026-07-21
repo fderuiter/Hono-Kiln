@@ -49,7 +49,7 @@ export const authMiddleware = createMiddleware<AppEnv>(async (c, next) => {
         const results = await db.select().from(organizationMembers).where(
           and(
             eq(organizationMembers.organizationId, orgId),
-            eq(organizationMembers.userId, parseInt(user.id, 10))
+            eq(organizationMembers.userId, user.id)
           )
         ).limit(1)
         

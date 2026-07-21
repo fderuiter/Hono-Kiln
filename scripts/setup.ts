@@ -178,7 +178,7 @@ async function main() {
     let whoamiOutput = '';
     try {
       whoamiOutput = execSync('bun x wrangler whoami', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
-    } catch (e) {
+    } catch {
       // ignore
     }
     
@@ -188,7 +188,7 @@ async function main() {
       execSync('bun x wrangler login', { stdio: 'inherit' });
       try {
         whoamiOutput = execSync('bun x wrangler whoami', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
-      } catch (e) {
+      } catch {
         // ignore
       }
     } else {

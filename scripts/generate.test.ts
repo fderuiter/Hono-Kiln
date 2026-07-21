@@ -209,6 +209,7 @@ import * as childProcess from 'node:child_process'
 describe('CLI Output Snapshots', () => {
   function cleanAnsi(str: string) {
     return str
+      // eslint-disable-next-line no-control-regex
       .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '')
       .replace(/\/tmp\/kiln-generate-[a-zA-Z0-9]+/g, '/tmp/kiln-generate-<ID>')
   }
