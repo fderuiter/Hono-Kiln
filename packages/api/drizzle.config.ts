@@ -5,7 +5,7 @@ import config from '../../kiln.json'
 
 const authToken = getDatabaseAuthToken()
 const provider = config.provider || 'libsql'
-const dialect = provider === 'postgresql' ? 'postgresql' : provider === 'mysql' ? 'mysql' : 'turso'
+const dialect = provider === 'postgresql' ? 'postgresql' : 'turso'
 
 export default defineConfig({
   dialect,
