@@ -1,13 +1,12 @@
 import { sqliteTable, integer as sqliteInt } from 'drizzle-orm/sqlite-core';
 import { pgTable, serial as pgSerial } from 'drizzle-orm/pg-core';
-import { mysqlTable, serial as mysqlSerial } from 'drizzle-orm/mysql-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from '@hono/zod-openapi';
 
 import * as config from '../../../kiln.json';
 
 const provider = config.provider || 'libsql';
-const createTableFn: any = provider === 'postgresql' ? pgTable : provider === 'mysql' ? mysqlTable : sqliteTable;
+const createTableFn: any = provider === 'postgresql' ? pgTable : sqliteTable;
 
 type FieldDefinition<TBuilder = any> = {
   db: TBuilder;
@@ -37,8 +36,6 @@ export function createEntity<T extends string, C extends EntityConfig>(
   if (!hasPrimaryKey) {
     if (provider === 'postgresql') {
       injectedIdColumn = pgSerial('id').primaryKey();
-    } else if (provider === 'mysql') {
-      injectedIdColumn = mysqlSerial('id').primaryKey();
     } else {
       injectedIdColumn = sqliteInt('id').primaryKey({ autoIncrement: true });
     }
